@@ -148,7 +148,15 @@
             <div class="ai-grid">
                 <div class="form-group"><label>User Height (m)</label><input type="number" id="ai-height" value="1.75" step="0.01"></div>
                 <div class="form-group"><label>Wingspan (m)</label><input type="number" id="ai-wingspan" value="1.80" step="0.01"></div>
-                <div class="form-group"><label>Target Grade</label><select id="ai-grade"><option value="V0">V0</option><option value="V1">V1</option><option value="V2">V2</option><option value="V3">V3</option><option value="V4">V4</option><option value="V5">V5</option></select></div>
+                <div class="form-group">
+                    <label>Target Grade</label>
+                    <select id="ai-grade">
+                        <option value="V0">V0</option><option value="V1">V1</option><option value="V2">V2</option>
+                        <option value="V3">V3</option><option value="V4">V4</option><option value="V5">V5</option>
+                        <option value="V6">V6</option><option value="V7">V7</option><option value="V8">V8</option>
+                        <option value="V9">V9</option><option value="V10">V10</option><option value="V11">V11</option>
+                    </select>
+                </div>
                 <div class="form-group"><label>Length (m)</label><input type="number" id="ai-length" value="3.0" step="0.1"></div>
             </div>
 
@@ -307,7 +315,7 @@
     function updateTransform() { wrapper.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`; }
 
     viewport.onwheel = (e) => { e.preventDefault(); const delta = e.deltaY > 0 ? 0.9 : 1.1; const oldScale = scale; scale = Math.min(Math.max(scale * delta, 0.01), 15); const vRect = viewport.getBoundingClientRect(); const mouseX = e.clientX - vRect.left, mouseY = e.clientY - vRect.top; translateX = mouseX - (mouseX - translateX) * (scale / oldScale); translateY = mouseY - (mouseY - translateY) * (scale / oldScale); updateTransform(); };
-    viewport.onmousedown = (e) => { if (currentTool !== 'none' && currentTool !== 'manual-set') return; if (e.target.tagName !== 'path' && e.target.tagName !== 'line') { isDragging = true; lastX = e.clientX; lastY = e.clientY; } };
+    viewport.onmousedown = (e) => { if (currentTool !== 'none' && currentTool !== 'manual-set' && currentTool !== 'ai-set') return; if (e.target.tagName !== 'path' && e.target.tagName !== 'line') { isDragging = true; lastX = e.clientX; lastY = e.clientY; } };
     window.onmousemove = (e) => { if (isDragging) { translateX += (e.clientX - lastX); translateY += (e.clientY - lastY); lastX = e.clientX; lastY = e.clientY; updateTransform(); } };
     window.onmouseup = () => isDragging = false;
 
@@ -344,12 +352,12 @@
         
         document.getElementById('set-type-controls').style.display = (currentTool === 'manual-set') ? 'block' : 'none';
         document.getElementById('ai-controls').style.display = (currentTool === 'ai-set') ? 'block' : 'none';
-        document.getElementById('setup-management-box').style.display = (currentTool === 'manual-set' || activeRoute) ? 'none' : 'block';
+        document.getElementById('setup-management-box').style.display = (currentTool === 'manual-set' || currentTool === 'ai-set' || activeRoute) ? 'none' : 'block';
         
         if (currentTool === 'manual-set' && !activeRoute) createNewRoute();
 
         let cursorClass = '';
-        if (currentTool === 'measure' || currentTool === 'boundary' || currentTool === 'calibrate') cursorClass = 'measuring';
+        if (currentTool === 'measure' || currentTool === 'boundary' || currentTool === 'calibrate' || currentTool === 'ai-set') cursorClass = 'measuring';
         else if (currentTool === 'clear') cursorClass = 'clearing';
         viewport.className = `viewport ${cursorClass}`;
         
@@ -363,7 +371,7 @@
     }
 
     function isPointInPoly(pt, poly) {
-        if (!poly.length) return true; // No boundary = everything is in
+        if (!poly.length) return true;
         let isInside = false;
         for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
             if (((poly[i].y > pt.y) !== (poly[j].y > pt.y)) &&
@@ -378,7 +386,8 @@
         const height = parseFloat(document.getElementById('ai-height').value);
         const wingspan = parseFloat(document.getElementById('ai-wingspan').value);
         const targetLen = parseFloat(document.getElementById('ai-length').value);
-        const grade = document.getElementById('ai-grade').value;
+        const targetGradeStr = document.getElementById('ai-grade').value;
+        const targetGradeNum = parseInt(targetGradeStr.replace('V', ''));
         const style = document.getElementById('ai-style').value;
         const prefType = document.getElementById('ai-pref-type').value;
 
@@ -387,21 +396,33 @@
         if (document.getElementById('ai-cat-i').checked) allowedCats.push('I');
         if (document.getElementById('ai-cat-f').checked) allowedCats.push('F');
 
-        // 1. Filter candidates
+        // Helper to check if hold is suitable for difficulty
+        function isDifficultyMatch(h) {
+            const meta = (richMetadata[h.cell] || {})[`${catMapFull[h.cat]}${h.num}`] || {};
+            const hDiff = parseInt(meta.difficulty || 1);
+            // Difficulty mapping: 1->V1, 2->V3, 3->V4, 4->V6, 5->V8
+            const gradeMap = { 1: 1, 2: 3, 3: 4, 4: 6, 5: 8 };
+            const hGrade = gradeMap[hDiff] || 0;
+            return hGrade <= targetGradeNum + 1; // Allow slightly harder holds for flavor
+        }
+
         const candidates = holds.filter(h => {
             if (!allowedCats.includes(h.cat)) return false;
             if (!isPointInPoly(h.center, boundaryPoints)) return false;
-            return true;
+            return isDifficultyMatch(h);
         });
 
-        if (candidates.length < 5) { alert("Not enough holds in boundary!"); return; }
+        if (candidates.length < 10) { alert("Not enough suitable holds in boundary!"); return; }
 
-        // 2. Simple Rule-based Generator
         let generatedHolds = {}, generatedOrder = [];
-        
-        // Pick 1-2 Starts (lowest ones)
         const sortedByY = [...candidates].sort((a, b) => b.center.y - a.center.y);
-        const start1 = sortedByY[Math.floor(Math.random() * Math.min(5, sortedByY.length))];
+        
+        // Pick Start (at least 50cm from bottom of IMAGE, or ideally relative to ground - but we'll use 50cm from image bottom for now)
+        const wallBottomY = Math.max(...holds.map(h => h.center.y));
+        const minStartY = wallBottomY - (0.5 / pixelsToMeters(1));
+        const startCandidates = sortedByY.filter(h => h.center.y < minStartY);
+        const start1 = startCandidates.length ? startCandidates[0] : sortedByY[0];
+        
         generatedHolds[start1.id] = 1;
         generatedOrder.push(start1.id);
 
@@ -411,59 +432,72 @@
 
         while (totalDist < targetLen && safety < 15) {
             safety++;
-            // Find reachable holds upwards (within wingspan * multiplier)
-            let reachMultiplier = 0.6; // Technical/Normal
-            if (style === 'dyno') reachMultiplier = 0.9;
-            if (style === 'foot-focused') reachMultiplier = 0.4;
-            
+            let reachMultiplier = style === 'dyno' ? 0.9 : (style === 'foot-focused' ? 0.4 : 0.6);
             const maxReachPx = (wingspan * reachMultiplier) / pixelsToMeters(1);
             
-            const neighbors = candidates.filter(h => {
+            const handNeighbors = candidates.filter(h => {
                 if (generatedHolds[h.id]) return false;
                 const d = Math.hypot(h.center.x - currentHold.center.x, h.center.y - currentHold.center.y);
-                return d < maxReachPx && h.center.y < currentHold.center.y; // Must move UP
+                return d < maxReachPx && h.center.y < currentHold.center.y;
             });
 
-            if (!neighbors.length) break;
+            if (!handNeighbors.length) break;
 
-            // Prioritize preferred type if available
             let next;
-            const preferred = neighbors.filter(h => {
+            const preferred = handNeighbors.filter(h => {
                 const meta = (richMetadata[h.cell] || {})[`${catMapFull[h.cat]}${h.num}`] || {};
                 return meta.type?.toLowerCase() === prefType;
             });
+            next = preferred.length ? preferred[Math.floor(Math.random() * preferred.length)] : handNeighbors[Math.floor(Math.random() * handNeighbors.length)];
             
-            next = preferred.length ? preferred[Math.floor(Math.random() * preferred.length)] : neighbors[Math.floor(Math.random() * neighbors.length)];
-            
-            generatedHolds[next.id] = 2; // Default to Hand
+            generatedHolds[next.id] = 2;
             generatedOrder.push(next.id);
             
+            // Add a Foot hold for this move (physics-based: 4-8 o'clock below center of mass)
+            // climber center roughly between current and next hand
+            const climberX = (currentHold.center.x + next.center.x) / 2;
+            const climberY = (currentHold.center.y + next.center.y) / 2 + (height * 0.4 / pixelsToMeters(1)); 
+            
+            const footNeighbors = holds.filter(h => {
+                if (generatedHolds[h.id]) return false;
+                const dx = h.center.x - climberX;
+                const dy = h.center.y - climberY;
+                const d = Math.hypot(dx, dy);
+                const angle = Math.atan2(dy, dx) * 180 / Math.PI; // 90 is down
+                return d < (height * 0.6 / pixelsToMeters(1)) && angle > 45 && angle < 135; // Roughly 4 to 8 o'clock
+            });
+
+            if (footNeighbors.length) {
+                const foot = footNeighbors[Math.floor(Math.random() * footNeighbors.length)];
+                generatedHolds[foot.id] = 3;
+                generatedOrder.push(foot.id);
+            }
+
             const stepDist = Math.hypot(next.center.x - currentHold.center.x, next.center.y - currentHold.center.y);
             totalDist += pixelsToMeters(stepDist);
             currentHold = next;
         }
 
-        // Set last one as END
         if (generatedOrder.length > 1) {
-            generatedHolds[generatedOrder[generatedOrder.length - 1]] = 4;
+            const lastHandId = [...generatedOrder].reverse().find(id => generatedHolds[id] === 2);
+            if (lastHandId) generatedHolds[lastHandId] = 4;
         }
 
         activeRoute = { 
-            name: `AI ${style.toUpperCase()} ${grade}`, 
-            grade: grade, 
+            name: `AI ROUTE ${style.toUpperCase()}`, 
+            grade: targetGradeStr, 
             holds: generatedHolds, 
             order: generatedOrder 
         };
         
-        toggleMode('manual-set'); // Switch to manual mode for tweaking
+        // Don't jump back to manual mode - stay in AI mode to allow regen/tweaking details
         document.getElementById('route-name-input').value = activeRoute.name;
         document.getElementById('route-grade-input').value = activeRoute.grade;
+        document.getElementById('set-type-controls').style.display = 'block'; 
         render();
     }
 
-    function toggleDrawFlow() {
-        alert("Flow Drawing coming soon! Use generated routes for now.");
-    }
+    function toggleDrawFlow() { alert("Flow Drawing coming soon!"); }
 
     function render() {
         svg.innerHTML = '';
@@ -471,8 +505,8 @@
         updateRouteList();
         updateActiveRouteHoldList();
         
-        // 1. Boundary / Support Lines (Hide if route active or being set)
-        if (boundaryPoints.length > 0 && !activeRoute && currentTool !== 'manual-set') {
+        // 1. Boundary / Support Lines (Hide if route active or in Route Setting/AI Mode)
+        if (boundaryPoints.length > 0 && !activeRoute && currentTool !== 'manual-set' && currentTool !== 'ai-set') {
             const poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
             const pointsStr = boundaryPoints.map(p => `${p.x},${p.y}`).join(' ');
             poly.setAttribute('points', pointsStr);
@@ -499,7 +533,7 @@
             }
         }
 
-        // 2. Holds (Conditional visibility)
+        // 2. Holds
         if (currentTool !== 'calibrate') {
             holds.forEach(h => {
                 const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -528,7 +562,7 @@
                 
                 if (isSelected || isMeasuringFirst) p.classList.add('highlight');
                 
-                if (currentTool === 'manual-set') {
+                if (currentTool === 'manual-set' || (currentTool === 'ai-set' && activeRoute)) {
                     p.onclick = (e) => { e.stopPropagation(); handleRouteHoldClick(h.id); };
                 } else if (currentTool === 'measure') {
                     p.onmouseenter = () => p.classList.add('glow');
@@ -544,8 +578,8 @@
             });
         }
 
-        // 3. Calibration Lines & Dots (Hide if route active or being set)
-        if (!activeRoute && currentTool !== 'manual-set') {
+        // 3. Calibration (Hide in route modes)
+        if (!activeRoute && currentTool !== 'manual-set' && currentTool !== 'ai-set') {
             calibrationData.forEach(c => {
                 if (!c.p1 || !c.p2 || typeof c.p1.x === 'undefined') return;
                 const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -553,14 +587,12 @@
                 l.setAttribute('x1', c.p1.x); l.setAttribute('y1', c.p1.y); l.setAttribute('x2', c.p2.x); l.setAttribute('y2', c.p2.y);
                 l.setAttribute('class', 'calib-line');
                 group.appendChild(l);
-
                 [c.p1, c.p2].forEach(p => {
                     const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                     dot.setAttribute('cx', p.x); dot.setAttribute('cy', p.y);
                     dot.setAttribute('r', '5'); dot.setAttribute('class', 'calib-dot');
                     group.appendChild(dot);
                 });
-
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 text.setAttribute('x', (c.p1.x + c.p2.x)/2); text.setAttribute('y', (c.p1.y + c.p2.y)/2 - 10);
                 text.setAttribute('class', 'calib-text');
@@ -570,21 +602,19 @@
             });
         }
 
-        // 3.5 Assisted Route Lines (Sequence lines - Skip Foot holds)
+        // 4. Assisted Lines
         if (activeRoute && activeRoute.order && activeRoute.order.length > 1) {
             const filteredOrder = activeRoute.order.filter(id => activeRoute.holds[id] !== 3);
             for (let i = 0; i < filteredOrder.length - 1; i++) {
                 const h1 = holds.find(x => x.id === filteredOrder[i]);
                 const h2 = holds.find(x => x.id === filteredOrder[i+1]);
                 if (!h1 || !h2) continue;
-                
                 const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
                 const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
                 line.setAttribute('x1', h1.center.x); line.setAttribute('y1', h1.center.y);
                 line.setAttribute('x2', h2.center.x); line.setAttribute('y2', h2.center.y);
                 line.setAttribute('class', 'assisted-line');
                 group.appendChild(line);
-
                 const distPx = Math.hypot(h1.center.x - h2.center.x, h1.center.y - h2.center.y);
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 text.setAttribute('x', (h1.center.x + h2.center.x)/2); text.setAttribute('y', (h1.center.y + h2.center.y)/2 - 5);
@@ -595,8 +625,8 @@
             }
         }
 
-        // 4. Measurement Lines (Hide in boundary mode for clarity)
-        if (currentTool !== 'boundary') {
+        // 5. Measurements
+        if (currentTool !== 'boundary' && !activeRoute && currentTool !== 'manual-set' && currentTool !== 'ai-set') {
             measurements.forEach((m, idx) => {
                 let p1, p2;
                 if (m.p1 && m.p2) { p1 = m.p1; p2 = m.p2; }
@@ -605,7 +635,6 @@
                     if (!h1 || !h2) return;
                     p1 = h1.center; p2 = h2.center;
                 }
-
                 const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
                 const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
                 line.setAttribute('x1', p1.x); line.setAttribute('y1', p1.y);
@@ -615,21 +644,17 @@
                 line.onclick = (e) => {
                     e.stopPropagation();
                     if (currentTool === 'clear') { measurements.splice(idx, 1); saveMeasurements(); return; }
-                    if (currentTool === 'info' && m.h1Id && m.h2Id) { showLinkInfo(idx); return; }
                 };
                 group.appendChild(line);
-
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 text.setAttribute('x', (p1.x + p2.x)/2); text.setAttribute('y', (p1.y + p2.y)/2 - 10);
                 text.setAttribute('class', 'measure-text');
-                const d = m.distM != null ? m.distM.toFixed(3) : "?.???";
-                text.textContent = `${d}m`;
+                text.textContent = `${m.distM != null ? m.distM.toFixed(3) : "?.???"}m`;
                 group.appendChild(text);
                 svg.appendChild(group);
             });
         }
         
-        // 5. Click Queue Dots
         clickQueue.forEach(p => {
             const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
             c.setAttribute('cx', p.x); c.setAttribute('cy', p.y);
@@ -641,7 +666,6 @@
     function updateSetupLists() {
         const bList = document.getElementById('boundary-list');
         const cList = document.getElementById('calibration-list');
-        
         bList.innerHTML = boundaryPoints.length ? '' : '<div style="padding:10px; color:#666; font-style:italic;">No boundary points</div>';
         boundaryPoints.forEach((p, i) => {
             const item = document.createElement('div');
@@ -649,7 +673,6 @@
             item.innerHTML = `<span>Point ${i+1}: ${Math.round(p.x)},${Math.round(p.y)}</span><span class="delete-small" onclick="event.stopPropagation(); boundaryPoints.splice(${i}, 1); saveAnnotations();">DEL</span>`;
             bList.appendChild(item);
         });
-
         cList.innerHTML = calibrationData.length ? '' : '<div style="padding:10px; color:#666; font-style:italic;">No calibrations</div>';
         calibrationData.forEach((c, i) => {
             const item = document.createElement('div');
@@ -662,14 +685,11 @@
     function updateRouteList() {
         const rList = document.getElementById('route-list');
         rList.innerHTML = allRoutes.length ? '' : '<div style="padding:10px; color:#666; font-style:italic; text-align:center;">No routes saved</div>';
-        
         allRoutes.forEach((r, idx) => {
             const item = document.createElement('div');
             item.className = `route-item ${activeRoute?.name === r.name ? 'active' : ''}`;
-            
             const stats = { 1: 0, 2: 0, 3: 0, 4: 0 };
             Object.values(r.holds).forEach(t => stats[t]++);
-            
             item.onclick = () => { activeRoute = r; render(); };
             item.innerHTML = `
                 <div style="flex:1;">
@@ -696,7 +716,6 @@
             list.innerHTML = '<div style="padding:10px; color:#666; font-style:italic;">No active route</div>';
             return;
         }
-
         list.innerHTML = activeRoute.order?.length ? '' : '<div style="padding:10px; color:#666; font-style:italic;">No holds in route</div>';
         activeRoute.order?.forEach((holdId, i) => {
             const h = holds.find(x => x.id === holdId);
@@ -709,11 +728,8 @@
             `;
             list.appendChild(item);
         });
-
-        // Calculate Estimated Distance
         const startHolds = activeRoute.order?.filter(id => activeRoute.holds[id] === 1).map(id => holds.find(x => x.id === id));
         const endHolds = activeRoute.order?.filter(id => activeRoute.holds[id] === 4).map(id => holds.find(x => x.id === id));
-        
         if (startHolds?.length && endHolds?.length) {
             let maxDistPx = 0;
             startHolds.forEach(s => {
@@ -738,7 +754,7 @@
     }
 
     function editRoute(idx) {
-        activeRoute = JSON.parse(JSON.stringify(allRoutes[idx])); // Deep copy
+        activeRoute = JSON.parse(JSON.stringify(allRoutes[idx]));
         document.getElementById('route-name-input').value = activeRoute.name || '';
         document.getElementById('route-grade-input').value = activeRoute.grade || 'V0';
         toggleMode('manual-set');
@@ -756,19 +772,13 @@
     function handleRouteHoldClick(holdId, forceRemove = false) {
         if (!activeRoute) return;
         if (!activeRoute.order) activeRoute.order = [];
-
         const currentTypeOnHold = activeRoute.holds[holdId];
-        
         if (forceRemove || settingType === 5 || currentTypeOnHold === settingType) {
             delete activeRoute.holds[holdId];
             activeRoute.order = activeRoute.order.filter(id => id !== holdId);
         } else {
             activeRoute.holds[holdId] = settingType;
-            if (!activeRoute.order.includes(holdId)) {
-                activeRoute.order.push(holdId);
-            }
-            
-            // Auto-switch logic: If setting type 1 (START) and we have 2 or more, switch to 2 (HAND)
+            if (!activeRoute.order.includes(holdId)) { activeRoute.order.push(holdId); }
             if (settingType === 1) {
                 const startCount = Object.values(activeRoute.holds).filter(t => t === 1).length;
                 if (startCount >= 2) setSettingType(2);
@@ -781,11 +791,9 @@
         if (!activeRoute) return;
         activeRoute.name = document.getElementById('route-name-input').value.trim();
         activeRoute.grade = document.getElementById('route-grade-input').value;
-        
         const existingIdx = allRoutes.findIndex(r => r.name === activeRoute.name);
         if (existingIdx >= 0) allRoutes[existingIdx] = activeRoute;
         else allRoutes.push(activeRoute);
-        
         await saveAllRoutes();
         toggleMode('none');
         status.innerText = "ROUTE SAVED";
@@ -801,17 +809,14 @@
         document.getElementById('hold-details').style.display = 'block';
         document.getElementById('edit-panel').style.display = 'none';
         document.getElementById('link-details').style.display = 'none';
-        
         const fullCat = catMapFull[h.cat];
         const meta = (richMetadata[h.cell] || {})[`${fullCat}${h.num}`] || {};
-
         const [x, y] = h.cell.split(',').map(n => parseInt(n) + 1);
         const id5 = `${h.cat}${x}${y}${h.num.toString().padStart(2, '0')}`;
         const t1 = h.cat === 'C' ? 'Rd' : (h.cat === 'F' ? 'Sm' : 'Bg');
         const t2 = typeShorthand[meta.type?.toLowerCase()] || 'Un';
         const diff = (meta.difficulty || '0').toString().padStart(2, '0');
         const clock = clockMap[parseInt(meta.direction)] || '06';
-
         document.getElementById('val-id-5').innerText = id5;
         document.getElementById('val-desc-8').innerText = `${t1}${t2}${diff}${clock}`;
         document.getElementById('val-id-cat').innerText = h.cat;
@@ -821,35 +826,15 @@
         render();
     }
 
-    function showLinkInfo(idx) {
-        selectedLinkId = idx; selectedHoldId = null;
-        const m = measurements[idx];
-        const h1 = holds.find(x => x.id === m.h1Id), h2 = holds.find(x => x.id === m.h2Id);
-        document.getElementById('hold-details').style.display = 'none';
-        document.getElementById('link-details').style.display = 'block';
-        document.getElementById('h1-card').innerText = `HOLD 1:\nID: ${h1.cat}${h1.num}\nCell: ${h1.cell}`;
-        document.getElementById('h2-card').innerText = `HOLD 2:\nID: ${h2.cat}${h2.num}\nCell: ${h2.cell}`;
-        document.getElementById('link-dist').innerText = `${m.distM ? m.distM.toFixed(3) : "?.???"} m`;
-        render();
-    }
-
     function handleMeasureClick(pt, holdId = null) {
         const point = { x: pt.x, y: pt.y, id: holdId };
         clickQueue.push(point);
-        
-        if (clickQueue.length === 1) {
-            status.innerText = "SELECT SECOND POINT";
-            render();
-        } else {
+        if (clickQueue.length === 1) { status.innerText = "SELECT SECOND POINT"; render(); }
+        else {
             const p1 = clickQueue[0], p2 = clickQueue[1];
             const distPx = Math.hypot(p1.x - p2.x, p1.y - p2.y);
-            measurements.push({ 
-                h1Id: p1.id, h2Id: p2.id, 
-                p1: {x: p1.x, y: p1.y}, p2: {x: p2.x, y: p2.y}, 
-                distM: pixelsToMeters(distPx) 
-            });
-            saveMeasurements(); 
-            toggleMode('none');
+            measurements.push({ h1Id: p1.id, h2Id: p2.id, p1: {x: p1.x, y: p1.y}, p2: {x: p2.x, y: p2.y}, distM: pixelsToMeters(distPx) });
+            saveMeasurements(); toggleMode('none');
         }
     }
 
@@ -869,44 +854,24 @@
             selectedHoldId = null; selectedLinkId = null;
             document.getElementById('hold-details').style.display = 'none';
             document.getElementById('link-details').style.display = 'none';
-            render();
-            return;
+            render(); return;
         }
-
         const pt = getSVGPoint(e);
-
-        if (currentTool === 'boundary') {
-            boundaryPoints.push(pt);
-            saveAnnotations();
-            return;
-        }
-        
-        if (currentTool === 'measure') {
-            handleMeasureClick(pt);
-            return;
-        }
-
+        if (currentTool === 'boundary') { boundaryPoints.push(pt); saveAnnotations(); return; }
+        if (currentTool === 'measure') { handleMeasureClick(pt); return; }
         if (currentTool === 'calibrate') {
-            clickQueue.push(pt);
-            render(); // Show the dot for the first click
-            if (clickQueue.length === 1) {
-                status.innerText = "CLICK END POINT";
-            } else {
+            clickQueue.push(pt); render();
+            if (clickQueue.length === 1) { status.innerText = "CLICK END POINT"; }
+            else {
                 const m = prompt("Distance (m):", "1.0");
-                if (m) {
-                    calibrationData.push({ p1: clickQueue[0], p2: clickQueue[1], lengthMeters: parseFloat(m) });
-                    saveCalibration();
-                }
-                toggleMode('none');
-                status.innerText = "CALIBRATED";
+                if (m) { calibrationData.push({ p1: clickQueue[0], p2: clickQueue[1], lengthMeters: parseFloat(m) }); saveCalibration(); }
+                toggleMode('none'); status.innerText = "CALIBRATED";
             }
         }
     };
 
     function getSVGPoint(e) { 
-        const pt = svg.createSVGPoint(); 
-        pt.x = e.clientX; 
-        pt.y = e.clientY; 
+        const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; 
         const transformed = pt.matrixTransform(svg.getScreenCTM().inverse());
         return { x: transformed.x, y: transformed.y };
     }
@@ -927,12 +892,11 @@
         const h = holds.find(x => x.id === selectedHoldId);
         const oldCell = h.cell, oldCat = h.cat, oldNum = h.num, oldKey = `${catMapFull[oldCat]}${oldNum}`;
         const newCell = document.getElementById('edit-cell').value.trim(), newCat = document.getElementById('edit-cat').value, newNum = parseInt(document.getElementById('edit-num').value);
-        const [cx, cy] = newCell.split(',').map(n => parseInt(n));
         h.cell = newCell; h.cat = newCat; h.num = newNum;
         if (richMetadata[oldCell]) delete richMetadata[oldCell][oldKey];
         if (!richMetadata[newCell]) richMetadata[newCell] = {};
         const newKey = `${catMapFull[newCat]}${newNum}`;
-        richMetadata[newCell][newKey] = { cell_x: cx, cell_y: cy, category: catMapFull[newCat], num: newNum.toString(), type: document.getElementById('edit-type').value.trim(), difficulty: document.getElementById('edit-diff').value, direction: document.getElementById('edit-grab').value, ideal: document.getElementById('edit-ideal').value };
+        richMetadata[newCell][newKey] = { cell_x: parseInt(newCell.split(',')[0]), cell_y: parseInt(newCell.split(',')[1]), category: catMapFull[newCat], num: newNum.toString(), type: document.getElementById('edit-type').value.trim(), difficulty: document.getElementById('edit-diff').value, direction: document.getElementById('edit-grab').value, ideal: document.getElementById('edit-ideal').value };
         status.innerText = "SAVING...";
         try { await fetch('/save_full_edit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ holds: holds, metadata: richMetadata }) }); status.innerText = "SAVED!"; cancelEdit(); selectHold(h); } catch(e) { status.innerText = "ERROR"; }
     }
