@@ -350,7 +350,7 @@
         if (btn) btn.classList.add('active');
         mStatus.innerText = `MODE: ${currentTool.toUpperCase()}`;
         
-        document.getElementById('set-type-controls').style.display = (currentTool === 'manual-set') ? 'block' : 'none';
+        document.getElementById('set-type-controls').style.display = (currentTool === 'manual-set' || currentTool === 'ai-set') ? 'block' : 'none';
         document.getElementById('ai-controls').style.display = (currentTool === 'ai-set') ? 'block' : 'none';
         document.getElementById('setup-management-box').style.display = (currentTool === 'manual-set' || currentTool === 'ai-set' || activeRoute) ? 'none' : 'block';
         
@@ -396,14 +396,15 @@
         if (document.getElementById('ai-cat-i').checked) allowedCats.push('I');
         if (document.getElementById('ai-cat-f').checked) allowedCats.push('F');
 
-        // Helper to check if hold is suitable for difficulty
+        // Difficulty mapping: 1->V1, 2->V3, 3->V4, 4->V6, 5->V8
+        const gradeMap = { 1: 1, 2: 3, 3: 4, 4: 6, 5: 8 };
+
         function isDifficultyMatch(h) {
             const meta = (richMetadata[h.cell] || {})[`${catMapFull[h.cat]}${h.num}`] || {};
             const hDiff = parseInt(meta.difficulty || 1);
-            // Difficulty mapping: 1->V1, 2->V3, 3->V4, 4->V6, 5->V8
-            const gradeMap = { 1: 1, 2: 3, 3: 4, 4: 6, 5: 8 };
             const hGrade = gradeMap[hDiff] || 0;
-            return hGrade <= targetGradeNum + 1; // Allow slightly harder holds for flavor
+            // Filter: Target grade V5 means use holds up to V5-V6
+            return hGrade <= targetGradeNum + 1;
         }
 
         const candidates = holds.filter(h => {
@@ -412,16 +413,15 @@
             return isDifficultyMatch(h);
         });
 
-        if (candidates.length < 10) { alert("Not enough suitable holds in boundary!"); return; }
+        if (candidates.length < 5) { alert("Not enough suitable holds in boundary!"); return; }
 
         let generatedHolds = {}, generatedOrder = [];
         const sortedByY = [...candidates].sort((a, b) => b.center.y - a.center.y);
         
-        // Pick Start (at least 50cm from bottom of IMAGE, or ideally relative to ground - but we'll use 50cm from image bottom for now)
-        const wallBottomY = Math.max(...holds.map(h => h.center.y));
-        const minStartY = wallBottomY - (0.5 / pixelsToMeters(1));
-        const startCandidates = sortedByY.filter(h => h.center.y < minStartY);
-        const start1 = startCandidates.length ? startCandidates[0] : sortedByY[0];
+        // Start hold: within reach height (approx 1.2m from bottom image if no floor, or just reachable)
+        // Tall people can start low. Let's pick from bottom 30% of wall candidates.
+        const bottomCandidates = sortedByY.slice(0, Math.ceil(candidates.length * 0.3));
+        const start1 = bottomCandidates[Math.floor(Math.random() * bottomCandidates.length)];
         
         generatedHolds[start1.id] = 1;
         generatedOrder.push(start1.id);
@@ -435,10 +435,12 @@
             let reachMultiplier = style === 'dyno' ? 0.9 : (style === 'foot-focused' ? 0.4 : 0.6);
             const maxReachPx = (wingspan * reachMultiplier) / pixelsToMeters(1);
             
+            // Reachable holds: Any direction (not just up) to allow horizontal routes
             const handNeighbors = candidates.filter(h => {
                 if (generatedHolds[h.id]) return false;
                 const d = Math.hypot(h.center.x - currentHold.center.x, h.center.y - currentHold.center.y);
-                return d < maxReachPx && h.center.y < currentHold.center.y;
+                // Biometric reach: wingspan * multiplier
+                return d < maxReachPx;
             });
 
             if (!handNeighbors.length) break;
@@ -453,8 +455,7 @@
             generatedHolds[next.id] = 2;
             generatedOrder.push(next.id);
             
-            // Add a Foot hold for this move (physics-based: 4-8 o'clock below center of mass)
-            // climber center roughly between current and next hand
+            // PHYSICS: Foot placement (4-8 o'clock below center)
             const climberX = (currentHold.center.x + next.center.x) / 2;
             const climberY = (currentHold.center.y + next.center.y) / 2 + (height * 0.4 / pixelsToMeters(1)); 
             
@@ -463,8 +464,9 @@
                 const dx = h.center.x - climberX;
                 const dy = h.center.y - climberY;
                 const d = Math.hypot(dx, dy);
-                const angle = Math.atan2(dy, dx) * 180 / Math.PI; // 90 is down
-                return d < (height * 0.6 / pixelsToMeters(1)) && angle > 45 && angle < 135; // Roughly 4 to 8 o'clock
+                const angle = Math.atan2(dy, dx) * 180 / Math.PI; 
+                // Reachable feet: 0.7 * user height
+                return d < (height * 0.7 / pixelsToMeters(1)) && angle > 45 && angle < 135; 
             });
 
             if (footNeighbors.length) {
@@ -490,10 +492,9 @@
             order: generatedOrder 
         };
         
-        // Don't jump back to manual mode - stay in AI mode to allow regen/tweaking details
+        // Populate inputs so user can edit details after generation
         document.getElementById('route-name-input').value = activeRoute.name;
         document.getElementById('route-grade-input').value = activeRoute.grade;
-        document.getElementById('set-type-controls').style.display = 'block'; 
         render();
     }
 
@@ -562,7 +563,7 @@
                 
                 if (isSelected || isMeasuringFirst) p.classList.add('highlight');
                 
-                if (currentTool === 'manual-set' || (currentTool === 'ai-set' && activeRoute)) {
+                if (currentTool === 'manual-set' || currentTool === 'ai-set') {
                     p.onclick = (e) => { e.stopPropagation(); handleRouteHoldClick(h.id); };
                 } else if (currentTool === 'measure') {
                     p.onmouseenter = () => p.classList.add('glow');
