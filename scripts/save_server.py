@@ -198,6 +198,30 @@ class SaveHandler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.dumps({'status': 'success'}).encode())
 
+        elif self.path == '/save_routes':
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            data = json.loads(post_data)
+
+            # Save all routes to a master JSON file
+            with open('docs/all_routes.json', 'w') as f:
+                json.dump(data, f, indent=4)
+
+            # Save each route to its own CSV for easy reading
+            for route in data:
+                safe_name = "".join([c for c in route['name'] if c.isalnum() or c in (' ', '.', '_')]).strip()
+                filename = f"docs/route_{safe_name}.csv"
+                with open(filename, 'w', newline='') as f:
+                    writer = csv.DictWriter(f, fieldnames=['hold_id', 'type'])
+                    writer.writeheader()
+                    for h_id, h_type in route['holds'].items():
+                        writer.writerow({'hold_id': h_id, 'type': h_type})
+
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({'status': 'success'}).encode())
+
         elif self.path == '/save_holds':
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)

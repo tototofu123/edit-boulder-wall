@@ -58,9 +58,13 @@
         .measure-line:hover { stroke-opacity: 1; stroke-width: 10; }
         .measure-text { fill: #00ff00; font-family: monospace; font-weight: bold; font-size: 18px; pointer-events: none; stroke: black; stroke-width: 0.5px; }
         .calib-line { stroke: #ff00ff; stroke-width: 6; stroke-opacity: 0.8; }
-        .calib-text { fill: #ff00ff; font-family: monospace; font-weight: bold; font-size: 16px; pointer-events: none; stroke: black; stroke-width: 0.5px; }
-        
+        .calib-text { fill: #ff00ff; font-family: monospace; font-weight: bold; font-size: 16px; pointer-events: none; stroke: black; stroke-width: 0.5px; } 
+
+        .assisted-line { stroke: white; stroke-width: 2; stroke-dasharray: 5,5; stroke-opacity: 0.5; pointer-events: none; }
+        .route-dist-text { fill: white; font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; stroke: black; stroke-width: 0.3px; }
+
         .click-dot { fill: white; stroke: #007acc; stroke-width: 2; pointer-events: none; }
+
         .calib-dot { fill: #ff00ff; stroke: white; stroke-width: 2; }
 
         .setup-list { background: #111; border: 1px solid #444; border-radius: 4px; padding: 10px; margin-top: 10px; max-height: 200px; overflow-y: auto; }
@@ -68,6 +72,13 @@
         .setup-item:last-child { border-bottom: none; }
         .delete-small { color: #ff4444; cursor: pointer; font-weight: bold; padding: 2px 6px; border: 1px solid #444; border-radius: 3px; background: #222; }
         .delete-small:hover { background: #442222; }
+        .edit-small { color: #007acc; cursor: pointer; font-weight: bold; padding: 2px 6px; border: 1px solid #444; border-radius: 3px; background: #222; margin-right: 4px; }
+        .edit-small:hover { background: #1e2a3a; }
+
+        .route-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #2d2d2d; border: 1px solid #444; border-radius: 4px; margin-bottom: 5px; cursor: pointer; }
+        .route-item:hover { background: #3d3d3d; }
+        .route-item.active { border-color: #007acc; background: #1e2a3a; }
+        .type-indicator { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 5px; border: 1px solid rgba(255,255,255,0.3); }
 
         /* Dual Hold Display */
         .dual-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -114,12 +125,59 @@
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
             <button class="tool-btn btn-green" id="btn-measure" onclick="toggleMode('measure')">ADD DISTANCE</button>
             <button class="tool-btn btn-red" id="btn-clear" onclick="toggleMode('clear')">CLEAR LINE</button>
-            <button class="tool-btn btn-blue" id="btn-info" onclick="toggleMode('info')">LINK INFO</button>
         </div>
         <div id="measure-status" style="font-family:monospace; color:#0f0; text-align:center; font-weight:bold; font-size:11px;">MODE: NAVIGATION</div>
     </div>
 
     <div class="box">
+        <div style="font-weight:bold; margin-bottom:10px; font-size:13px;">Route Setting:</div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-bottom:10px;">
+            <button class="tool-btn btn-purple" id="btn-manual-set" onclick="toggleMode('manual-set')">MANUAL SET (P)</button>
+            <button class="tool-btn btn-blue" id="btn-ai-set" onclick="toggleMode('ai-set')" disabled>AI SET (O)</button>
+        </div>
+        
+        <div id="set-type-controls" style="display: none; background: #111; padding: 10px; border-radius: 4px; border: 1px solid #444; margin-bottom: 10px;">
+            <div style="font-size:10px; color:#aaa; margin-bottom:8px; text-align:center;">ROUTE DETAILS</div>
+            <div class="form-group"><label>Route Name</label><input type="text" id="route-name-input"></div>
+            <div class="form-group">
+                <label>Grade</label>
+                <select id="route-grade-input">
+                    <option value="V0">V0</option><option value="V1">V1</option><option value="V2">V2</option>
+                    <option value="V3">V3</option><option value="V4">V4</option><option value="V5">V5</option>
+                    <option value="V6">V6</option><option value="V7">V7</option><option value="V8">V8</option>
+                    <option value="V9">V9</option><option value="V10">V10</option><option value="V11">V11</option>
+                </select>
+            </div>
+
+            <div style="background:#222; padding:8px; border-radius:4px; margin-bottom:10px; text-align:center;">
+                <div style="font-size:9px; color:#aaa;">ESTIMATED VERTICAL LENGTH</div>
+                <div id="route-vert-length" style="font-size:16px; font-weight:bold; color:#0f0;">0.00m</div>
+            </div>
+
+            <div style="font-size:10px; color:#aaa; margin-bottom:8px; text-align:center;">SELECT HOLD TYPE (1-4)</div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+                <button class="mode-btn" id="btn-type-1" onclick="setSettingType(1)" style="border-color:#00ff00;">1: START</button>
+                <button class="mode-btn" id="btn-type-2" onclick="setSettingType(2)" style="border-color:#007acc;">2: HAND</button>
+                <button class="mode-btn" id="btn-type-3" onclick="setSettingType(3)" style="border-color:#ff8800;">3: FOOT</button>
+                <button class="mode-btn" id="btn-type-4" onclick="setSettingType(4)" style="border-color:#ff0000;">4: END</button>
+            </div>
+            <button class="tool-btn btn-red" style="margin-top:8px;" id="btn-type-5" onclick="setSettingType(5)">5: REMOVE FROM ROUTE</button>
+            
+            <div style="font-size:10px; color:#aaa; margin-top:15px; margin-bottom:5px;">ACTIVE ROUTE HOLDS</div>
+            <div id="route-holds-list" class="setup-list" style="max-height: 150px;">
+                <div style="padding:10px; color:#666; font-style:italic;">No holds in route</div>
+            </div>
+            
+            <button class="tool-btn btn-green" style="margin-top:10px; margin-bottom:0;" onclick="saveActiveRoute()">SAVE ROUTE</button>
+        </div>
+
+        <button class="tool-btn btn-blue" id="btn-new-route" onclick="createNewRoute()">ADD NEW ROUTE +</button>
+        <div id="route-list" style="margin-top:10px;">
+            <div style="padding:10px; color:#666; font-style:italic; text-align:center;">No routes saved</div>
+        </div>
+    </div>
+
+    <div class="box" id="setup-management-box">
         <div style="font-weight:bold; margin-bottom:10px; font-size:13px;">Setup Management:</div>
         <div style="font-size:10px; color:#aaa; margin-bottom:5px;">BOUNDARY POINTS</div>
         <div id="boundary-list" class="setup-list">
@@ -187,9 +245,13 @@
     const status = document.getElementById('status');
     const mStatus = document.getElementById('measure-status');
     
-    let holds = [], richMetadata = {}, calibrationData = [], measurements = [], boundaryPoints = [];
+    let holds = [], richMetadata = {}, calibrationData = [], measurements = [], boundaryPoints = [], allRoutes = [];
     let appMode = 'clean', currentTool = 'none', selectedHoldId = null, selectedLinkId = null;
     let scale = 1.0, translateX = 0, translateY = 0, isDragging = false, lastX, lastY, clickQueue = [];
+    let activeRoute = null, settingType = 1;
+
+    const typeColors = { 1: '#00ff00', 2: '#007acc', 3: '#ff8800', 4: '#ff0000' };
+    const typeNames = { 1: 'START', 2: 'HAND', 3: 'FOOT', 4: 'END' };
 
     const catNames = { 'C': 'Climbing', 'I': 'Insert', 'F': 'Feature' };
     const catMapFull = { 'C': 'climbing holds', 'I': 'insert holds', 'F': 'wall features' };
@@ -202,9 +264,18 @@
     function updateTransform() { wrapper.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`; }
 
     viewport.onwheel = (e) => { e.preventDefault(); const delta = e.deltaY > 0 ? 0.9 : 1.1; const oldScale = scale; scale = Math.min(Math.max(scale * delta, 0.01), 15); const vRect = viewport.getBoundingClientRect(); const mouseX = e.clientX - vRect.left, mouseY = e.clientY - vRect.top; translateX = mouseX - (mouseX - translateX) * (scale / oldScale); translateY = mouseY - (mouseY - translateY) * (scale / oldScale); updateTransform(); };
-    viewport.onmousedown = (e) => { if (currentTool !== 'none') return; if (e.target.tagName !== 'path' && e.target.tagName !== 'line') { isDragging = true; lastX = e.clientX; lastY = e.clientY; } };
+    viewport.onmousedown = (e) => { if (currentTool !== 'none' && currentTool !== 'manual-set') return; if (e.target.tagName !== 'path' && e.target.tagName !== 'line') { isDragging = true; lastX = e.clientX; lastY = e.clientY; } };
     window.onmousemove = (e) => { if (isDragging) { translateX += (e.clientX - lastX); translateY += (e.clientY - lastY); lastX = e.clientX; lastY = e.clientY; updateTransform(); } };
     window.onmouseup = () => isDragging = false;
+
+    window.onkeydown = (e) => {
+        if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT') return;
+        if (e.key === 'p' || e.key === 'P') toggleMode('manual-set');
+        if (e.key === 'o' || e.key === 'O') console.log("AI Mode Soon");
+        if (currentTool === 'manual-set') {
+            if (['1', '2', '3', '4', '5'].includes(e.key)) setSettingType(parseInt(e.key));
+        }
+    };
 
     async function loadData() {
         try {
@@ -213,6 +284,7 @@
             calibrationData = await (await fetch('docs/calibration.json')).json().catch(()=>[]);
             measurements = await (await fetch('docs/measurements.json')).json().catch(()=>[]);
             boundaryPoints = await (await fetch('docs/wall_annotations.json')).json().catch(()=>[]);
+            allRoutes = await (await fetch('docs/all_routes.json')).json().catch(()=>[]);
             render();
             status.innerText = `READY: ${holds.length} HOLDS`;
         } catch(e) { status.innerText = "DATA LOAD ERROR"; }
@@ -227,6 +299,11 @@
         if (btn) btn.classList.add('active');
         mStatus.innerText = `MODE: ${currentTool.toUpperCase()}`;
         
+        document.getElementById('set-type-controls').style.display = (currentTool === 'manual-set') ? 'block' : 'none';
+        document.getElementById('setup-management-box').style.display = (currentTool === 'manual-set' || activeRoute) ? 'none' : 'block';
+        
+        if (currentTool === 'manual-set' && !activeRoute) createNewRoute();
+
         let cursorClass = '';
         if (currentTool === 'measure' || currentTool === 'boundary' || currentTool === 'calibrate') cursorClass = 'measuring';
         else if (currentTool === 'clear') cursorClass = 'clearing';
@@ -234,6 +311,7 @@
         
         if (currentTool === 'calibrate') status.innerText = "CLICK START POINT";
         else if (currentTool === 'boundary') status.innerText = "CLICK TO ADD BOUNDARY POINTS";
+        else if (currentTool === 'manual-set') status.innerText = "ROUTE SETTING MODE";
         else status.innerText = "WALL WORKSPACE";
         
         render();
@@ -242,9 +320,11 @@
     function render() {
         svg.innerHTML = '';
         updateSetupLists();
+        updateRouteList();
+        updateActiveRouteHoldList();
         
-        // 1. Boundary / Support Lines
-        if (boundaryPoints.length > 0) {
+        // 1. Boundary / Support Lines (Hide if route active or being set)
+        if (boundaryPoints.length > 0 && !activeRoute && currentTool !== 'manual-set') {
             const poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
             const pointsStr = boundaryPoints.map(p => `${p.x},${p.y}`).join(' ');
             poly.setAttribute('points', pointsStr);
@@ -280,21 +360,29 @@
                 
                 const isSelected = h.id === selectedHoldId;
                 const isMeasuringFirst = clickQueue.length === 1 && clickQueue[0].id === h.id;
-                
+                const routeType = activeRoute?.holds[h.id];
+
                 if (currentTool === 'boundary') {
                     p.style.strokeOpacity = '0.3';
                     p.style.fill = 'transparent';
                     p.style.pointerEvents = 'none';
-                } else if (appMode === 'messy' || isSelected || isMeasuringFirst) {
+                } else if (appMode === 'messy' || isSelected || isMeasuringFirst || routeType) {
                     p.style.strokeOpacity = '1';
                     p.style.fill = (isSelected || isMeasuringFirst) ? 'transparent' : colors[h.cat] + "40"; 
+                    if (routeType) {
+                        p.style.stroke = typeColors[routeType];
+                        p.style.strokeWidth = '8';
+                        p.style.fill = 'transparent';
+                    }
                 } else {
                     p.style.strokeOpacity = '0'; p.style.fill = 'transparent';
                 }
                 
                 if (isSelected || isMeasuringFirst) p.classList.add('highlight');
                 
-                if (currentTool === 'measure') {
+                if (currentTool === 'manual-set') {
+                    p.onclick = (e) => { e.stopPropagation(); handleRouteHoldClick(h.id); };
+                } else if (currentTool === 'measure') {
                     p.onmouseenter = () => p.classList.add('glow');
                     p.onmouseleave = () => p.classList.remove('glow');
                     p.onclick = (e) => { e.stopPropagation(); handleMeasureClick(h.center, h.id); };
@@ -308,29 +396,56 @@
             });
         }
 
-        // 3. Calibration Lines & Dots
-        calibrationData.forEach(c => {
-            if (!c.p1 || !c.p2 || typeof c.p1.x === 'undefined') return;
-            const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
-            const l = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            l.setAttribute('x1', c.p1.x); l.setAttribute('y1', c.p1.y); l.setAttribute('x2', c.p2.x); l.setAttribute('y2', c.p2.y);
-            l.setAttribute('class', 'calib-line');
-            group.appendChild(l);
+        // 3. Calibration Lines & Dots (Hide if route active or being set)
+        if (!activeRoute && currentTool !== 'manual-set') {
+            calibrationData.forEach(c => {
+                if (!c.p1 || !c.p2 || typeof c.p1.x === 'undefined') return;
+                const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                const l = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                l.setAttribute('x1', c.p1.x); l.setAttribute('y1', c.p1.y); l.setAttribute('x2', c.p2.x); l.setAttribute('y2', c.p2.y);
+                l.setAttribute('class', 'calib-line');
+                group.appendChild(l);
 
-            [c.p1, c.p2].forEach(p => {
-                const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                dot.setAttribute('cx', p.x); dot.setAttribute('cy', p.y);
-                dot.setAttribute('r', '5'); dot.setAttribute('class', 'calib-dot');
-                group.appendChild(dot);
+                [c.p1, c.p2].forEach(p => {
+                    const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    dot.setAttribute('cx', p.x); dot.setAttribute('cy', p.y);
+                    dot.setAttribute('r', '5'); dot.setAttribute('class', 'calib-dot');
+                    group.appendChild(dot);
+                });
+
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute('x', (c.p1.x + c.p2.x)/2); text.setAttribute('y', (c.p1.y + c.p2.y)/2 - 10);
+                text.setAttribute('class', 'calib-text');
+                text.textContent = `${c.lengthMeters}m`;
+                group.appendChild(text);
+                svg.appendChild(group);
             });
+        }
 
-            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            text.setAttribute('x', (c.p1.x + c.p2.x)/2); text.setAttribute('y', (c.p1.y + c.p2.y)/2 - 10);
-            text.setAttribute('class', 'calib-text');
-            text.textContent = `${c.lengthMeters}m`;
-            group.appendChild(text);
-            svg.appendChild(group);
-        });
+        // 3.5 Assisted Route Lines (Sequence lines - Skip Foot holds)
+        if (activeRoute && activeRoute.order && activeRoute.order.length > 1) {
+            const filteredOrder = activeRoute.order.filter(id => activeRoute.holds[id] !== 3);
+            for (let i = 0; i < filteredOrder.length - 1; i++) {
+                const h1 = holds.find(x => x.id === filteredOrder[i]);
+                const h2 = holds.find(x => x.id === filteredOrder[i+1]);
+                if (!h1 || !h2) continue;
+                
+                const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute('x1', h1.center.x); line.setAttribute('y1', h1.center.y);
+                line.setAttribute('x2', h2.center.x); line.setAttribute('y2', h2.center.y);
+                line.setAttribute('class', 'assisted-line');
+                group.appendChild(line);
+
+                const distPx = Math.hypot(h1.center.x - h2.center.x, h1.center.y - h2.center.y);
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute('x', (h1.center.x + h2.center.x)/2); text.setAttribute('y', (h1.center.y + h2.center.y)/2 - 5);
+                text.setAttribute('class', 'route-dist-text');
+                text.textContent = `${pixelsToMeters(distPx).toFixed(2)}m`;
+                group.appendChild(text);
+                svg.appendChild(group);
+            }
+        }
 
         // 4. Measurement Lines (Hide in boundary mode for clarity)
         if (currentTool !== 'boundary') {
@@ -394,6 +509,121 @@
             item.innerHTML = `<span>Dist: ${c.lengthMeters}m</span><span class="delete-small" onclick="event.stopPropagation(); calibrationData.splice(${i}, 1); saveCalibration();">DEL</span>`;
             cList.appendChild(item);
         });
+    }
+
+    function updateRouteList() {
+        const rList = document.getElementById('route-list');
+        rList.innerHTML = allRoutes.length ? '' : '<div style="padding:10px; color:#666; font-style:italic; text-align:center;">No routes saved</div>';
+        
+        allRoutes.forEach((r, idx) => {
+            const item = document.createElement('div');
+            item.className = `route-item ${activeRoute?.name === r.name ? 'active' : ''}`;
+            
+            const stats = { 1: 0, 2: 0, 3: 0, 4: 0 };
+            Object.values(r.holds).forEach(t => stats[t]++);
+            
+            item.onclick = () => { activeRoute = r; render(); };
+            item.innerHTML = `
+                <div style="flex:1;">
+                    <div style="font-weight:bold; font-size:12px;">${r.name}</div>
+                    <div style="display:flex; gap:4px; margin-top:4px;">
+                        <span class="type-indicator" style="background:${typeColors[1]};"></span>${stats[1]}
+                        <span class="type-indicator" style="background:${typeColors[2]};"></span>${stats[2]}
+                        <span class="type-indicator" style="background:${typeColors[3]};"></span>${stats[3]}
+                        <span class="type-indicator" style="background:${typeColors[4]};"></span>${stats[4]}
+                    </div>
+                </div>
+                <div style="display:flex; align-items:center;">
+                    <span class="edit-small" onclick="event.stopPropagation(); editRoute(${idx});">EDIT</span>
+                    <span class="delete-small" onclick="event.stopPropagation(); allRoutes.splice(${idx}, 1); saveAllRoutes();">DEL</span>
+                </div>
+            `;
+            rList.appendChild(item);
+        });
+    }
+
+    function updateActiveRouteHoldList() {
+        const list = document.getElementById('route-holds-list');
+        if (!activeRoute) {
+            list.innerHTML = '<div style="padding:10px; color:#666; font-style:italic;">No active route</div>';
+            return;
+        }
+
+        list.innerHTML = activeRoute.order?.length ? '' : '<div style="padding:10px; color:#666; font-style:italic;">No holds in route</div>';
+        activeRoute.order?.forEach((holdId, i) => {
+            const h = holds.find(x => x.id === holdId);
+            const type = activeRoute.holds[holdId];
+            const item = document.createElement('div');
+            item.className = 'setup-item';
+            item.innerHTML = `
+                <span style="color:${typeColors[type]}">${i+1}. ${typeNames[type]} (${h.cell})</span>
+                <span class="delete-small" onclick="event.stopPropagation(); handleRouteHoldClick(${holdId}, true);">DEL</span>
+            `;
+            list.appendChild(item);
+        });
+    }
+
+    function createNewRoute() {
+        const name = prompt("Route Name:", `Route ${allRoutes.length + 1}`);
+        if (!name) return;
+        activeRoute = { name: name, holds: {}, order: [] };
+        settingType = 1;
+        toggleMode('manual-set');
+        render();
+    }
+
+    function editRoute(idx) {
+        activeRoute = JSON.parse(JSON.stringify(allRoutes[idx])); // Deep copy
+        toggleMode('manual-set');
+        render();
+    }
+
+    function setSettingType(t) {
+        settingType = t;
+        document.querySelectorAll('#set-type-controls .mode-btn').forEach(b => b.classList.remove('active'));
+        const btn = document.getElementById(`btn-type-${t}`);
+        if (btn) btn.classList.add('active');
+        else if (t === 5) document.getElementById('btn-type-5').classList.add('active');
+    }
+
+    function handleRouteHoldClick(holdId, forceRemove = false) {
+        if (!activeRoute) return;
+        if (!activeRoute.order) activeRoute.order = [];
+
+        const currentTypeOnHold = activeRoute.holds[holdId];
+        
+        if (forceRemove || settingType === 5 || currentTypeOnHold === settingType) {
+            delete activeRoute.holds[holdId];
+            activeRoute.order = activeRoute.order.filter(id => id !== holdId);
+        } else {
+            activeRoute.holds[holdId] = settingType;
+            if (!activeRoute.order.includes(holdId)) {
+                activeRoute.order.push(holdId);
+            }
+            
+            // Auto-switch logic: If setting type 1 (START) and we have 2 or more, switch to 2 (HAND)
+            if (settingType === 1) {
+                const startCount = Object.values(activeRoute.holds).filter(t => t === 1).length;
+                if (startCount >= 2) setSettingType(2);
+            }
+        }
+        render();
+    }
+
+    async function saveActiveRoute() {
+        if (!activeRoute) return;
+        const existingIdx = allRoutes.findIndex(r => r.name === activeRoute.name);
+        if (existingIdx >= 0) allRoutes[existingIdx] = activeRoute;
+        else allRoutes.push(activeRoute);
+        
+        await saveAllRoutes();
+        toggleMode('none');
+        status.innerText = "ROUTE SAVED";
+    }
+
+    async function saveAllRoutes() {
+        await fetch('/save_routes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(allRoutes) });
+        render();
     }
 
     function selectHold(h) {
