@@ -3,72 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wall Editor - Interactive</title>
+    <title>Wall Editor - Multi-Tool</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #1a1a1a; color: white; display: flex; height: 100vh; overflow: hidden; touch-action: none; }
         
         .viewport { 
-            flex: 1; 
-            position: relative; 
-            background: #000;
-            overflow: hidden;
-            cursor: grab;
+            flex: 1; position: relative; background: #000; overflow: hidden; cursor: grab;
         }
         .viewport:active { cursor: grabbing; }
+        .viewport.measuring { cursor: crosshair; }
 
-        #canvas-wrapper {
-            position: absolute;
-            transform-origin: 0 0;
-            will-change: transform;
-        }
-
-        #wall-img { 
-            display: block; 
-            user-select: none;
-            -webkit-user-drag: none;
-        }
-
-        #overlay { 
-            position: absolute; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            z-index: 10; 
-            pointer-events: all;
-        }
+        #canvas-wrapper { position: absolute; transform-origin: 0 0; will-change: transform; }
+        #wall-img { display: block; user-select: none; -webkit-user-drag: none; }
+        #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: all; }
         
-        .sidebar { width: 380px; background: #252526; border-left: 2px solid #444; display: flex; flex-direction: column; gap: 15px; padding: 20px; overflow-y: auto; z-index: 100; }
+        .sidebar { width: 400px; background: #252526; border-left: 2px solid #444; display: flex; flex-direction: column; gap: 15px; padding: 20px; overflow-y: auto; z-index: 100; }
         .status { background: #000; padding: 15px; color: #0f0; font-family: monospace; border: 1px solid #555; font-size: 14px; font-weight: bold; text-align: center; }
         
         .box { background: #333; padding: 15px; border-radius: 4px; border-left: 4px solid #007acc; }
         
         .mode-selector { display: flex; gap: 10px; margin-top: 10px; }
-        .mode-btn { flex: 1; padding: 12px; border: 1px solid #555; background: #444; color: white; cursor: pointer; border-radius: 4px; font-weight: bold; text-align: center; }
+        .mode-btn { flex: 1; padding: 10px; border: 1px solid #555; background: #444; color: white; cursor: pointer; border-radius: 4px; font-weight: bold; text-align: center; font-size: 12px; }
         .mode-btn.active { background: #007acc; border-color: white; }
 
         .hold-info { background: #1e1e1e; padding: 20px; border-radius: 8px; border: 1px solid #444; margin-top: 10px; display: none; }
-        .info-label { color: #aaa; font-size: 12px; text-transform: uppercase; margin-bottom: 4px; }
+        .info-label { color: #aaa; font-size: 11px; text-transform: uppercase; margin-bottom: 4px; }
+        
+        /* Highlighted ID */
+        .id-container { font-family: monospace; font-size: 24px; font-weight: bold; margin-bottom: 15px; display: flex; gap: 8px; }
+        .id-cat { color: #ff4444; } /* Red for Cat */
+        .id-cell { color: #44ff44; } /* Green for Cell */
+        .id-num { color: #fff; }     /* White for Num */
+        
         .info-value { font-size: 16px; font-weight: bold; margin-bottom: 12px; color: #0098ff; }
-        .info-value-big { font-size: 22px; font-weight: bold; margin-bottom: 15px; color: #fff; letter-spacing: 1px; }
+        .info-value-big { font-size: 20px; font-weight: bold; margin-bottom: 15px; color: #fff; letter-spacing: 1px; }
 
         .edit-form { display: none; background: #2d2d2d; padding: 15px; border-radius: 8px; border: 1px solid #007acc; margin-top: 10px; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 11px; color: #aaa; text-transform: uppercase; margin-bottom: 5px; }
-        .form-group input, .form-group select { width: 100%; padding: 8px; background: #1a1a1a; border: 1px solid #444; color: white; border-radius: 4px; box-sizing: border-box; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 10px; color: #aaa; text-transform: uppercase; margin-bottom: 3px; }
+        .form-group input, .form-group select { width: 100%; padding: 6px; background: #1a1a1a; border: 1px solid #444; color: white; border-radius: 4px; box-sizing: border-box; }
         
-        .btn-row { display: flex; gap: 10px; margin-top: 10px; }
-        .save-btn { flex: 2; background: #28a745; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .cancel-btn { flex: 1; background: #dc3545; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .tool-btn { width: 100%; padding: 12px; border: none; color: white; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 8px; font-size: 13px; }
+        .btn-blue { background: #007acc; }
+        .btn-green { background: #28a745; }
+        .btn-purple { background: #6f42c1; }
+        .btn-red { background: #dc3545; }
 
         .hold-path { cursor: pointer; stroke-width: 3; fill: none; transition: stroke-opacity 0.2s, fill 0.2s; pointer-events: all; }
         .hold-path.highlight { stroke: white !important; stroke-width: 10 !important; filter: drop-shadow(0 0 10px white); }
         
-        .cat-C { stroke: #ff4444; }
-        .cat-I { stroke: #44ff44; }
-        .cat-F { stroke: #ffff44; }
+        /* Measurement visuals */
+        .measure-line { stroke: #00ff00; stroke-width: 2; stroke-dasharray: 5,5; }
+        .measure-text { fill: #00ff00; font-family: monospace; font-weight: bold; font-size: 20px; }
+        .calib-line { stroke: #ff00ff; stroke-width: 4; }
 
         @media (max-width: 768px) {
             body { flex-direction: column; }
-            .sidebar { width: 100%; height: auto; border-left: none; border-top: 2px solid #444; order: 2; padding-bottom: 50px; }
+            .sidebar { width: 100%; height: auto; border-left: none; border-top: 2px solid #444; order: 2; }
             .viewport { order: 1; min-height: 400px; }
         }
     </style>
@@ -83,105 +74,67 @@
 </div>
 
 <div class="sidebar">
-    <div class="status" id="status">WALL EDITOR</div>
+    <div class="status" id="status">WALL WORKSPACE</div>
 
     <div class="box">
-        <div style="font-weight:bold; margin-bottom:10px;">Display Mode:</div>
+        <div style="font-weight:bold; margin-bottom:10px; font-size:13px;">View Controls:</div>
         <div class="mode-selector">
             <div class="mode-btn active" id="mode-clean" onclick="setMode('clean')">CLEAN</div>
             <div class="mode-btn" id="mode-messy" onclick="setMode('messy')">MESSY</div>
+        </div>
+        <button class="tool-btn btn-purple" style="margin-top:10px;" onclick="chooseRandomHold()">RANDOM HOLD</button>
+    </div>
+
+    <div class="box">
+        <div style="font-weight:bold; margin-bottom:10px; font-size:13px;">Measurement (Meters):</div>
+        <button class="tool-btn btn-green" id="measure-btn" onclick="toggleMeasureMode()">MEASURE DISTANCE</button>
+        <div id="measure-result" style="font-family:monospace; color:#0f0; text-align:center; font-weight:bold;">Click two holds</div>
+        
+        <div style="border-top: 1px solid #555; margin: 10px 0; padding-top: 10px;">
+            <div style="font-size:11px; color:#aaa; margin-bottom:5px;">CALIBRATION SETTINGS</div>
+            <button class="tool-btn btn-blue" style="padding:6px; font-size:11px;" onclick="startCalibration()">ADD HELPER LINE</button>
+            <div id="calib-list" style="font-size:10px; color:#ccc; max-height:60px; overflow-y:auto;"></div>
         </div>
     </div>
 
     <!-- VIEW MODE -->
     <div id="hold-details" class="hold-info">
-        <div class="info-label">HOLD ID (5-char)</div>
-        <div id="val-id-5" class="info-value-big">-</div>
+        <div class="info-label">ORIGINAL ID (READ: [CAT] [CELL] [NUM])</div>
+        <div class="id-container" id="val-id-full">
+            <span class="id-cat" id="val-id-cat">-</span>
+            <span class="id-cell" id="val-id-cell">-</span>
+            <span class="id-num" id="val-id-num">-</span>
+        </div>
 
-        <div class="info-label">DESCRIPTION (8-char)</div>
-        <div id="val-desc-8" class="info-value-big" style="color:#ffc107">-</div>
-
-        <div class="info-label">CATEGORY + TYPE</div>
+        <div class="info-label">TYPE + CATEGORY</div>
         <div id="val-cat-type" class="info-value">-</div>
 
-        <div class="info-label">DIFFICULTY LEVEL</div>
-        <div id="val-diff" class="info-value" style="color:#28a745">-</div>
+        <div class="info-label">DIFFICULTY / GRAB / IDEAL</div>
+        <div style="display:flex; gap:10px;">
+            <div id="val-diff" class="info-value" style="color:#28a745; margin-bottom:0;">-</div>
+            <div style="color:#555">|</div>
+            <div id="val-grab" class="info-value" style="color:#ffc107; margin-bottom:0;">-</div>
+            <div style="color:#555">|</div>
+            <div id="val-ideal" class="info-value" style="color:#0098ff; margin-bottom:0;">-</div>
+        </div>
 
-        <div class="info-label">GRAB POSITION</div>
-        <div id="val-grab" class="info-value">-</div>
-
-        <div class="info-label">IDEAL USAGE</div>
-        <div id="val-ideal" class="info-value" style="color:#0098ff">-</div>
-
-        <button onclick="startEdit()" style="width:100%; padding:12px; background:#007acc; border:none; color:white; border-radius:4px; cursor:pointer; font-weight:bold; margin-top:10px;">EDIT DATA</button>
+        <div style="margin-top:15px; display:flex; gap:10px;">
+            <button onclick="startEdit()" class="tool-btn btn-blue" style="flex:1; margin-bottom:0;">EDIT DATA</button>
+            <button onclick="zoomToHold()" class="tool-btn btn-purple" style="flex:1; margin-bottom:0;">ZOOM TO</button>
+        </div>
     </div>
 
     <!-- EDIT MODE -->
     <div id="edit-panel" class="edit-form">
         <div style="font-weight:bold; margin-bottom:15px; color:#007acc; border-bottom:1px solid #444; padding-bottom:5px;">EDITING HOLD</div>
-        
-        <div class="form-group">
-            <label>Hold Cell (e.g. 0,0)</label>
-            <input type="text" id="edit-cell">
-        </div>
-
-        <div class="form-group">
-            <label>Category</label>
-            <select id="edit-cat">
-                <option value="C">Climbing Hold (Red)</option>
-                <option value="I">Insert Hold (Green)</option>
-                <option value="F">Wall Feature (Yellow)</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>Hold Number</label>
-            <input type="number" id="edit-num">
-        </div>
-
-        <div class="form-group">
-            <label>Hold Type</label>
-            <input type="text" id="edit-type" placeholder="jug, crimp, sloper...">
-        </div>
-
-        <div class="form-group">
-            <label>Difficulty (1-5)</label>
-            <select id="edit-diff">
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>Grab Position</label>
-            <select id="edit-grab">
-                <option value="0">0° (Up)</option>
-                <option value="45">45° (Up-Right)</option>
-                <option value="90">90° (Right)</option>
-                <option value="135">135° (Down-Right)</option>
-                <option value="180">180° (Down)</option>
-                <option value="225">225° (Down-Left)</option>
-                <option value="270">270° (Left)</option>
-                <option value="315">315° (Up-Left)</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>Ideal Usage</label>
-            <select id="edit-ideal">
-                <option value="General">General</option>
-                <option value="Hand Prefer">Hand Prefer</option>
-                <option value="Feet Prefer">Feet Prefer</option>
-            </select>
-        </div>
-
-        <div class="btn-row">
-            <button class="save-btn" onclick="saveEdit()">SAVE CHANGES</button>
-            <button class="cancel-btn" onclick="cancelEdit()">CANCEL</button>
-        </div>
+        <div class="form-group"><label>Hold Cell (x,y)</label><input type="text" id="edit-cell"></div>
+        <div class="form-group"><label>Category</label><select id="edit-cat"><option value="C">Climbing (Red)</option><option value="I">Insert (Green)</option><option value="F">Feature (Yellow)</option></select></div>
+        <div class="form-group"><label>Hold Number</label><input type="number" id="edit-num"></div>
+        <div class="form-group"><label>Hold Type</label><input type="text" id="edit-type"></div>
+        <div class="form-group"><label>Difficulty</label><select id="edit-diff"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div>
+        <div class="form-group"><label>Grab Position</label><select id="edit-grab"><option value="0">0°</option><option value="45">45°</option><option value="90">90°</option><option value="135">135°</option><option value="180">180°</option><option value="225">225°</option><option value="270">270°</option><option value="315">315°</option></select></div>
+        <div class="form-group"><label>Ideal Usage</label><select id="edit-ideal"><option value="General">General</option><option value="Hand Prefer">Hand Prefer</option><option value="Feet Prefer">Feet Prefer</option></select></div>
+        <div style="display:flex; gap:10px;"><button class="save-btn" onclick="saveEdit()">SAVE</button><button class="cancel-btn" onclick="cancelEdit()">CANCEL</button></div>
     </div>
 </div>
 
@@ -194,35 +147,21 @@
     
     let holds = [];
     let richMetadata = {}; 
+    let calibrationData = []; // { p1: {x,y}, p2: {x,y}, lengthMeters }
+    
     let appMode = 'clean'; 
     let selectedHoldId = null;
+    let measureMode = false;
+    let calibMode = false;
+    let clickQueue = [];
 
-    let scale = 1.0;
-    let translateX = 0;
-    let translateY = 0;
-    let isDragging = false;
-    let lastX, lastY;
-    let initialPinchDist = null;
+    // Nav State
+    let scale = 1.0, translateX = 0, translateY = 0;
+    let isDragging = false, lastX, lastY, initialPinchDist = null;
 
-    const catNames = { 'C': 'Climbing Hold', 'I': 'Insert Hold', 'F': 'Wall Feature' };
+    const catNames = { 'C': 'Climbing', 'I': 'Insert', 'F': 'Feature' };
     const catMapFull = { 'C': 'climbing holds', 'I': 'insert holds', 'F': 'wall features' };
     const colors = { 'C': '#ff4444', 'I': '#44ff44', 'F': '#ffff44' };
-
-    const typeShorthand = {
-        'crimp': 'Cr', 'jug': 'Jg', 'pocket': 'Pk', 'sloper': 'Sl', 
-        'pinch': 'Pn', 'jib': 'Jb', 'uncategorized': 'Un'
-    };
-
-    const clockMap = {
-        0: "12", 45: "01", 90: "03", 135: "04", 
-        180: "06", 225: "07", 270: "09", 315: "10"
-    };
-
-    function getDirectionName(deg) {
-        const d = parseInt(deg);
-        const map = { 0: "Up", 45: "Up-Right", 90: "Right", 135: "Down-Right", 180: "Down", 225: "Down-Left", 270: "Left", 315: "Up-Left" };
-        return map[d] ? `${d}° (${map[d]})` : `${d}°`;
-    }
 
     img.onload = () => {
         svg.setAttribute('viewBox', `0 0 ${img.naturalWidth} ${img.naturalHeight}`);
@@ -232,69 +171,45 @@
 
     function initFit() {
         const vRect = viewport.getBoundingClientRect();
-        const scaleX = vRect.width / img.naturalWidth;
-        const scaleY = vRect.height / img.naturalHeight;
-        scale = Math.min(scaleX, scaleY);
+        scale = Math.min(vRect.width / img.naturalWidth, vRect.height / img.naturalHeight);
         translateX = (vRect.width - img.naturalWidth * scale) / 2;
         translateY = (vRect.height - img.naturalHeight * scale) / 2;
         updateTransform();
     }
 
-    function updateTransform() {
-        wrapper.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-    }
+    function updateTransform() { wrapper.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`; }
 
+    // INTERACTIONS
     viewport.onwheel = (e) => {
         e.preventDefault();
         const delta = e.deltaY > 0 ? 0.9 : 1.1;
         const oldScale = scale;
-        scale = Math.min(Math.max(scale * delta, 0.05), 15);
+        scale = Math.min(Math.max(scale * delta, 0.01), 15);
         const vRect = viewport.getBoundingClientRect();
-        const mouseX = e.clientX - vRect.left;
-        const mouseY = e.clientY - vRect.top;
+        const mouseX = e.clientX - vRect.left, mouseY = e.clientY - vRect.top;
         translateX = mouseX - (mouseX - translateX) * (scale / oldScale);
         translateY = mouseY - (mouseY - translateY) * (scale / oldScale);
         updateTransform();
     };
 
-    viewport.onmousedown = (e) => { if (e.target.tagName !== 'path') { isDragging = true; lastX = e.clientX; lastY = e.clientY; } };
+    viewport.onmousedown = (e) => { 
+        if (measureMode || calibMode) return;
+        if (e.target.tagName !== 'path') { isDragging = true; lastX = e.clientX; lastY = e.clientY; } 
+    };
     window.onmousemove = (e) => { if (isDragging) { translateX += (e.clientX - lastX); translateY += (e.clientY - lastY); lastX = e.clientX; lastY = e.clientY; updateTransform(); } };
     window.onmouseup = () => isDragging = false;
 
-    viewport.ontouchstart = (e) => {
-        if (e.touches.length === 1) { isDragging = true; lastX = e.touches[0].clientX; lastY = e.touches[0].clientY; }
-        else if (e.touches.length === 2) initialPinchDist = getDist(e.touches);
-    };
-
-    viewport.ontouchmove = (e) => {
-        if (e.touches.length === 1 && isDragging) {
-            translateX += (e.touches[0].clientX - lastX); translateY += (e.touches[0].clientY - lastY);
-            lastX = e.touches[0].clientX; lastY = e.touches[0].clientY; updateTransform();
-        } else if (e.touches.length === 2 && initialPinchDist) {
-            const newDist = getDist(e.touches);
-            const delta = newDist / initialPinchDist;
-            const oldScale = scale;
-            scale = Math.min(Math.max(scale * delta, 0.05), 15);
-            const vRect = viewport.getBoundingClientRect();
-            const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - vRect.left;
-            const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - vRect.top;
-            translateX = midX - (midX - translateX) * (scale / oldScale);
-            translateY = midY - (midY - translateY) * (scale / oldScale);
-            initialPinchDist = newDist; updateTransform();
-        }
-    };
-    viewport.ontouchend = () => { isDragging = false; initialPinchDist = null; };
-    function getDist(touches) { return Math.hypot(touches[0].clientX - touches[1].clientX, touches[0].clientY - touches[1].clientY); }
-
+    // DATA
     async function loadData() {
         try {
-            const resAnn = await fetch('docs/hold_annotations.json');
-            if (resAnn.ok) holds = await resAnn.json();
-            const resRich = await fetch('docs/holds_data.json');
-            if (resRich.ok) richMetadata = await resRich.json();
+            holds = await (await fetch('docs/hold_annotations.json')).json();
+            richMetadata = await (await fetch('docs/holds_data.json')).json();
+            const resC = await fetch('docs/calibration.json');
+            if (resC.ok) calibrationData = await resC.json();
             render();
+            updateCalibList();
             status.innerText = `READY: ${holds.length} HOLDS`;
-        } catch(e) { status.innerText = "ERROR LOADING DATA"; }
+        } catch(e) { status.innerText = "DATA LOAD ERROR"; }
     }
 
     function render() {
@@ -312,7 +227,11 @@
                 p.style.fill = 'transparent';
             }
             if (isSelected) p.classList.add('highlight');
-            p.onclick = (e) => { e.stopPropagation(); selectHold(h); };
+            p.onclick = (e) => {
+                e.stopPropagation();
+                if (measureMode) { handleMeasureClick(h); return; }
+                selectHold(h);
+            };
             svg.appendChild(p);
         });
     }
@@ -321,31 +240,137 @@
         selectedHoldId = h.id;
         document.getElementById('hold-details').style.display = 'block';
         document.getElementById('edit-panel').style.display = 'none';
-
+        
         const fullCat = catMapFull[h.cat];
-        const key = `${fullCat}${h.num}`;
-        const meta = (richMetadata[h.cell] || {})[key] || {};
+        const meta = (richMetadata[h.cell] || {})[`${fullCat}${h.num}`] || {};
 
-        // 1. GENERATE 5-CHAR ID: [Type][X][Y][Num]
-        const [x, y] = h.cell.split(',').map(n => parseInt(n) + 1);
-        const id5 = `${h.cat}${x}${y}${h.num.toString().padStart(2, '0')}`;
-        document.getElementById('val-id-5').innerText = id5;
+        document.getElementById('val-id-cat').innerText = h.cat;
+        document.getElementById('val-id-cell').innerText = h.cell;
+        document.getElementById('val-id-num').innerText = h.num;
 
-        // 2. GENERATE 8-CHAR DESCRIPTION: [Trait1][Trait2][Diff][Clock]
-        const t1 = h.cat === 'C' ? 'Rd' : (h.cat === 'F' ? 'Sm' : 'Bg');
-        const t2 = typeShorthand[meta.type?.toLowerCase()] || 'Un';
-        const diff = (meta.difficulty || '0').toString().padStart(2, '0');
-        const clock = clockMap[parseInt(meta.direction)] || '06';
-        const desc8 = `${t1}${t2}${diff}${clock}`;
-        document.getElementById('val-desc-8').innerText = desc8;
-
-        document.getElementById('val-cat-type').innerText = `${catNames[h.cat]} ${meta.type || "uncategorized"}`;
-        document.getElementById('val-diff').innerText = meta.difficulty || "N/A";
-        document.getElementById('val-grab').innerText = getDirectionName(meta.direction);
+        document.getElementById('val-cat-type').innerText = `${meta.type || "uncategorized"} (${catNames[h.cat]})`;
+        document.getElementById('val-diff').innerText = `Lvl ${meta.difficulty || "?"}`;
+        document.getElementById('val-grab').innerText = `${meta.direction || "?"}°`;
         document.getElementById('val-ideal').innerText = meta.ideal || "General";
         render();
     }
 
+    // RANDOM & ZOOM
+    function chooseRandomHold() {
+        if (!holds.length) return;
+        const random = holds[Math.floor(Math.random() * holds.length)];
+        selectHold(random);
+        zoomToHold();
+    }
+
+    function zoomToHold() {
+        const h = holds.find(x => x.id === selectedHoldId);
+        if (!h) return;
+        const vRect = viewport.getBoundingClientRect();
+        scale = 1.5;
+        translateX = vRect.width/2 - h.center.x * scale;
+        translateY = vRect.height/2 - h.center.y * scale;
+        updateTransform();
+    }
+
+    // MEASUREMENT
+    function toggleMeasureMode() {
+        measureMode = !measureMode;
+        clickQueue = [];
+        document.getElementById('measure-btn').classList.toggle('active', measureMode);
+        document.getElementById('measure-result').innerText = measureMode ? "Select First Hold" : "Click two holds";
+        viewport.classList.toggle('measuring', measureMode);
+    }
+
+    function handleMeasureClick(h) {
+        clickQueue.push(h);
+        if (clickQueue.length === 1) {
+            document.getElementById('measure-result').innerText = "Select Second Hold";
+        } else if (clickQueue.length === 2) {
+            const [h1, h2] = clickQueue;
+            const distPx = Math.hypot(h1.center.x - h2.center.x, h1.center.y - h2.center.y);
+            const distM = pixelsToMeters(distPx);
+            document.getElementById('measure-result').innerText = `${distM.toFixed(3)} m`;
+            
+            // Draw visual line
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute('x1', h1.center.x); line.setAttribute('y1', h1.center.y);
+            line.setAttribute('x2', h2.center.x); line.setAttribute('y2', h2.center.y);
+            line.setAttribute('class', 'measure-line');
+            svg.appendChild(line);
+            
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute('x', (h1.center.x + h2.center.x)/2);
+            text.setAttribute('y', (h1.center.y + h2.center.y)/2 - 10);
+            text.setAttribute('class', 'measure-text');
+            text.textContent = `${distM.toFixed(3)}m`;
+            svg.appendChild(text);
+
+            clickQueue = [];
+        }
+    }
+
+    function pixelsToMeters(px) {
+        if (!calibrationData.length) return px / 500; // Default fallback
+        let sumScale = 0;
+        calibrationData.forEach(c => {
+            const pxDist = Math.hypot(c.p1.x - c.p2.x, c.p1.y - c.p2.y);
+            sumScale += (c.lengthMeters / pxDist);
+        });
+        return px * (sumScale / calibrationData.length);
+    }
+
+    // CALIBRATION
+    function startCalibration() {
+        calibMode = true;
+        clickQueue = [];
+        status.innerText = "CLICK START POINT ON WALL";
+        svg.onclick = (e) => {
+            if (!calibMode) return;
+            const pt = getSVGPoint(e);
+            clickQueue.push(pt);
+            if (clickQueue.length === 1) {
+                status.innerText = "CLICK END POINT ON WALL";
+            } else if (clickQueue.length === 2) {
+                const meters = prompt("Enter length between these points (meters):", "1.0");
+                if (meters) {
+                    calibrationData.push({ p1: clickQueue[0], p2: clickQueue[1], lengthMeters: parseFloat(meters) });
+                    saveCalibration();
+                }
+                calibMode = false;
+                clickQueue = [];
+                status.innerText = "CALIBRATION ADDED";
+                svg.onclick = null;
+            }
+        };
+    }
+
+    function getSVGPoint(e) {
+        const pt = svg.createSVGPoint();
+        pt.x = e.clientX; pt.y = e.clientY;
+        return pt.matrixTransform(svg.getScreenCTM().inverse());
+    }
+
+    async function saveCalibration() {
+        await fetch('/save_calibration', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(calibrationData)
+        });
+        updateCalibList();
+    }
+
+    function updateCalibList() {
+        const list = document.getElementById('calib-list');
+        list.innerHTML = calibrationData.map((c, i) => `<div>Helper ${i+1}: ${c.lengthMeters}m <button onclick="deleteCalib(${i})" style="padding:0 2px; font-size:8px;">X</button></div>`).join('');
+    }
+
+    function deleteCalib(i) {
+        calibrationData.splice(i, 1);
+        saveCalibration();
+    }
+
+    // EDITING (Basic mapping as before)
     function startEdit() {
         const h = holds.find(x => x.id === selectedHoldId);
         if (!h) return;
@@ -385,18 +410,17 @@
 
         status.innerText = "SAVING...";
         try {
-            const response = await fetch('/save_full_edit', {
+            await fetch('/save_full_edit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ holds: holds, metadata: richMetadata })
             });
-            if (response.ok) { status.innerText = "SAVED!"; cancelEdit(); selectHold(h); }
-            else status.innerText = "SAVE FAILED";
+            status.innerText = "SAVED!"; cancelEdit(); selectHold(h);
         } catch(e) { status.innerText = "SERVER ERROR"; }
     }
 
     function setMode(m) { appMode = m; document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active')); document.getElementById(`mode-${m}`).classList.add('active'); render(); }
-    svg.onclick = () => { if (document.getElementById('edit-panel').style.display === 'block') return; selectedHoldId = null; document.getElementById('hold-details').style.display = 'none'; render(); };
+    svg.onclick = () => { if (calibMode) return; if (document.getElementById('edit-panel').style.display === 'block') return; selectedHoldId = null; document.getElementById('hold-details').style.display = 'none'; render(); };
 </script>
 </body>
 </html>
