@@ -79,6 +79,13 @@
         .route-item.active { border-color: #007acc; background: #1e2a3a; }
         .type-indicator { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 5px; border: 1px solid rgba(255,255,255,0.3); }
 
+        /* AI Panel */
+        .ai-panel { display: none; background: #1a1a1a; border: 1px solid #6f42c1; padding: 15px; border-radius: 8px; margin-top: 10px; }
+        .ai-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
+        .checkbox-item { display: flex; align-items: center; gap: 4px; font-size: 10px; background: #333; padding: 4px 8px; border-radius: 12px; cursor: pointer; }
+        .checkbox-item input { margin: 0; }
+
         /* Dual Hold Display */
         .dual-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .mini-card { background: #111; padding: 10px; border-radius: 4px; border: 1px solid #444; font-size: 11px; }
@@ -132,7 +139,44 @@
         <div style="font-weight:bold; margin-bottom:10px; font-size:13px;">Route Setting:</div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-bottom:10px;">
             <button class="tool-btn btn-purple" id="btn-manual-set" onclick="toggleMode('manual-set')">MANUAL SET (P)</button>
-            <button class="tool-btn btn-blue" id="btn-ai-set" onclick="toggleMode('ai-set')" disabled>AI SET (O)</button>
+            <button class="tool-btn btn-blue" id="btn-ai-set" onclick="toggleMode('ai-set')">AI SET (O)</button>
+        </div>
+
+        <div id="ai-controls" class="ai-panel">
+            <div style="font-size:11px; color:#6f42c1; font-weight:bold; margin-bottom:10px; border-bottom:1px solid #6f42c1; padding-bottom:5px;">AI GENERATION CONFIG</div>
+            
+            <div class="ai-grid">
+                <div class="form-group"><label>User Height (m)</label><input type="number" id="ai-height" value="1.75" step="0.01"></div>
+                <div class="form-group"><label>Wingspan (m)</label><input type="number" id="ai-wingspan" value="1.80" step="0.01"></div>
+                <div class="form-group"><label>Target Grade</label><select id="ai-grade"><option value="V0">V0</option><option value="V1">V1</option><option value="V2">V2</option><option value="V3">V3</option><option value="V4">V4</option><option value="V5">V5</option></select></div>
+                <div class="form-group"><label>Length (m)</label><input type="number" id="ai-length" value="3.0" step="0.1"></div>
+            </div>
+
+            <div class="form-group">
+                <label>Route Style</label>
+                <select id="ai-style">
+                    <option value="normal">Normal</option><option value="technical">Technical</option>
+                    <option value="dyno">Dyno (Power)</option><option value="foot-focused">Foot Focused</option>
+                    <option value="compression">Compression</option>
+                </select>
+            </div>
+
+            <div style="font-size:10px; color:#aaa; margin-bottom:5px;">HOLD CATEGORIES</div>
+            <div class="checkbox-group">
+                <label class="checkbox-item"><input type="checkbox" id="ai-cat-c" checked> Climbing</label>
+                <label class="checkbox-item"><input type="checkbox" id="ai-cat-i" checked> Insert</label>
+                <label class="checkbox-item"><input type="checkbox" id="ai-cat-f"> Feature</label>
+            </div>
+
+            <div style="font-size:10px; color:#aaa; margin-top:10px; margin-bottom:5px;">PREFERRED HOLD TYPES</div>
+            <select id="ai-pref-type" style="width:100%; background:#333; color:white; border:1px solid #444; padding:5px; font-size:11px;">
+                <option value="any">Any (Random)</option>
+                <option value="crimp">Crimps</option><option value="jug">Jugs</option>
+                <option value="pocket">Pockets</option><option value="sloper">Slopers</option>
+            </select>
+
+            <button class="tool-btn btn-purple" style="margin-top:15px;" onclick="generateAIRoute()">GENERATE ROUTE</button>
+            <button class="tool-btn btn-blue" style="margin-top:5px;" onclick="toggleDrawFlow()">DRAW FLOW (PLACEHOLDER)</button>
         </div>
         
         <div id="set-type-controls" style="display: none; background: #111; padding: 10px; border-radius: 4px; border: 1px solid #444; margin-bottom: 10px;">
@@ -270,7 +314,7 @@
     window.onkeydown = (e) => {
         if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT') return;
         if (e.key === 'p' || e.key === 'P') toggleMode('manual-set');
-        if (e.key === 'o' || e.key === 'O') console.log("AI Mode Soon");
+        if (e.key === 'o' || e.key === 'O') toggleMode('ai-set');
         if (currentTool === 'manual-set') {
             if (['1', '2', '3', '4', '5'].includes(e.key)) setSettingType(parseInt(e.key));
         }
@@ -299,6 +343,7 @@
         mStatus.innerText = `MODE: ${currentTool.toUpperCase()}`;
         
         document.getElementById('set-type-controls').style.display = (currentTool === 'manual-set') ? 'block' : 'none';
+        document.getElementById('ai-controls').style.display = (currentTool === 'ai-set') ? 'block' : 'none';
         document.getElementById('setup-management-box').style.display = (currentTool === 'manual-set' || activeRoute) ? 'none' : 'block';
         
         if (currentTool === 'manual-set' && !activeRoute) createNewRoute();
@@ -311,9 +356,113 @@
         if (currentTool === 'calibrate') status.innerText = "CLICK START POINT";
         else if (currentTool === 'boundary') status.innerText = "CLICK TO ADD BOUNDARY POINTS";
         else if (currentTool === 'manual-set') status.innerText = "ROUTE SETTING MODE";
+        else if (currentTool === 'ai-set') status.innerText = "AI GENERATION MODE";
         else status.innerText = "WALL WORKSPACE";
         
         render();
+    }
+
+    function isPointInPoly(pt, poly) {
+        if (!poly.length) return true; // No boundary = everything is in
+        let isInside = false;
+        for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+            if (((poly[i].y > pt.y) !== (poly[j].y > pt.y)) &&
+                (pt.x < (poly[j].x - poly[i].x) * (pt.y - poly[i].y) / (poly[j].y - poly[i].y) + poly[i].x)) {
+                isInside = !isInside;
+            }
+        }
+        return isInside;
+    }
+
+    function generateAIRoute() {
+        const height = parseFloat(document.getElementById('ai-height').value);
+        const wingspan = parseFloat(document.getElementById('ai-wingspan').value);
+        const targetLen = parseFloat(document.getElementById('ai-length').value);
+        const grade = document.getElementById('ai-grade').value;
+        const style = document.getElementById('ai-style').value;
+        const prefType = document.getElementById('ai-pref-type').value;
+
+        const allowedCats = [];
+        if (document.getElementById('ai-cat-c').checked) allowedCats.push('C');
+        if (document.getElementById('ai-cat-i').checked) allowedCats.push('I');
+        if (document.getElementById('ai-cat-f').checked) allowedCats.push('F');
+
+        // 1. Filter candidates
+        const candidates = holds.filter(h => {
+            if (!allowedCats.includes(h.cat)) return false;
+            if (!isPointInPoly(h.center, boundaryPoints)) return false;
+            return true;
+        });
+
+        if (candidates.length < 5) { alert("Not enough holds in boundary!"); return; }
+
+        // 2. Simple Rule-based Generator
+        let generatedHolds = {}, generatedOrder = [];
+        
+        // Pick 1-2 Starts (lowest ones)
+        const sortedByY = [...candidates].sort((a, b) => b.center.y - a.center.y);
+        const start1 = sortedByY[Math.floor(Math.random() * Math.min(5, sortedByY.length))];
+        generatedHolds[start1.id] = 1;
+        generatedOrder.push(start1.id);
+
+        let currentHold = start1;
+        let totalDist = 0;
+        let safety = 0;
+
+        while (totalDist < targetLen && safety < 15) {
+            safety++;
+            // Find reachable holds upwards (within wingspan * multiplier)
+            let reachMultiplier = 0.6; // Technical/Normal
+            if (style === 'dyno') reachMultiplier = 0.9;
+            if (style === 'foot-focused') reachMultiplier = 0.4;
+            
+            const maxReachPx = (wingspan * reachMultiplier) / pixelsToMeters(1);
+            
+            const neighbors = candidates.filter(h => {
+                if (generatedHolds[h.id]) return false;
+                const d = Math.hypot(h.center.x - currentHold.center.x, h.center.y - currentHold.center.y);
+                return d < maxReachPx && h.center.y < currentHold.center.y; // Must move UP
+            });
+
+            if (!neighbors.length) break;
+
+            // Prioritize preferred type if available
+            let next;
+            const preferred = neighbors.filter(h => {
+                const meta = (richMetadata[h.cell] || {})[`${catMapFull[h.cat]}${h.num}`] || {};
+                return meta.type?.toLowerCase() === prefType;
+            });
+            
+            next = preferred.length ? preferred[Math.floor(Math.random() * preferred.length)] : neighbors[Math.floor(Math.random() * neighbors.length)];
+            
+            generatedHolds[next.id] = 2; // Default to Hand
+            generatedOrder.push(next.id);
+            
+            const stepDist = Math.hypot(next.center.x - currentHold.center.x, next.center.y - currentHold.center.y);
+            totalDist += pixelsToMeters(stepDist);
+            currentHold = next;
+        }
+
+        // Set last one as END
+        if (generatedOrder.length > 1) {
+            generatedHolds[generatedOrder[generatedOrder.length - 1]] = 4;
+        }
+
+        activeRoute = { 
+            name: `AI ${style.toUpperCase()} ${grade}`, 
+            grade: grade, 
+            holds: generatedHolds, 
+            order: generatedOrder 
+        };
+        
+        toggleMode('manual-set'); // Switch to manual mode for tweaking
+        document.getElementById('route-name-input').value = activeRoute.name;
+        document.getElementById('route-grade-input').value = activeRoute.grade;
+        render();
+    }
+
+    function toggleDrawFlow() {
+        alert("Flow Drawing coming soon! Use generated routes for now.");
     }
 
     function render() {
