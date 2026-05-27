@@ -52,11 +52,22 @@
 
         .hold-path { cursor: pointer; stroke-width: 3; fill: none; transition: stroke-opacity 0.2s, fill 0.2s; pointer-events: all; }
         .hold-path.highlight { stroke: white !important; stroke-width: 10 !important; filter: drop-shadow(0 0 10px white); }
+        .hold-path.glow { stroke: white !important; stroke-width: 8 !important; stroke-opacity: 0.8 !important; }
         
         .measure-line { cursor: pointer; stroke: #00ff00; stroke-width: 6; stroke-dasharray: 8,4; stroke-opacity: 0.6; }
         .measure-line:hover { stroke-opacity: 1; stroke-width: 10; }
-        .measure-text { fill: #00ff00; font-family: monospace; font-weight: bold; font-size: 18px; pointer-events: none; }
+        .measure-text { fill: #00ff00; font-family: monospace; font-weight: bold; font-size: 18px; pointer-events: none; stroke: black; stroke-width: 0.5px; }
         .calib-line { stroke: #ff00ff; stroke-width: 6; stroke-opacity: 0.8; }
+        .calib-text { fill: #ff00ff; font-family: monospace; font-weight: bold; font-size: 16px; pointer-events: none; stroke: black; stroke-width: 0.5px; }
+        
+        .click-dot { fill: white; stroke: #007acc; stroke-width: 2; pointer-events: none; }
+        .calib-dot { fill: #ff00ff; stroke: white; stroke-width: 2; }
+
+        .setup-list { background: #111; border: 1px solid #444; border-radius: 4px; padding: 10px; margin-top: 10px; max-height: 200px; overflow-y: auto; }
+        .setup-item { display: flex; justify-content: space-between; align-items: center; padding: 6px; border-bottom: 1px solid #333; font-size: 11px; font-family: monospace; }
+        .setup-item:last-child { border-bottom: none; }
+        .delete-small { color: #ff4444; cursor: pointer; font-weight: bold; padding: 2px 6px; border: 1px solid #444; border-radius: 3px; background: #222; }
+        .delete-small:hover { background: #442222; }
 
         /* Dual Hold Display */
         .dual-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -91,14 +102,33 @@
     </div>
 
     <div class="box">
-        <div style="font-weight:bold; margin-bottom:10px; font-size:13px;">Measurement Multi-Tool:</div>
+        <div style="font-weight:bold; margin-bottom:10px; font-size:13px;">Wall Setup:</div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+            <button class="tool-btn btn-blue" id="btn-boundary" onclick="toggleMode('boundary')">SET BOUNDARY</button>
+            <button class="tool-btn btn-purple" id="btn-calibrate" onclick="toggleMode('calibrate')">CALIBRATE</button>
+        </div>
+    </div>
+
+    <div class="box">
+        <div style="font-weight:bold; margin-bottom:10px; font-size:13px;">Measurement Tools:</div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
             <button class="tool-btn btn-green" id="btn-measure" onclick="toggleMode('measure')">ADD DISTANCE</button>
             <button class="tool-btn btn-red" id="btn-clear" onclick="toggleMode('clear')">CLEAR LINE</button>
             <button class="tool-btn btn-blue" id="btn-info" onclick="toggleMode('info')">LINK INFO</button>
-            <button class="tool-btn btn-purple" onclick="startCalibration()">CALIBRATE</button>
         </div>
         <div id="measure-status" style="font-family:monospace; color:#0f0; text-align:center; font-weight:bold; font-size:11px;">MODE: NAVIGATION</div>
+    </div>
+
+    <div class="box">
+        <div style="font-weight:bold; margin-bottom:10px; font-size:13px;">Setup Management:</div>
+        <div style="font-size:10px; color:#aaa; margin-bottom:5px;">BOUNDARY POINTS</div>
+        <div id="boundary-list" class="setup-list">
+            <div style="padding:10px; color:#666; font-style:italic;">No boundary points</div>
+        </div>
+        <div style="font-size:10px; color:#aaa; margin-top:10px; margin-bottom:5px;">CALIBRATIONS</div>
+        <div id="calibration-list" class="setup-list">
+            <div style="padding:10px; color:#666; font-style:italic;">No calibrations</div>
+        </div>
     </div>
 
     <!-- VIEW MODE -->
@@ -157,9 +187,9 @@
     const status = document.getElementById('status');
     const mStatus = document.getElementById('measure-status');
     
-    let holds = [], richMetadata = {}, calibrationData = [], measurements = [];
+    let holds = [], richMetadata = {}, calibrationData = [], measurements = [], boundaryPoints = [];
     let appMode = 'clean', currentTool = 'none', selectedHoldId = null, selectedLinkId = null;
-    let scale = 1.0, translateX = 0, translateY = 0, isDragging = false, lastX, lastY, clickQueue = [], calibMode = false;
+    let scale = 1.0, translateX = 0, translateY = 0, isDragging = false, lastX, lastY, clickQueue = [];
 
     const catNames = { 'C': 'Climbing', 'I': 'Insert', 'F': 'Feature' };
     const catMapFull = { 'C': 'climbing holds', 'I': 'insert holds', 'F': 'wall features' };
@@ -172,7 +202,7 @@
     function updateTransform() { wrapper.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`; }
 
     viewport.onwheel = (e) => { e.preventDefault(); const delta = e.deltaY > 0 ? 0.9 : 1.1; const oldScale = scale; scale = Math.min(Math.max(scale * delta, 0.01), 15); const vRect = viewport.getBoundingClientRect(); const mouseX = e.clientX - vRect.left, mouseY = e.clientY - vRect.top; translateX = mouseX - (mouseX - translateX) * (scale / oldScale); translateY = mouseY - (mouseY - translateY) * (scale / oldScale); updateTransform(); };
-    viewport.onmousedown = (e) => { if (currentTool !== 'none' || calibMode) return; if (e.target.tagName !== 'path' && e.target.tagName !== 'line') { isDragging = true; lastX = e.clientX; lastY = e.clientY; } };
+    viewport.onmousedown = (e) => { if (currentTool !== 'none') return; if (e.target.tagName !== 'path' && e.target.tagName !== 'line') { isDragging = true; lastX = e.clientX; lastY = e.clientY; } };
     window.onmousemove = (e) => { if (isDragging) { translateX += (e.clientX - lastX); translateY += (e.clientY - lastY); lastX = e.clientX; lastY = e.clientY; updateTransform(); } };
     window.onmouseup = () => isDragging = false;
 
@@ -182,6 +212,7 @@
             richMetadata = await (await fetch('docs/holds_data.json')).json();
             calibrationData = await (await fetch('docs/calibration.json')).json().catch(()=>[]);
             measurements = await (await fetch('docs/measurements.json')).json().catch(()=>[]);
+            boundaryPoints = await (await fetch('docs/wall_annotations.json')).json().catch(()=>[]);
             render();
             status.innerText = `READY: ${holds.length} HOLDS`;
         } catch(e) { status.innerText = "DATA LOAD ERROR"; }
@@ -192,72 +223,176 @@
         else currentTool = m;
         clickQueue = [];
         document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
-        if (currentTool !== 'none') document.getElementById(`btn-${currentTool}`).classList.add('active');
+        const btn = document.getElementById(`btn-${currentTool}`);
+        if (btn) btn.classList.add('active');
         mStatus.innerText = `MODE: ${currentTool.toUpperCase()}`;
-        viewport.className = `viewport ${currentTool === 'measure' ? 'measuring' : (currentTool === 'clear' ? 'clearing' : '')}`;
+        
+        let cursorClass = '';
+        if (currentTool === 'measure' || currentTool === 'boundary' || currentTool === 'calibrate') cursorClass = 'measuring';
+        else if (currentTool === 'clear') cursorClass = 'clearing';
+        viewport.className = `viewport ${cursorClass}`;
+        
+        if (currentTool === 'calibrate') status.innerText = "CLICK START POINT";
+        else if (currentTool === 'boundary') status.innerText = "CLICK TO ADD BOUNDARY POINTS";
+        else status.innerText = "WALL WORKSPACE";
+        
+        render();
     }
 
     function render() {
         svg.innerHTML = '';
+        updateSetupLists();
+        
+        // 1. Boundary / Support Lines
+        if (boundaryPoints.length > 0) {
+            const poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+            const pointsStr = boundaryPoints.map(p => `${p.x},${p.y}`).join(' ');
+            poly.setAttribute('points', pointsStr);
+            poly.setAttribute('fill', 'rgba(0, 122, 204, 0.2)');
+            poly.setAttribute('stroke', '#007acc');
+            poly.setAttribute('stroke-width', '4');
+            if (currentTool !== 'boundary') poly.setAttribute('stroke-dasharray', '10,5');
+            svg.appendChild(poly);
+            
+            if (currentTool === 'boundary') {
+                boundaryPoints.forEach((p, i) => {
+                    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    circle.setAttribute('cx', p.x); circle.setAttribute('cy', p.y);
+                    circle.setAttribute('r', '8'); circle.setAttribute('fill', 'white');
+                    circle.setAttribute('stroke', '#007acc');
+                    circle.style.cursor = 'pointer';
+                    circle.onclick = (e) => {
+                        e.stopPropagation();
+                        boundaryPoints.splice(i, 1);
+                        saveAnnotations();
+                    };
+                    svg.appendChild(circle);
+                });
+            }
+        }
+
+        // 2. Holds (Conditional visibility)
+        if (currentTool !== 'calibrate') {
+            holds.forEach(h => {
+                const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                p.setAttribute('d', h.path);
+                p.setAttribute('class', `hold-path cat-${h.cat}`);
+                
+                const isSelected = h.id === selectedHoldId;
+                const isMeasuringFirst = clickQueue.length === 1 && clickQueue[0].id === h.id;
+                
+                if (currentTool === 'boundary') {
+                    p.style.strokeOpacity = '0.3';
+                    p.style.fill = 'transparent';
+                    p.style.pointerEvents = 'none';
+                } else if (appMode === 'messy' || isSelected || isMeasuringFirst) {
+                    p.style.strokeOpacity = '1';
+                    p.style.fill = (isSelected || isMeasuringFirst) ? 'transparent' : colors[h.cat] + "40"; 
+                } else {
+                    p.style.strokeOpacity = '0'; p.style.fill = 'transparent';
+                }
+                
+                if (isSelected || isMeasuringFirst) p.classList.add('highlight');
+                
+                if (currentTool === 'measure') {
+                    p.onmouseenter = () => p.classList.add('glow');
+                    p.onmouseleave = () => p.classList.remove('glow');
+                    p.onclick = (e) => { e.stopPropagation(); handleMeasureClick(h.center, h.id); };
+                } else if (currentTool === 'clear') {
+                    p.onclick = (e) => { e.stopPropagation(); measurements = measurements.filter(m => m.h1Id !== h.id && m.h2Id !== h.id); saveMeasurements(); };
+                } else if (currentTool === 'none') {
+                    p.onclick = (e) => { e.stopPropagation(); selectHold(h); };
+                }
+                
+                svg.appendChild(p);
+            });
+        }
+
+        // 3. Calibration Lines & Dots
         calibrationData.forEach(c => {
+            if (!c.p1 || !c.p2 || typeof c.p1.x === 'undefined') return;
+            const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
             const l = document.createElementNS("http://www.w3.org/2000/svg", "line");
             l.setAttribute('x1', c.p1.x); l.setAttribute('y1', c.p1.y); l.setAttribute('x2', c.p2.x); l.setAttribute('y2', c.p2.y);
             l.setAttribute('class', 'calib-line');
-            svg.appendChild(l);
-        });
+            group.appendChild(l);
 
-        measurements.forEach((m, idx) => {
-            const h1 = holds.find(x => x.id === m.h1Id), h2 = holds.find(x => x.id === m.h2Id);
-            if (!h1 || !h2) return;
-            const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
-            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            line.setAttribute('x1', h1.center.x); line.setAttribute('y1', h1.center.y);
-            line.setAttribute('x2', h2.center.x); line.setAttribute('y2', h2.center.y);
-            line.setAttribute('class', 'measure-line');
-            if (selectedLinkId === idx) line.style.strokeOpacity = "1";
-            line.onclick = (e) => {
-                e.stopPropagation();
-                if (calibMode) return; // 1. Block calibration click on lines
-                if (currentTool === 'clear') { measurements.splice(idx, 1); saveMeasurements(); return; }
-                if (currentTool === 'info') { showLinkInfo(idx); return; }
-            };
-            group.appendChild(line);
+            [c.p1, c.p2].forEach(p => {
+                const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                dot.setAttribute('cx', p.x); dot.setAttribute('cy', p.y);
+                dot.setAttribute('r', '5'); dot.setAttribute('class', 'calib-dot');
+                group.appendChild(dot);
+            });
 
             const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            text.setAttribute('x', (h1.center.x + h2.center.x)/2); text.setAttribute('y', (h1.center.y + h2.center.y)/2 - 10);
-            text.setAttribute('class', 'measure-text');
-            text.textContent = `${m.distM.toFixed(3)}m`;
+            text.setAttribute('x', (c.p1.x + c.p2.x)/2); text.setAttribute('y', (c.p1.y + c.p2.y)/2 - 10);
+            text.setAttribute('class', 'calib-text');
+            text.textContent = `${c.lengthMeters}m`;
             group.appendChild(text);
             svg.appendChild(group);
         });
 
-        holds.forEach(h => {
-            const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            p.setAttribute('d', h.path);
-            p.setAttribute('class', `hold-path cat-${h.cat}`);
-            const isSelected = h.id === selectedHoldId;
-            if (appMode === 'messy' || isSelected) {
-                p.style.strokeOpacity = '1';
-                p.style.fill = isSelected ? 'transparent' : colors[h.cat] + "40"; 
-            } else {
-                p.style.strokeOpacity = '0'; p.style.fill = 'transparent';
-            }
-            if (isSelected) p.classList.add('highlight');
-            p.onclick = (e) => { 
-                e.stopPropagation(); 
-                if (calibMode) return; // 1. Block calibration click on holds
-                
-                if (currentTool === 'clear') {
-                    // 2. Clear all lines connected to this hold
-                    measurements = measurements.filter(m => m.h1Id !== h.id && m.h2Id !== h.id);
-                    saveMeasurements();
-                    return;
+        // 4. Measurement Lines (Hide in boundary mode for clarity)
+        if (currentTool !== 'boundary') {
+            measurements.forEach((m, idx) => {
+                let p1, p2;
+                if (m.p1 && m.p2) { p1 = m.p1; p2 = m.p2; }
+                else {
+                    const h1 = holds.find(x => x.id === m.h1Id), h2 = holds.find(x => x.id === m.h2Id);
+                    if (!h1 || !h2) return;
+                    p1 = h1.center; p2 = h2.center;
                 }
-                
-                if (currentTool === 'measure') { handleMeasureClick(h); return; } 
-                selectHold(h); 
-            };
-            svg.appendChild(p);
+
+                const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute('x1', p1.x); line.setAttribute('y1', p1.y);
+                line.setAttribute('x2', p2.x); line.setAttribute('y2', p2.y);
+                line.setAttribute('class', 'measure-line');
+                if (selectedLinkId === idx) line.style.strokeOpacity = "1";
+                line.onclick = (e) => {
+                    e.stopPropagation();
+                    if (currentTool === 'clear') { measurements.splice(idx, 1); saveMeasurements(); return; }
+                    if (currentTool === 'info' && m.h1Id && m.h2Id) { showLinkInfo(idx); return; }
+                };
+                group.appendChild(line);
+
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute('x', (p1.x + p2.x)/2); text.setAttribute('y', (p1.y + p2.y)/2 - 10);
+                text.setAttribute('class', 'measure-text');
+                const d = m.distM != null ? m.distM.toFixed(3) : "?.???";
+                text.textContent = `${d}m`;
+                group.appendChild(text);
+                svg.appendChild(group);
+            });
+        }
+        
+        // 5. Click Queue Dots
+        clickQueue.forEach(p => {
+            const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            c.setAttribute('cx', p.x); c.setAttribute('cy', p.y);
+            c.setAttribute('r', '6'); c.setAttribute('class', 'click-dot');
+            svg.appendChild(c);
+        });
+    }
+
+    function updateSetupLists() {
+        const bList = document.getElementById('boundary-list');
+        const cList = document.getElementById('calibration-list');
+        
+        bList.innerHTML = boundaryPoints.length ? '' : '<div style="padding:10px; color:#666; font-style:italic;">No boundary points</div>';
+        boundaryPoints.forEach((p, i) => {
+            const item = document.createElement('div');
+            item.className = 'setup-item';
+            item.innerHTML = `<span>Point ${i+1}: ${Math.round(p.x)},${Math.round(p.y)}</span><span class="delete-small" onclick="event.stopPropagation(); boundaryPoints.splice(${i}, 1); saveAnnotations();">DEL</span>`;
+            bList.appendChild(item);
+        });
+
+        cList.innerHTML = calibrationData.length ? '' : '<div style="padding:10px; color:#666; font-style:italic;">No calibrations</div>';
+        calibrationData.forEach((c, i) => {
+            const item = document.createElement('div');
+            item.className = 'setup-item';
+            item.innerHTML = `<span>Dist: ${c.lengthMeters}m</span><span class="delete-small" onclick="event.stopPropagation(); calibrationData.splice(${i}, 1); saveCalibration();">DEL</span>`;
+            cList.appendChild(item);
         });
     }
 
@@ -294,18 +429,27 @@
         document.getElementById('link-details').style.display = 'block';
         document.getElementById('h1-card').innerText = `HOLD 1:\nID: ${h1.cat}${h1.num}\nCell: ${h1.cell}`;
         document.getElementById('h2-card').innerText = `HOLD 2:\nID: ${h2.cat}${h2.num}\nCell: ${h2.cell}`;
-        document.getElementById('link-dist').innerText = `${m.distM.toFixed(3)} m`;
+        document.getElementById('link-dist').innerText = `${m.distM ? m.distM.toFixed(3) : "?.???"} m`;
         render();
     }
 
-    function handleMeasureClick(h) {
-        clickQueue.push(h);
-        if (clickQueue.length === 1) status.innerText = "SELECT SECOND HOLD";
-        else {
-            const h1 = clickQueue[0], h2 = h;
-            const distPx = Math.hypot(h1.center.x - h2.center.x, h1.center.y - h2.center.y);
-            measurements.push({ h1Id: h1.id, h2Id: h2.id, distM: pixelsToMeters(distPx) });
-            saveMeasurements(); toggleMode('none');
+    function handleMeasureClick(pt, holdId = null) {
+        const point = { x: pt.x, y: pt.y, id: holdId };
+        clickQueue.push(point);
+        
+        if (clickQueue.length === 1) {
+            status.innerText = "SELECT SECOND POINT";
+            render();
+        } else {
+            const p1 = clickQueue[0], p2 = clickQueue[1];
+            const distPx = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+            measurements.push({ 
+                h1Id: p1.id, h2Id: p2.id, 
+                p1: {x: p1.x, y: p1.y}, p2: {x: p2.x, y: p2.y}, 
+                distM: pixelsToMeters(distPx) 
+            });
+            saveMeasurements(); 
+            toggleMode('none');
         }
     }
 
@@ -318,17 +462,54 @@
 
     async function saveMeasurements() { await fetch('/save_measurements', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(measurements) }); render(); }
     async function saveCalibration() { await fetch('/save_calibration', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(calibrationData) }); render(); }
+    async function saveAnnotations() { await fetch('/save_annotations', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(boundaryPoints) }); render(); }
 
-    function startCalibration() {
-        calibMode = true; clickQueue = []; status.innerText = "CLICK START POINT";
-        svg.onclick = (e) => {
-            if (!calibMode) return;
-            const pt = getSVGPoint(e); clickQueue.push(pt);
-            if (clickQueue.length === 1) status.innerText = "CLICK END POINT";
-            else { const m = prompt("Distance (m):", "1.0"); if (m) { calibrationData.push({ p1: clickQueue[0], p2: clickQueue[1], lengthMeters: parseFloat(m) }); saveCalibration(); } calibMode = false; svg.onclick = null; status.innerText = "CALIBRATED"; }
-        };
+    svg.onclick = (e) => {
+        if (currentTool === 'none' || document.getElementById('edit-panel').style.display === 'block') {
+            selectedHoldId = null; selectedLinkId = null;
+            document.getElementById('hold-details').style.display = 'none';
+            document.getElementById('link-details').style.display = 'none';
+            render();
+            return;
+        }
+
+        const pt = getSVGPoint(e);
+
+        if (currentTool === 'boundary') {
+            boundaryPoints.push(pt);
+            saveAnnotations();
+            return;
+        }
+        
+        if (currentTool === 'measure') {
+            handleMeasureClick(pt);
+            return;
+        }
+
+        if (currentTool === 'calibrate') {
+            clickQueue.push(pt);
+            render(); // Show the dot for the first click
+            if (clickQueue.length === 1) {
+                status.innerText = "CLICK END POINT";
+            } else {
+                const m = prompt("Distance (m):", "1.0");
+                if (m) {
+                    calibrationData.push({ p1: clickQueue[0], p2: clickQueue[1], lengthMeters: parseFloat(m) });
+                    saveCalibration();
+                }
+                toggleMode('none');
+                status.innerText = "CALIBRATED";
+            }
+        }
+    };
+
+    function getSVGPoint(e) { 
+        const pt = svg.createSVGPoint(); 
+        pt.x = e.clientX; 
+        pt.y = e.clientY; 
+        const transformed = pt.matrixTransform(svg.getScreenCTM().inverse());
+        return { x: transformed.x, y: transformed.y };
     }
-    function getSVGPoint(e) { const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; return pt.matrixTransform(svg.getScreenCTM().inverse()); }
 
     function chooseRandomHold() { if (!holds.length) return; const r = holds[Math.floor(Math.random() * holds.length)]; selectHold(r); zoomToHold(); }
     function zoomToHold() { const h = holds.find(x => x.id === selectedHoldId); if (!h) return; const vRect = viewport.getBoundingClientRect(); scale = 2.0; translateX = vRect.width/2 - h.center.x * scale; translateY = vRect.height/2 - h.center.y * scale; updateTransform(); }
@@ -357,7 +538,6 @@
     }
 
     function setMode(m) { appMode = m; document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active')); document.getElementById(`mode-${m}`).classList.add('active'); render(); }
-    svg.onclick = () => { if (calibMode || currentTool !== 'none' || document.getElementById('edit-panel').style.display === 'block') return; selectedHoldId = null; selectedLinkId = null; document.getElementById('hold-details').style.display = 'none'; document.getElementById('link-details').style.display = 'none'; render(); };
 </script>
 </body>
 </html>
