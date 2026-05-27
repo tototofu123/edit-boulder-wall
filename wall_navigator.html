@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wall Navigator - Interactive</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #1a1a1a; color: white; display: flex; height: 100vh; overflow: hidden; touch-action: none; }
+        
+        .viewport { 
+            flex: 1; 
+            position: relative; 
+            background: #000;
+            overflow: hidden;
+            cursor: grab;
+        }
+        .viewport:active { cursor: grabbing; }
+
+        #canvas-wrapper {
+            position: absolute;
+            transform-origin: 0 0;
+            will-change: transform;
+        }
+
+        #wall-img { 
+            display: block; 
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        #overlay { 
+            position: absolute; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            z-index: 10; 
+            pointer-events: all;
+        }
+        
+        .sidebar { width: 380px; background: #252526; border-left: 2px solid #444; display: flex; flex-direction: column; gap: 15px; padding: 20px; overflow-y: auto; z-index: 100; }
+        .status { background: #000; padding: 15px; color: #0f0; font-family: monospace; border: 1px solid #555; font-size: 14px; font-weight: bold; text-align: center; }
+        
+        .box { background: #333; padding: 15px; border-radius: 4px; border-left: 4px solid #007acc; }
+        
+        .mode-selector { display: flex; gap: 10px; margin-top: 10px; }
+        .mode-btn { flex: 1; padding: 12px; border: 1px solid #555; background: #444; color: white; cursor: pointer; border-radius: 4px; font-weight: bold; text-align: center; }
+        .mode-btn.active { background: #007acc; border-color: white; }
+
+        .hold-info { background: #1e1e1e; padding: 20px; border-radius: 8px; border: 1px solid #444; margin-top: 10px; display: none; }
+        .info-label { color: #aaa; font-size: 12px; text-transform: uppercase; margin-bottom: 4px; }
+        .info-value { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #0098ff; }
+
+        .hold-path { cursor: pointer; stroke-width: 3; fill: none; transition: stroke-opacity 0.2s, fill 0.2s; pointer-events: all; }
+        .hold-path.highlight { stroke: white !important; stroke-width: 8 !important; filter: drop-shadow(0 0 10px white); }
+        
+        .cat-C { stroke: #ff4444; }
+        .cat-I { stroke: #44ff44; }
+        .cat-F { stroke: #ffff44; }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: 300px; border-left: none; border-top: 2px solid #444; order: 2; }
+            .viewport { order: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="viewport" id="viewport">
+    <div id="canvas-wrapper">
+        <img id="wall-img" src="Correct Real Wall Photo.jpeg">
+        <svg id="overlay"></svg>
+    </div>
+</div>
+
+<div class="sidebar">
+    <div class="status" id="status">WALL NAVIGATOR</div>
+
+    <div class="box">
+        <div style="font-weight:bold; margin-bottom:10px;">Display Mode:</div>
+        <div class="mode-selector">
+            <div class="mode-btn active" id="mode-clean" onclick="setMode('clean')">CLEAN</div>
+            <div class="mode-btn" id="mode-messy" onclick="setMode('messy')">MESSY</div>
+        </div>
+    </div>
+
+    <div id="hold-details" class="hold-info">
+        <div class="info-label">HOLD ID (Cell + ID)</div>
+        <div id="val-id" class="info-value">-</div>
+        
+        <div class="info-label">CATEGORY + TYPE</div>
+        <div id="val-cat-type" class="info-value">-</div>
+
+        <div class="info-label">DIFFICULTY LEVEL</div>
+        <div id="val-diff" class="info-value" style="color:#28a745">-</div>
+
+        <div class="info-label">HOLD GRAB POSITION</div>
+        <div id="val-grab" class="info-value" style="color:#ffc107">-</div>
+    </div>
+
+    <div style="margin-top:auto;">
+        <button onclick="window.location.reload()" style="width:100%; padding:10px; background:#444; border:none; color:white; border-radius:4px; cursor:pointer;">Refresh Data</button>
+    </div>
+</div>
+
+<script>
+    const img = document.getElementById('wall-img');
+    const svg = document.getElementById('overlay');
+    const wrapper = document.getElementById('canvas-wrapper');
+    const viewport = document.getElementById('viewport');
+    const status = document.getElementById('status');
+    
+    let holds = [];
+    let richMetadata = {}; 
+    let appMode = 'clean'; 
+    let selectedHoldId = null;
+
+    // Navigation State
+    let scale = 1.0;
+    let translateX = 0;
+    let translateY = 0;
+    
+    // Interaction State
+    let isDragging = false;
+    let lastX, lastY;
+    let initialPinchDist = null;
+
+    const catNames = { 'C': 'Climbing Hold', 'I': 'Insert Hold', 'F': 'Wall Feature' };
+    const catMapFull = { 'C': 'climbing holds', 'I': 'insert holds', 'F': 'wall features' };
+    const colors = { 'C': '#ff4444', 'I': '#44ff44', 'F': '#ffff44' };
+
+    function getDirectionName(deg) {
+        if (deg === null || deg === undefined) return "Unknown";
+        const d = parseInt(deg);
+        const map = {
+            0: "Up",
+            45: "Up-Right",
+            90: "Right",
+            135: "Down-Right",
+            180: "Down",
+            225: "Down-Left",
+            270: "Left",
+            315: "Up-Left"
+        };
+        return map[d] ? `${d}° (${map[d]})` : `${d}°`;
+    }
+
+    img.onload = () => {
+        svg.setAttribute('viewBox', `0 0 ${img.naturalWidth} ${img.naturalHeight}`);
+        loadData();
+        setTimeout(initFit, 100);
+    };
+
+    function initFit() {
+        const vRect = viewport.getBoundingClientRect();
+        const scaleX = vRect.width / img.naturalWidth;
+        const scaleY = vRect.height / img.naturalHeight;
+        scale = Math.min(scaleX, scaleY);
+        translateX = (vRect.width - img.naturalWidth * scale) / 2;
+        translateY = (vRect.height - img.naturalHeight * scale) / 2;
+        updateTransform();
+    }
+
+    function updateTransform() {
+        wrapper.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+    }
+
+    // DESKTOP & MOBILE PAN/ZOOM
+    viewport.onwheel = (e) => {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? 0.9 : 1.1;
+        const oldScale = scale;
+        scale = Math.min(Math.max(scale * delta, 0.05), 15);
+        
+        const vRect = viewport.getBoundingClientRect();
+        const mouseX = e.clientX - vRect.left;
+        const mouseY = e.clientY - vRect.top;
+        
+        translateX = mouseX - (mouseX - translateX) * (scale / oldScale);
+        translateY = mouseY - (mouseY - translateY) * (scale / oldScale);
+        updateTransform();
+    };
+
+    viewport.onmousedown = (e) => {
+        if (e.target.tagName === 'path') return;
+        isDragging = true;
+        lastX = e.clientX;
+        lastY = e.clientY;
+    };
+
+    window.onmousemove = (e) => {
+        if (!isDragging) return;
+        translateX += (e.clientX - lastX);
+        translateY += (e.clientY - lastY);
+        lastX = e.clientX;
+        lastY = e.clientY;
+        updateTransform();
+    };
+
+    window.onmouseup = () => isDragging = false;
+
+    // MOBILE TOUCH HANDLING
+    viewport.ontouchstart = (e) => {
+        if (e.touches.length === 1) {
+            isDragging = true;
+            lastX = e.touches[0].clientX;
+            lastY = e.touches[0].clientY;
+        } else if (e.touches.length === 2) {
+            initialPinchDist = getDist(e.touches);
+        }
+    };
+
+    viewport.ontouchmove = (e) => {
+        if (e.touches.length === 1 && isDragging) {
+            translateX += (e.touches[0].clientX - lastX);
+            translateY += (e.touches[0].clientY - lastY);
+            lastX = e.touches[0].clientX;
+            lastY = e.touches[0].clientY;
+            updateTransform();
+        } else if (e.touches.length === 2 && initialPinchDist) {
+            const newDist = getDist(e.touches);
+            const delta = newDist / initialPinchDist;
+            const oldScale = scale;
+            scale = Math.min(Math.max(scale * delta, 0.05), 15);
+            
+            // Zoom at center of pinch
+            const vRect = viewport.getBoundingClientRect();
+            const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - vRect.left;
+            const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - vRect.top;
+            
+            translateX = midX - (midX - translateX) * (scale / oldScale);
+            translateY = midY - (midY - translateY) * (scale / oldScale);
+            
+            initialPinchDist = newDist;
+            updateTransform();
+        }
+    };
+
+    viewport.ontouchend = () => {
+        isDragging = false;
+        initialPinchDist = null;
+    };
+
+    function getDist(touches) {
+        return Math.hypot(touches[0].clientX - touches[1].clientX, touches[0].clientY - touches[1].clientY);
+    }
+
+    // LOGIC & RENDERING
+    function setMode(m) {
+        appMode = m;
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(`mode-${m}`).classList.add('active');
+        render();
+    }
+
+    async function loadData() {
+        try {
+            const resAnn = await fetch('docs/hold_annotations.json');
+            if (resAnn.ok) holds = await resAnn.json();
+            const resRich = await fetch('docs/holds_data.json');
+            if (resRich.ok) richMetadata = await resRich.json();
+            render();
+            status.innerText = `LOADED ${holds.length} HOLDS`;
+        } catch(e) {
+            status.innerText = "ERROR LOADING DATA";
+        }
+    }
+
+    function render() {
+        svg.innerHTML = '';
+        holds.forEach(h => {
+            const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            p.setAttribute('d', h.path);
+            p.setAttribute('class', `hold-path cat-${h.cat}`);
+            
+            const isSelected = h.id === selectedHoldId;
+            if (appMode === 'messy' || isSelected) {
+                p.style.strokeOpacity = '1';
+                p.style.fill = colors[h.cat] + "80"; 
+            } else {
+                p.style.strokeOpacity = '0';
+                p.style.fill = 'transparent';
+            }
+            if (isSelected) p.classList.add('highlight');
+            p.onclick = (e) => { e.stopPropagation(); selectHold(h); };
+            svg.appendChild(p);
+        });
+    }
+
+    function selectHold(h) {
+        selectedHoldId = h.id;
+        document.getElementById('hold-details').style.display = 'block';
+        document.getElementById('val-id').innerText = `${h.cell} ${h.cat}${h.num}`;
+
+        const fullCat = catMapFull[h.cat];
+        const key = `${fullCat}${h.num}`;
+        const cellData = richMetadata[h.cell];
+        const meta = cellData ? cellData[key] : null;
+
+        if (meta) {
+            document.getElementById('val-cat-type').innerText = `${catNames[h.cat]} ${meta.type || ""}`;
+            document.getElementById('val-diff').innerText = meta.difficulty || "N/A";
+            // Enhanced Grab Position with English Labels
+            document.getElementById('val-grab').innerText = getDirectionName(meta.direction);
+        } else {
+            document.getElementById('val-cat-type').innerText = `${catNames[h.cat]} (Not categorized)`;
+            document.getElementById('val-diff').innerText = "-";
+            document.getElementById('val-grab').innerText = "-";
+        }
+        render();
+    }
+
+    svg.onclick = () => {
+        selectedHoldId = null;
+        document.getElementById('hold-details').style.display = 'none';
+        render();
+    };
+</script>
+</body>
+</html>
