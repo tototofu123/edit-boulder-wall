@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wall Navigator - Interactive</title>
+    <title>Wall Editor - Interactive</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #1a1a1a; color: white; display: flex; height: 100vh; overflow: hidden; touch-action: none; }
         
@@ -47,10 +47,20 @@
 
         .hold-info { background: #1e1e1e; padding: 20px; border-radius: 8px; border: 1px solid #444; margin-top: 10px; display: none; }
         .info-label { color: #aaa; font-size: 12px; text-transform: uppercase; margin-bottom: 4px; }
-        .info-value { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #0098ff; }
+        .info-value { font-size: 16px; font-weight: bold; margin-bottom: 12px; color: #0098ff; }
+        .info-value-big { font-size: 22px; font-weight: bold; margin-bottom: 15px; color: #fff; letter-spacing: 1px; }
+
+        .edit-form { display: none; background: #2d2d2d; padding: 15px; border-radius: 8px; border: 1px solid #007acc; margin-top: 10px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 11px; color: #aaa; text-transform: uppercase; margin-bottom: 5px; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; background: #1a1a1a; border: 1px solid #444; color: white; border-radius: 4px; box-sizing: border-box; }
+        
+        .btn-row { display: flex; gap: 10px; margin-top: 10px; }
+        .save-btn { flex: 2; background: #28a745; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .cancel-btn { flex: 1; background: #dc3545; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
         .hold-path { cursor: pointer; stroke-width: 3; fill: none; transition: stroke-opacity 0.2s, fill 0.2s; pointer-events: all; }
-        .hold-path.highlight { stroke: white !important; stroke-width: 8 !important; filter: drop-shadow(0 0 10px white); }
+        .hold-path.highlight { stroke: white !important; stroke-width: 10 !important; filter: drop-shadow(0 0 10px white); }
         
         .cat-C { stroke: #ff4444; }
         .cat-I { stroke: #44ff44; }
@@ -58,8 +68,8 @@
 
         @media (max-width: 768px) {
             body { flex-direction: column; }
-            .sidebar { width: 100%; height: 300px; border-left: none; border-top: 2px solid #444; order: 2; }
-            .viewport { order: 1; }
+            .sidebar { width: 100%; height: auto; border-left: none; border-top: 2px solid #444; order: 2; padding-bottom: 50px; }
+            .viewport { order: 1; min-height: 400px; }
         }
     </style>
 </head>
@@ -73,7 +83,7 @@
 </div>
 
 <div class="sidebar">
-    <div class="status" id="status">WALL NAVIGATOR</div>
+    <div class="status" id="status">WALL EDITOR</div>
 
     <div class="box">
         <div style="font-weight:bold; margin-bottom:10px;">Display Mode:</div>
@@ -83,22 +93,95 @@
         </div>
     </div>
 
+    <!-- VIEW MODE -->
     <div id="hold-details" class="hold-info">
-        <div class="info-label">HOLD ID (Cell + ID)</div>
-        <div id="val-id" class="info-value">-</div>
-        
+        <div class="info-label">HOLD ID (5-char)</div>
+        <div id="val-id-5" class="info-value-big">-</div>
+
+        <div class="info-label">DESCRIPTION (8-char)</div>
+        <div id="val-desc-8" class="info-value-big" style="color:#ffc107">-</div>
+
         <div class="info-label">CATEGORY + TYPE</div>
         <div id="val-cat-type" class="info-value">-</div>
 
         <div class="info-label">DIFFICULTY LEVEL</div>
         <div id="val-diff" class="info-value" style="color:#28a745">-</div>
 
-        <div class="info-label">HOLD GRAB POSITION</div>
-        <div id="val-grab" class="info-value" style="color:#ffc107">-</div>
+        <div class="info-label">GRAB POSITION</div>
+        <div id="val-grab" class="info-value">-</div>
+
+        <div class="info-label">IDEAL USAGE</div>
+        <div id="val-ideal" class="info-value" style="color:#0098ff">-</div>
+
+        <button onclick="startEdit()" style="width:100%; padding:12px; background:#007acc; border:none; color:white; border-radius:4px; cursor:pointer; font-weight:bold; margin-top:10px;">EDIT DATA</button>
     </div>
 
-    <div style="margin-top:auto;">
-        <button onclick="window.location.reload()" style="width:100%; padding:10px; background:#444; border:none; color:white; border-radius:4px; cursor:pointer;">Refresh Data</button>
+    <!-- EDIT MODE -->
+    <div id="edit-panel" class="edit-form">
+        <div style="font-weight:bold; margin-bottom:15px; color:#007acc; border-bottom:1px solid #444; padding-bottom:5px;">EDITING HOLD</div>
+        
+        <div class="form-group">
+            <label>Hold Cell (e.g. 0,0)</label>
+            <input type="text" id="edit-cell">
+        </div>
+
+        <div class="form-group">
+            <label>Category</label>
+            <select id="edit-cat">
+                <option value="C">Climbing Hold (Red)</option>
+                <option value="I">Insert Hold (Green)</option>
+                <option value="F">Wall Feature (Yellow)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Hold Number</label>
+            <input type="number" id="edit-num">
+        </div>
+
+        <div class="form-group">
+            <label>Hold Type</label>
+            <input type="text" id="edit-type" placeholder="jug, crimp, sloper...">
+        </div>
+
+        <div class="form-group">
+            <label>Difficulty (1-5)</label>
+            <select id="edit-diff">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Grab Position</label>
+            <select id="edit-grab">
+                <option value="0">0° (Up)</option>
+                <option value="45">45° (Up-Right)</option>
+                <option value="90">90° (Right)</option>
+                <option value="135">135° (Down-Right)</option>
+                <option value="180">180° (Down)</option>
+                <option value="225">225° (Down-Left)</option>
+                <option value="270">270° (Left)</option>
+                <option value="315">315° (Up-Left)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Ideal Usage</label>
+            <select id="edit-ideal">
+                <option value="General">General</option>
+                <option value="Hand Prefer">Hand Prefer</option>
+                <option value="Feet Prefer">Feet Prefer</option>
+            </select>
+        </div>
+
+        <div class="btn-row">
+            <button class="save-btn" onclick="saveEdit()">SAVE CHANGES</button>
+            <button class="cancel-btn" onclick="cancelEdit()">CANCEL</button>
+        </div>
     </div>
 </div>
 
@@ -114,12 +197,9 @@
     let appMode = 'clean'; 
     let selectedHoldId = null;
 
-    // Navigation State
     let scale = 1.0;
     let translateX = 0;
     let translateY = 0;
-    
-    // Interaction State
     let isDragging = false;
     let lastX, lastY;
     let initialPinchDist = null;
@@ -128,19 +208,19 @@
     const catMapFull = { 'C': 'climbing holds', 'I': 'insert holds', 'F': 'wall features' };
     const colors = { 'C': '#ff4444', 'I': '#44ff44', 'F': '#ffff44' };
 
+    const typeShorthand = {
+        'crimp': 'Cr', 'jug': 'Jg', 'pocket': 'Pk', 'sloper': 'Sl', 
+        'pinch': 'Pn', 'jib': 'Jb', 'uncategorized': 'Un'
+    };
+
+    const clockMap = {
+        0: "12", 45: "01", 90: "03", 135: "04", 
+        180: "06", 225: "07", 270: "09", 315: "10"
+    };
+
     function getDirectionName(deg) {
-        if (deg === null || deg === undefined) return "Unknown";
         const d = parseInt(deg);
-        const map = {
-            0: "Up",
-            45: "Up-Right",
-            90: "Right",
-            135: "Down-Right",
-            180: "Down",
-            225: "Down-Left",
-            270: "Left",
-            315: "Up-Left"
-        };
+        const map = { 0: "Up", 45: "Up-Right", 90: "Right", 135: "Down-Right", 180: "Down", 225: "Down-Left", 270: "Left", 315: "Up-Left" };
         return map[d] ? `${d}° (${map[d]})` : `${d}°`;
     }
 
@@ -164,93 +244,47 @@
         wrapper.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
     }
 
-    // DESKTOP & MOBILE PAN/ZOOM
     viewport.onwheel = (e) => {
         e.preventDefault();
         const delta = e.deltaY > 0 ? 0.9 : 1.1;
         const oldScale = scale;
         scale = Math.min(Math.max(scale * delta, 0.05), 15);
-        
         const vRect = viewport.getBoundingClientRect();
         const mouseX = e.clientX - vRect.left;
         const mouseY = e.clientY - vRect.top;
-        
         translateX = mouseX - (mouseX - translateX) * (scale / oldScale);
         translateY = mouseY - (mouseY - translateY) * (scale / oldScale);
         updateTransform();
     };
 
-    viewport.onmousedown = (e) => {
-        if (e.target.tagName === 'path') return;
-        isDragging = true;
-        lastX = e.clientX;
-        lastY = e.clientY;
-    };
-
-    window.onmousemove = (e) => {
-        if (!isDragging) return;
-        translateX += (e.clientX - lastX);
-        translateY += (e.clientY - lastY);
-        lastX = e.clientX;
-        lastY = e.clientY;
-        updateTransform();
-    };
-
+    viewport.onmousedown = (e) => { if (e.target.tagName !== 'path') { isDragging = true; lastX = e.clientX; lastY = e.clientY; } };
+    window.onmousemove = (e) => { if (isDragging) { translateX += (e.clientX - lastX); translateY += (e.clientY - lastY); lastX = e.clientX; lastY = e.clientY; updateTransform(); } };
     window.onmouseup = () => isDragging = false;
 
-    // MOBILE TOUCH HANDLING
     viewport.ontouchstart = (e) => {
-        if (e.touches.length === 1) {
-            isDragging = true;
-            lastX = e.touches[0].clientX;
-            lastY = e.touches[0].clientY;
-        } else if (e.touches.length === 2) {
-            initialPinchDist = getDist(e.touches);
-        }
+        if (e.touches.length === 1) { isDragging = true; lastX = e.touches[0].clientX; lastY = e.touches[0].clientY; }
+        else if (e.touches.length === 2) initialPinchDist = getDist(e.touches);
     };
 
     viewport.ontouchmove = (e) => {
         if (e.touches.length === 1 && isDragging) {
-            translateX += (e.touches[0].clientX - lastX);
-            translateY += (e.touches[0].clientY - lastY);
-            lastX = e.touches[0].clientX;
-            lastY = e.touches[0].clientY;
-            updateTransform();
+            translateX += (e.touches[0].clientX - lastX); translateY += (e.touches[0].clientY - lastY);
+            lastX = e.touches[0].clientX; lastY = e.touches[0].clientY; updateTransform();
         } else if (e.touches.length === 2 && initialPinchDist) {
             const newDist = getDist(e.touches);
             const delta = newDist / initialPinchDist;
             const oldScale = scale;
             scale = Math.min(Math.max(scale * delta, 0.05), 15);
-            
-            // Zoom at center of pinch
             const vRect = viewport.getBoundingClientRect();
             const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - vRect.left;
             const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - vRect.top;
-            
             translateX = midX - (midX - translateX) * (scale / oldScale);
             translateY = midY - (midY - translateY) * (scale / oldScale);
-            
-            initialPinchDist = newDist;
-            updateTransform();
+            initialPinchDist = newDist; updateTransform();
         }
     };
-
-    viewport.ontouchend = () => {
-        isDragging = false;
-        initialPinchDist = null;
-    };
-
-    function getDist(touches) {
-        return Math.hypot(touches[0].clientX - touches[1].clientX, touches[0].clientY - touches[1].clientY);
-    }
-
-    // LOGIC & RENDERING
-    function setMode(m) {
-        appMode = m;
-        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(`mode-${m}`).classList.add('active');
-        render();
-    }
+    viewport.ontouchend = () => { isDragging = false; initialPinchDist = null; };
+    function getDist(touches) { return Math.hypot(touches[0].clientX - touches[1].clientX, touches[0].clientY - touches[1].clientY); }
 
     async function loadData() {
         try {
@@ -259,10 +293,8 @@
             const resRich = await fetch('docs/holds_data.json');
             if (resRich.ok) richMetadata = await resRich.json();
             render();
-            status.innerText = `LOADED ${holds.length} HOLDS`;
-        } catch(e) {
-            status.innerText = "ERROR LOADING DATA";
-        }
+            status.innerText = `READY: ${holds.length} HOLDS`;
+        } catch(e) { status.innerText = "ERROR LOADING DATA"; }
     }
 
     function render() {
@@ -271,11 +303,10 @@
             const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
             p.setAttribute('d', h.path);
             p.setAttribute('class', `hold-path cat-${h.cat}`);
-            
             const isSelected = h.id === selectedHoldId;
             if (appMode === 'messy' || isSelected) {
                 p.style.strokeOpacity = '1';
-                p.style.fill = colors[h.cat] + "80"; 
+                p.style.fill = isSelected ? 'transparent' : colors[h.cat] + "40"; 
             } else {
                 p.style.strokeOpacity = '0';
                 p.style.fill = 'transparent';
@@ -289,31 +320,83 @@
     function selectHold(h) {
         selectedHoldId = h.id;
         document.getElementById('hold-details').style.display = 'block';
-        document.getElementById('val-id').innerText = `${h.cell} ${h.cat}${h.num}`;
+        document.getElementById('edit-panel').style.display = 'none';
 
         const fullCat = catMapFull[h.cat];
         const key = `${fullCat}${h.num}`;
-        const cellData = richMetadata[h.cell];
-        const meta = cellData ? cellData[key] : null;
+        const meta = (richMetadata[h.cell] || {})[key] || {};
 
-        if (meta) {
-            document.getElementById('val-cat-type').innerText = `${catNames[h.cat]} ${meta.type || ""}`;
-            document.getElementById('val-diff').innerText = meta.difficulty || "N/A";
-            // Enhanced Grab Position with English Labels
-            document.getElementById('val-grab').innerText = getDirectionName(meta.direction);
-        } else {
-            document.getElementById('val-cat-type').innerText = `${catNames[h.cat]} (Not categorized)`;
-            document.getElementById('val-diff').innerText = "-";
-            document.getElementById('val-grab').innerText = "-";
-        }
+        // 1. GENERATE 5-CHAR ID: [Type][X][Y][Num]
+        const [x, y] = h.cell.split(',').map(n => parseInt(n) + 1);
+        const id5 = `${h.cat}${x}${y}${h.num.toString().padStart(2, '0')}`;
+        document.getElementById('val-id-5').innerText = id5;
+
+        // 2. GENERATE 8-CHAR DESCRIPTION: [Trait1][Trait2][Diff][Clock]
+        const t1 = h.cat === 'C' ? 'Rd' : (h.cat === 'F' ? 'Sm' : 'Bg');
+        const t2 = typeShorthand[meta.type?.toLowerCase()] || 'Un';
+        const diff = (meta.difficulty || '0').toString().padStart(2, '0');
+        const clock = clockMap[parseInt(meta.direction)] || '06';
+        const desc8 = `${t1}${t2}${diff}${clock}`;
+        document.getElementById('val-desc-8').innerText = desc8;
+
+        document.getElementById('val-cat-type').innerText = `${catNames[h.cat]} ${meta.type || "uncategorized"}`;
+        document.getElementById('val-diff').innerText = meta.difficulty || "N/A";
+        document.getElementById('val-grab').innerText = getDirectionName(meta.direction);
+        document.getElementById('val-ideal').innerText = meta.ideal || "General";
         render();
     }
 
-    svg.onclick = () => {
-        selectedHoldId = null;
+    function startEdit() {
+        const h = holds.find(x => x.id === selectedHoldId);
+        if (!h) return;
         document.getElementById('hold-details').style.display = 'none';
-        render();
-    };
+        document.getElementById('edit-panel').style.display = 'block';
+        const meta = (richMetadata[h.cell] || {})[`${catMapFull[h.cat]}${h.num}`] || {};
+        document.getElementById('edit-cell').value = h.cell;
+        document.getElementById('edit-cat').value = h.cat;
+        document.getElementById('edit-num').value = h.num;
+        document.getElementById('edit-type').value = meta.type || "";
+        document.getElementById('edit-diff').value = meta.difficulty || "1";
+        document.getElementById('edit-grab').value = meta.direction || "180";
+        document.getElementById('edit-ideal').value = meta.ideal || "General";
+    }
+
+    function cancelEdit() { document.getElementById('edit-panel').style.display = 'none'; document.getElementById('hold-details').style.display = 'block'; }
+
+    async function saveEdit() {
+        const h = holds.find(x => x.id === selectedHoldId);
+        const oldCell = h.cell, oldCat = h.cat, oldNum = h.num, oldKey = `${catMapFull[oldCat]}${oldNum}`;
+        const newCell = document.getElementById('edit-cell').value.trim();
+        const newCat = document.getElementById('edit-cat').value;
+        const newNum = parseInt(document.getElementById('edit-num').value);
+        const [cx, cy] = newCell.split(',').map(n => parseInt(n));
+
+        h.cell = newCell; h.cat = newCat; h.num = newNum;
+        if (richMetadata[oldCell]) delete richMetadata[oldCell][oldKey];
+        if (!richMetadata[newCell]) richMetadata[newCell] = {};
+        const newKey = `${catMapFull[newCat]}${newNum}`;
+        richMetadata[newCell][newKey] = {
+            cell_x: cx, cell_y: cy, category: catMapFull[newCat], num: newNum.toString(),
+            type: document.getElementById('edit-type').value.trim(),
+            difficulty: document.getElementById('edit-diff').value,
+            direction: document.getElementById('edit-grab').value,
+            ideal: document.getElementById('edit-ideal').value
+        };
+
+        status.innerText = "SAVING...";
+        try {
+            const response = await fetch('/save_full_edit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ holds: holds, metadata: richMetadata })
+            });
+            if (response.ok) { status.innerText = "SAVED!"; cancelEdit(); selectHold(h); }
+            else status.innerText = "SAVE FAILED";
+        } catch(e) { status.innerText = "SERVER ERROR"; }
+    }
+
+    function setMode(m) { appMode = m; document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active')); document.getElementById(`mode-${m}`).classList.add('active'); render(); }
+    svg.onclick = () => { if (document.getElementById('edit-panel').style.display === 'block') return; selectedHoldId = null; document.getElementById('hold-details').style.display = 'none'; render(); };
 </script>
 </body>
 </html>

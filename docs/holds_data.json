@@ -1254,15 +1254,6 @@
             "difficulty": "5",
             "direction": "180"
         },
-        "climbing holds8": {
-            "cell_x": 3,
-            "cell_y": 1,
-            "category": "climbing holds",
-            "num": "8",
-            "type": "pinch",
-            "difficulty": "1",
-            "direction": "270"
-        },
         "climbing holds9": {
             "cell_x": 3,
             "cell_y": 1,
@@ -1370,6 +1361,15 @@
             "type": "uncategorized",
             "difficulty": "5",
             "direction": "180"
+        },
+        "climbing holds8": {
+            "cell_x": 3,
+            "cell_y": 1,
+            "category": "climbing holds",
+            "num": "8",
+            "type": "pinch",
+            "difficulty": "1",
+            "direction": "270"
         }
     },
     "2,0": {
