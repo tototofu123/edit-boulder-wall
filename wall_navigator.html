@@ -12,12 +12,13 @@
         }
         .viewport:active { cursor: grabbing; }
         .viewport.measuring { cursor: crosshair; }
+        .viewport.clearing { cursor: pointer; }
 
         #canvas-wrapper { position: absolute; transform-origin: 0 0; will-change: transform; }
         #wall-img { display: block; user-select: none; -webkit-user-drag: none; }
         #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: all; }
         
-        .sidebar { width: 400px; background: #252526; border-left: 2px solid #444; display: flex; flex-direction: column; gap: 15px; padding: 20px; overflow-y: auto; z-index: 100; }
+        .sidebar { width: 420px; background: #252526; border-left: 2px solid #444; display: flex; flex-direction: column; gap: 15px; padding: 20px; overflow-y: auto; z-index: 100; }
         .status { background: #000; padding: 15px; color: #0f0; font-family: monospace; border: 1px solid #555; font-size: 14px; font-weight: bold; text-align: center; }
         
         .box { background: #333; padding: 15px; border-radius: 4px; border-left: 4px solid #007acc; }
@@ -29,21 +30,21 @@
         .hold-info { background: #1e1e1e; padding: 20px; border-radius: 8px; border: 1px solid #444; margin-top: 10px; display: none; }
         .info-label { color: #aaa; font-size: 11px; text-transform: uppercase; margin-bottom: 4px; }
         
-        /* Highlighted ID */
-        .id-container { font-family: monospace; font-size: 24px; font-weight: bold; margin-bottom: 15px; display: flex; gap: 8px; }
-        .id-cat { color: #ff4444; } /* Red for Cat */
-        .id-cell { color: #44ff44; } /* Green for Cell */
-        .id-num { color: #fff; }     /* White for Num */
+        .id-container { font-family: monospace; font-size: 20px; font-weight: bold; margin-bottom: 15px; display: flex; gap: 8px; }
+        .id-cat { color: #ff4444; } 
+        .id-cell { color: #44ff44; }
+        .id-num { color: #fff; }     
         
-        .info-value { font-size: 16px; font-weight: bold; margin-bottom: 12px; color: #0098ff; }
-        .info-value-big { font-size: 20px; font-weight: bold; margin-bottom: 15px; color: #fff; letter-spacing: 1px; }
+        .info-value { font-size: 14px; font-weight: bold; margin-bottom: 10px; color: #0098ff; }
+        .info-value-big { font-size: 18px; font-weight: bold; margin-bottom: 12px; color: #fff; letter-spacing: 1px; font-family: monospace; }
 
         .edit-form { display: none; background: #2d2d2d; padding: 15px; border-radius: 8px; border: 1px solid #007acc; margin-top: 10px; }
-        .form-group { margin-bottom: 12px; }
+        .form-group { margin-bottom: 10px; }
         .form-group label { display: block; font-size: 10px; color: #aaa; text-transform: uppercase; margin-bottom: 3px; }
         .form-group input, .form-group select { width: 100%; padding: 6px; background: #1a1a1a; border: 1px solid #444; color: white; border-radius: 4px; box-sizing: border-box; }
         
-        .tool-btn { width: 100%; padding: 12px; border: none; color: white; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 8px; font-size: 13px; }
+        .tool-btn { width: 100%; padding: 10px; border: none; color: white; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 6px; font-size: 12px; transition: 0.2s; }
+        .tool-btn.active { outline: 2px solid white; box-shadow: 0 0 10px rgba(255,255,255,0.5); }
         .btn-blue { background: #007acc; }
         .btn-green { background: #28a745; }
         .btn-purple { background: #6f42c1; }
@@ -52,10 +53,14 @@
         .hold-path { cursor: pointer; stroke-width: 3; fill: none; transition: stroke-opacity 0.2s, fill 0.2s; pointer-events: all; }
         .hold-path.highlight { stroke: white !important; stroke-width: 10 !important; filter: drop-shadow(0 0 10px white); }
         
-        /* Measurement visuals */
-        .measure-line { stroke: #00ff00; stroke-width: 2; stroke-dasharray: 5,5; }
-        .measure-text { fill: #00ff00; font-family: monospace; font-weight: bold; font-size: 20px; }
-        .calib-line { stroke: #ff00ff; stroke-width: 4; }
+        .measure-line { cursor: pointer; stroke: #00ff00; stroke-width: 6; stroke-dasharray: 8,4; stroke-opacity: 0.6; }
+        .measure-line:hover { stroke-opacity: 1; stroke-width: 10; }
+        .measure-text { fill: #00ff00; font-family: monospace; font-weight: bold; font-size: 18px; pointer-events: none; }
+        .calib-line { stroke: #ff00ff; stroke-width: 6; stroke-opacity: 0.8; }
+
+        /* Dual Hold Display */
+        .dual-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .mini-card { background: #111; padding: 10px; border-radius: 4px; border: 1px solid #444; font-size: 11px; }
 
         @media (max-width: 768px) {
             body { flex-direction: column; }
@@ -82,41 +87,37 @@
             <div class="mode-btn active" id="mode-clean" onclick="setMode('clean')">CLEAN</div>
             <div class="mode-btn" id="mode-messy" onclick="setMode('messy')">MESSY</div>
         </div>
-        <button class="tool-btn btn-purple" style="margin-top:10px;" onclick="chooseRandomHold()">RANDOM HOLD</button>
+        <button class="tool-btn btn-purple" style="margin-top:8px;" onclick="chooseRandomHold()">RANDOM HOLD</button>
     </div>
 
     <div class="box">
-        <div style="font-weight:bold; margin-bottom:10px; font-size:13px;">Measurement (Meters):</div>
-        <button class="tool-btn btn-green" id="measure-btn" onclick="toggleMeasureMode()">MEASURE DISTANCE</button>
-        <div id="measure-result" style="font-family:monospace; color:#0f0; text-align:center; font-weight:bold;">Click two holds</div>
-        
-        <div style="border-top: 1px solid #555; margin: 10px 0; padding-top: 10px;">
-            <div style="font-size:11px; color:#aaa; margin-bottom:5px;">CALIBRATION SETTINGS</div>
-            <button class="tool-btn btn-blue" style="padding:6px; font-size:11px;" onclick="startCalibration()">ADD HELPER LINE</button>
-            <div id="calib-list" style="font-size:10px; color:#ccc; max-height:60px; overflow-y:auto;"></div>
+        <div style="font-weight:bold; margin-bottom:10px; font-size:13px;">Measurement Multi-Tool:</div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+            <button class="tool-btn btn-green" id="btn-measure" onclick="toggleMode('measure')">ADD DISTANCE</button>
+            <button class="tool-btn btn-red" id="btn-clear" onclick="toggleMode('clear')">CLEAR LINE</button>
+            <button class="tool-btn btn-blue" id="btn-info" onclick="toggleMode('info')">LINK INFO</button>
+            <button class="tool-btn btn-purple" onclick="startCalibration()">CALIBRATE</button>
         </div>
+        <div id="measure-status" style="font-family:monospace; color:#0f0; text-align:center; font-weight:bold; font-size:11px;">MODE: NAVIGATION</div>
     </div>
 
     <!-- VIEW MODE -->
     <div id="hold-details" class="hold-info">
+        <div class="info-label">HOLD ID (5-char)</div>
+        <div id="val-id-5" class="info-value-big">-</div>
+
+        <div class="info-label">DESCRIPTION (8-char)</div>
+        <div id="val-desc-8" class="info-value-big" style="color:#ffc107">-</div>
+
         <div class="info-label">ORIGINAL ID (READ: [CAT] [CELL] [NUM])</div>
-        <div class="id-container" id="val-id-full">
+        <div class="id-container">
             <span class="id-cat" id="val-id-cat">-</span>
             <span class="id-cell" id="val-id-cell">-</span>
             <span class="id-num" id="val-id-num">-</span>
         </div>
 
-        <div class="info-label">TYPE + CATEGORY</div>
-        <div id="val-cat-type" class="info-value">-</div>
-
-        <div class="info-label">DIFFICULTY / GRAB / IDEAL</div>
-        <div style="display:flex; gap:10px;">
-            <div id="val-diff" class="info-value" style="color:#28a745; margin-bottom:0;">-</div>
-            <div style="color:#555">|</div>
-            <div id="val-grab" class="info-value" style="color:#ffc107; margin-bottom:0;">-</div>
-            <div style="color:#555">|</div>
-            <div id="val-ideal" class="info-value" style="color:#0098ff; margin-bottom:0;">-</div>
-        </div>
+        <div class="info-label">DETAILS (TYPE / DIFF / GRAB / IDEAL)</div>
+        <div id="val-all-details" class="info-value" style="color:#0098ff; line-height:1.4;">-</div>
 
         <div style="margin-top:15px; display:flex; gap:10px;">
             <button onclick="startEdit()" class="tool-btn btn-blue" style="flex:1; margin-bottom:0;">EDIT DATA</button>
@@ -124,11 +125,21 @@
         </div>
     </div>
 
+    <!-- DUAL HOLD LINK INFO -->
+    <div id="link-details" class="hold-info">
+        <div class="info-label" style="text-align:center; margin-bottom:10px;">LINKED HOLDS COMPARISON</div>
+        <div class="dual-container">
+            <div id="h1-card" class="mini-card">-</div>
+            <div id="h2-card" class="mini-card">-</div>
+        </div>
+        <div id="link-dist" style="text-align:center; font-size:24px; font-weight:bold; color:#0f0; margin-top:15px;">-</div>
+    </div>
+
     <!-- EDIT MODE -->
     <div id="edit-panel" class="edit-form">
         <div style="font-weight:bold; margin-bottom:15px; color:#007acc; border-bottom:1px solid #444; padding-bottom:5px;">EDITING HOLD</div>
         <div class="form-group"><label>Hold Cell (x,y)</label><input type="text" id="edit-cell"></div>
-        <div class="form-group"><label>Category</label><select id="edit-cat"><option value="C">Climbing (Red)</option><option value="I">Insert (Green)</option><option value="F">Feature (Yellow)</option></select></div>
+        <div class="form-group"><label>Category</label><select id="edit-cat"><option value="C">Climbing</option><option value="I">Insert</option><option value="F">Feature</option></select></div>
         <div class="form-group"><label>Hold Number</label><input type="number" id="edit-num"></div>
         <div class="form-group"><label>Hold Type</label><input type="text" id="edit-type"></div>
         <div class="form-group"><label>Difficulty</label><select id="edit-diff"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div>
@@ -144,76 +155,84 @@
     const wrapper = document.getElementById('canvas-wrapper');
     const viewport = document.getElementById('viewport');
     const status = document.getElementById('status');
+    const mStatus = document.getElementById('measure-status');
     
-    let holds = [];
-    let richMetadata = {}; 
-    let calibrationData = []; // { p1: {x,y}, p2: {x,y}, lengthMeters }
-    
-    let appMode = 'clean'; 
-    let selectedHoldId = null;
-    let measureMode = false;
-    let calibMode = false;
-    let clickQueue = [];
-
-    // Nav State
-    let scale = 1.0, translateX = 0, translateY = 0;
-    let isDragging = false, lastX, lastY, initialPinchDist = null;
+    let holds = [], richMetadata = {}, calibrationData = [], measurements = [];
+    let appMode = 'clean', currentTool = 'none', selectedHoldId = null, selectedLinkId = null;
+    let scale = 1.0, translateX = 0, translateY = 0, isDragging = false, lastX, lastY, clickQueue = [];
 
     const catNames = { 'C': 'Climbing', 'I': 'Insert', 'F': 'Feature' };
     const catMapFull = { 'C': 'climbing holds', 'I': 'insert holds', 'F': 'wall features' };
     const colors = { 'C': '#ff4444', 'I': '#44ff44', 'F': '#ffff44' };
+    const typeShorthand = { 'crimp': 'Cr', 'jug': 'Jg', 'pocket': 'Pk', 'sloper': 'Sl', 'pinch': 'Pn', 'jib': 'Jb', 'uncategorized': 'Un' };
+    const clockMap = { 0: "12", 45: "01", 90: "03", 135: "04", 180: "06", 225: "07", 270: "09", 315: "10" };
 
-    img.onload = () => {
-        svg.setAttribute('viewBox', `0 0 ${img.naturalWidth} ${img.naturalHeight}`);
-        loadData();
-        setTimeout(initFit, 100);
-    };
-
-    function initFit() {
-        const vRect = viewport.getBoundingClientRect();
-        scale = Math.min(vRect.width / img.naturalWidth, vRect.height / img.naturalHeight);
-        translateX = (vRect.width - img.naturalWidth * scale) / 2;
-        translateY = (vRect.height - img.naturalHeight * scale) / 2;
-        updateTransform();
-    }
-
+    img.onload = () => { svg.setAttribute('viewBox', `0 0 ${img.naturalWidth} ${img.naturalHeight}`); loadData(); setTimeout(initFit, 100); };
+    function initFit() { const vRect = viewport.getBoundingClientRect(); scale = Math.min(vRect.width / img.naturalWidth, vRect.height / img.naturalHeight); translateX = (vRect.width - img.naturalWidth * scale) / 2; translateY = (vRect.height - img.naturalHeight * scale) / 2; updateTransform(); }
     function updateTransform() { wrapper.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`; }
 
-    // INTERACTIONS
-    viewport.onwheel = (e) => {
-        e.preventDefault();
-        const delta = e.deltaY > 0 ? 0.9 : 1.1;
-        const oldScale = scale;
-        scale = Math.min(Math.max(scale * delta, 0.01), 15);
-        const vRect = viewport.getBoundingClientRect();
-        const mouseX = e.clientX - vRect.left, mouseY = e.clientY - vRect.top;
-        translateX = mouseX - (mouseX - translateX) * (scale / oldScale);
-        translateY = mouseY - (mouseY - translateY) * (scale / oldScale);
-        updateTransform();
-    };
-
-    viewport.onmousedown = (e) => { 
-        if (measureMode || calibMode) return;
-        if (e.target.tagName !== 'path') { isDragging = true; lastX = e.clientX; lastY = e.clientY; } 
-    };
+    viewport.onwheel = (e) => { e.preventDefault(); const delta = e.deltaY > 0 ? 0.9 : 1.1; const oldScale = scale; scale = Math.min(Math.max(scale * delta, 0.01), 15); const vRect = viewport.getBoundingClientRect(); const mouseX = e.clientX - vRect.left, mouseY = e.clientY - vRect.top; translateX = mouseX - (mouseX - translateX) * (scale / oldScale); translateY = mouseY - (mouseY - translateY) * (scale / oldScale); updateTransform(); };
+    viewport.onmousedown = (e) => { if (currentTool !== 'none') return; if (e.target.tagName !== 'path' && e.target.tagName !== 'line') { isDragging = true; lastX = e.clientX; lastY = e.clientY; } };
     window.onmousemove = (e) => { if (isDragging) { translateX += (e.clientX - lastX); translateY += (e.clientY - lastY); lastX = e.clientX; lastY = e.clientY; updateTransform(); } };
     window.onmouseup = () => isDragging = false;
 
-    // DATA
     async function loadData() {
         try {
             holds = await (await fetch('docs/hold_annotations.json')).json();
             richMetadata = await (await fetch('docs/holds_data.json')).json();
-            const resC = await fetch('docs/calibration.json');
-            if (resC.ok) calibrationData = await resC.json();
+            calibrationData = await (await fetch('docs/calibration.json')).json().catch(()=>[]);
+            measurements = await (await fetch('docs/measurements.json')).json().catch(()=>[]);
             render();
-            updateCalibList();
             status.innerText = `READY: ${holds.length} HOLDS`;
         } catch(e) { status.innerText = "DATA LOAD ERROR"; }
     }
 
+    function toggleMode(m) {
+        if (currentTool === m) currentTool = 'none';
+        else currentTool = m;
+        clickQueue = [];
+        document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+        if (currentTool !== 'none') document.getElementById(`btn-${currentTool}`).classList.add('active');
+        mStatus.innerText = `MODE: ${currentTool.toUpperCase()}`;
+        viewport.className = `viewport ${currentTool === 'measure' ? 'measuring' : (currentTool === 'clear' ? 'clearing' : '')}`;
+    }
+
     function render() {
         svg.innerHTML = '';
+        // 1. Draw Helper Lines (Calibration)
+        calibrationData.forEach(c => {
+            const l = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            l.setAttribute('x1', c.p1.x); l.setAttribute('y1', c.p1.y); l.setAttribute('x2', c.p2.x); l.setAttribute('y2', c.p2.y);
+            l.setAttribute('class', 'calib-line');
+            svg.appendChild(l);
+        });
+
+        // 2. Draw Measurements
+        measurements.forEach((m, idx) => {
+            const h1 = holds.find(x => x.id === m.h1Id), h2 = holds.find(x => x.id === m.h2Id);
+            if (!h1 || !h2) return;
+            const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute('x1', h1.center.x); line.setAttribute('y1', h1.center.y);
+            line.setAttribute('x2', h2.center.x); line.setAttribute('y2', h2.center.y);
+            line.setAttribute('class', 'measure-line');
+            if (selectedLinkId === idx) line.style.strokeOpacity = "1";
+            line.onclick = (e) => {
+                e.stopPropagation();
+                if (currentTool === 'clear') { measurements.splice(idx, 1); saveMeasurements(); return; }
+                if (currentTool === 'info') { showLinkInfo(idx); return; }
+            };
+            group.appendChild(line);
+
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute('x', (h1.center.x + h2.center.x)/2); text.setAttribute('y', (h1.center.y + h2.center.y)/2 - 10);
+            text.setAttribute('class', 'measure-text');
+            text.textContent = `${m.distM.toFixed(3)}m`;
+            group.appendChild(text);
+            svg.appendChild(group);
+        });
+
+        // 3. Draw Holds
         holds.forEach(h => {
             const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
             p.setAttribute('d', h.path);
@@ -223,204 +242,111 @@
                 p.style.strokeOpacity = '1';
                 p.style.fill = isSelected ? 'transparent' : colors[h.cat] + "40"; 
             } else {
-                p.style.strokeOpacity = '0';
-                p.style.fill = 'transparent';
+                p.style.strokeOpacity = '0'; p.style.fill = 'transparent';
             }
             if (isSelected) p.classList.add('highlight');
-            p.onclick = (e) => {
-                e.stopPropagation();
-                if (measureMode) { handleMeasureClick(h); return; }
-                selectHold(h);
-            };
+            p.onclick = (e) => { e.stopPropagation(); if (currentTool === 'measure') { handleMeasureClick(h); return; } selectHold(h); };
             svg.appendChild(p);
         });
     }
 
     function selectHold(h) {
-        selectedHoldId = h.id;
+        selectedHoldId = h.id; selectedLinkId = null;
         document.getElementById('hold-details').style.display = 'block';
         document.getElementById('edit-panel').style.display = 'none';
+        document.getElementById('link-details').style.display = 'none';
         
         const fullCat = catMapFull[h.cat];
         const meta = (richMetadata[h.cell] || {})[`${fullCat}${h.num}`] || {};
 
+        const [x, y] = h.cell.split(',').map(n => parseInt(n) + 1);
+        const id5 = `${h.cat}${x}${y}${h.num.toString().padStart(2, '0')}`;
+        const t1 = h.cat === 'C' ? 'Rd' : (h.cat === 'F' ? 'Sm' : 'Bg');
+        const t2 = typeShorthand[meta.type?.toLowerCase()] || 'Un';
+        const diff = (meta.difficulty || '0').toString().padStart(2, '0');
+        const clock = clockMap[parseInt(meta.direction)] || '06';
+
+        document.getElementById('val-id-5').innerText = id5;
+        document.getElementById('val-desc-8').innerText = `${t1}${t2}${diff}${clock}`;
         document.getElementById('val-id-cat').innerText = h.cat;
         document.getElementById('val-id-cell').innerText = h.cell;
         document.getElementById('val-id-num').innerText = h.num;
-
-        document.getElementById('val-cat-type').innerText = `${meta.type || "uncategorized"} (${catNames[h.cat]})`;
-        document.getElementById('val-diff').innerText = `Lvl ${meta.difficulty || "?"}`;
-        document.getElementById('val-grab').innerText = `${meta.direction || "?"}°`;
-        document.getElementById('val-ideal').innerText = meta.ideal || "General";
+        document.getElementById('val-all-details').innerText = `${meta.type || "uncategorized"} / Lvl ${meta.difficulty || "?"} / ${meta.direction || "?"}° / ${meta.ideal || "General"}`;
         render();
     }
 
-    // RANDOM & ZOOM
-    function chooseRandomHold() {
-        if (!holds.length) return;
-        const random = holds[Math.floor(Math.random() * holds.length)];
-        selectHold(random);
-        zoomToHold();
-    }
-
-    function zoomToHold() {
-        const h = holds.find(x => x.id === selectedHoldId);
-        if (!h) return;
-        const vRect = viewport.getBoundingClientRect();
-        scale = 1.5;
-        translateX = vRect.width/2 - h.center.x * scale;
-        translateY = vRect.height/2 - h.center.y * scale;
-        updateTransform();
-    }
-
-    // MEASUREMENT
-    function toggleMeasureMode() {
-        measureMode = !measureMode;
-        clickQueue = [];
-        document.getElementById('measure-btn').classList.toggle('active', measureMode);
-        document.getElementById('measure-result').innerText = measureMode ? "Select First Hold" : "Click two holds";
-        viewport.classList.toggle('measuring', measureMode);
+    function showLinkInfo(idx) {
+        selectedLinkId = idx; selectedHoldId = null;
+        const m = measurements[idx];
+        const h1 = holds.find(x => x.id === m.h1Id), h2 = holds.find(x => x.id === m.h2Id);
+        document.getElementById('hold-details').style.display = 'none';
+        document.getElementById('link-details').style.display = 'block';
+        document.getElementById('h1-card').innerText = `HOLD 1:\nID: ${h1.cat}${h1.num}\nCell: ${h1.cell}`;
+        document.getElementById('h2-card').innerText = `HOLD 2:\nID: ${h2.cat}${h2.num}\nCell: ${h2.cell}`;
+        document.getElementById('link-dist').innerText = `${m.distM.toFixed(3)} m`;
+        render();
     }
 
     function handleMeasureClick(h) {
         clickQueue.push(h);
-        if (clickQueue.length === 1) {
-            document.getElementById('measure-result').innerText = "Select Second Hold";
-        } else if (clickQueue.length === 2) {
-            const [h1, h2] = clickQueue;
+        if (clickQueue.length === 1) status.innerText = "SELECT SECOND HOLD";
+        else {
+            const h1 = clickQueue[0], h2 = h;
             const distPx = Math.hypot(h1.center.x - h2.center.x, h1.center.y - h2.center.y);
-            const distM = pixelsToMeters(distPx);
-            document.getElementById('measure-result').innerText = `${distM.toFixed(3)} m`;
-            
-            // Draw visual line
-            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            line.setAttribute('x1', h1.center.x); line.setAttribute('y1', h1.center.y);
-            line.setAttribute('x2', h2.center.x); line.setAttribute('y2', h2.center.y);
-            line.setAttribute('class', 'measure-line');
-            svg.appendChild(line);
-            
-            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            text.setAttribute('x', (h1.center.x + h2.center.x)/2);
-            text.setAttribute('y', (h1.center.y + h2.center.y)/2 - 10);
-            text.setAttribute('class', 'measure-text');
-            text.textContent = `${distM.toFixed(3)}m`;
-            svg.appendChild(text);
-
-            clickQueue = [];
+            measurements.push({ h1Id: h1.id, h2Id: h2.id, distM: pixelsToMeters(distPx) });
+            saveMeasurements(); toggleMode('none');
         }
     }
 
     function pixelsToMeters(px) {
-        if (!calibrationData.length) return px / 500; // Default fallback
+        if (!calibrationData.length) return px / 500;
         let sumScale = 0;
-        calibrationData.forEach(c => {
-            const pxDist = Math.hypot(c.p1.x - c.p2.x, c.p1.y - c.p2.y);
-            sumScale += (c.lengthMeters / pxDist);
-        });
+        calibrationData.forEach(c => { const pxDist = Math.hypot(c.p1.x - c.p2.x, c.p1.y - c.p2.y); sumScale += (c.lengthMeters / pxDist); });
         return px * (sumScale / calibrationData.length);
     }
 
-    // CALIBRATION
+    async function saveMeasurements() { await fetch('/save_measurements', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(measurements) }); render(); }
+    async function saveCalibration() { await fetch('/save_calibration', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(calibrationData) }); render(); }
+
     function startCalibration() {
-        calibMode = true;
-        clickQueue = [];
-        status.innerText = "CLICK START POINT ON WALL";
+        calibMode = true; clickQueue = []; status.innerText = "CLICK START POINT";
         svg.onclick = (e) => {
             if (!calibMode) return;
-            const pt = getSVGPoint(e);
-            clickQueue.push(pt);
-            if (clickQueue.length === 1) {
-                status.innerText = "CLICK END POINT ON WALL";
-            } else if (clickQueue.length === 2) {
-                const meters = prompt("Enter length between these points (meters):", "1.0");
-                if (meters) {
-                    calibrationData.push({ p1: clickQueue[0], p2: clickQueue[1], lengthMeters: parseFloat(meters) });
-                    saveCalibration();
-                }
-                calibMode = false;
-                clickQueue = [];
-                status.innerText = "CALIBRATION ADDED";
-                svg.onclick = null;
-            }
+            const pt = getSVGPoint(e); clickQueue.push(pt);
+            if (clickQueue.length === 1) status.innerText = "CLICK END POINT";
+            else { const m = prompt("Distance (m):", "1.0"); if (m) { calibrationData.push({ p1: clickQueue[0], p2: clickQueue[1], lengthMeters: parseFloat(m) }); saveCalibration(); } calibMode = false; svg.onclick = null; status.innerText = "CALIBRATED"; }
         };
     }
+    function getSVGPoint(e) { const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; return pt.matrixTransform(svg.getScreenCTM().inverse()); }
 
-    function getSVGPoint(e) {
-        const pt = svg.createSVGPoint();
-        pt.x = e.clientX; pt.y = e.clientY;
-        return pt.matrixTransform(svg.getScreenCTM().inverse());
-    }
+    function chooseRandomHold() { if (!holds.length) return; const r = holds[Math.floor(Math.random() * holds.length)]; selectHold(r); zoomToHold(); }
+    function zoomToHold() { const h = holds.find(x => x.id === selectedHoldId); if (!h) return; const vRect = viewport.getBoundingClientRect(); scale = 2.0; translateX = vRect.width/2 - h.center.x * scale; translateY = vRect.height/2 - h.center.y * scale; updateTransform(); }
 
-    async function saveCalibration() {
-        await fetch('/save_calibration', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(calibrationData)
-        });
-        updateCalibList();
-    }
-
-    function updateCalibList() {
-        const list = document.getElementById('calib-list');
-        list.innerHTML = calibrationData.map((c, i) => `<div>Helper ${i+1}: ${c.lengthMeters}m <button onclick="deleteCalib(${i})" style="padding:0 2px; font-size:8px;">X</button></div>`).join('');
-    }
-
-    function deleteCalib(i) {
-        calibrationData.splice(i, 1);
-        saveCalibration();
-    }
-
-    // EDITING (Basic mapping as before)
-    function startEdit() {
-        const h = holds.find(x => x.id === selectedHoldId);
-        if (!h) return;
-        document.getElementById('hold-details').style.display = 'none';
-        document.getElementById('edit-panel').style.display = 'block';
+    function startEdit() { 
+        const h = holds.find(x => x.id === selectedHoldId); if (!h) return;
+        document.getElementById('hold-details').style.display = 'none'; document.getElementById('edit-panel').style.display = 'block';
         const meta = (richMetadata[h.cell] || {})[`${catMapFull[h.cat]}${h.num}`] || {};
-        document.getElementById('edit-cell').value = h.cell;
-        document.getElementById('edit-cat').value = h.cat;
-        document.getElementById('edit-num').value = h.num;
-        document.getElementById('edit-type').value = meta.type || "";
-        document.getElementById('edit-diff').value = meta.difficulty || "1";
-        document.getElementById('edit-grab').value = meta.direction || "180";
-        document.getElementById('edit-ideal').value = meta.ideal || "General";
+        document.getElementById('edit-cell').value = h.cell; document.getElementById('edit-cat').value = h.cat; document.getElementById('edit-num').value = h.num;
+        document.getElementById('edit-type').value = meta.type || ""; document.getElementById('edit-diff').value = meta.difficulty || "1";
+        document.getElementById('edit-grab').value = meta.direction || "180"; document.getElementById('edit-ideal').value = meta.ideal || "General";
     }
-
     function cancelEdit() { document.getElementById('edit-panel').style.display = 'none'; document.getElementById('hold-details').style.display = 'block'; }
-
     async function saveEdit() {
         const h = holds.find(x => x.id === selectedHoldId);
         const oldCell = h.cell, oldCat = h.cat, oldNum = h.num, oldKey = `${catMapFull[oldCat]}${oldNum}`;
-        const newCell = document.getElementById('edit-cell').value.trim();
-        const newCat = document.getElementById('edit-cat').value;
-        const newNum = parseInt(document.getElementById('edit-num').value);
+        const newCell = document.getElementById('edit-cell').value.trim(), newCat = document.getElementById('edit-cat').value, newNum = parseInt(document.getElementById('edit-num').value);
         const [cx, cy] = newCell.split(',').map(n => parseInt(n));
-
         h.cell = newCell; h.cat = newCat; h.num = newNum;
         if (richMetadata[oldCell]) delete richMetadata[oldCell][oldKey];
         if (!richMetadata[newCell]) richMetadata[newCell] = {};
         const newKey = `${catMapFull[newCat]}${newNum}`;
-        richMetadata[newCell][newKey] = {
-            cell_x: cx, cell_y: cy, category: catMapFull[newCat], num: newNum.toString(),
-            type: document.getElementById('edit-type').value.trim(),
-            difficulty: document.getElementById('edit-diff').value,
-            direction: document.getElementById('edit-grab').value,
-            ideal: document.getElementById('edit-ideal').value
-        };
-
+        richMetadata[newCell][newKey] = { cell_x: cx, cell_y: cy, category: catMapFull[newCat], num: newNum.toString(), type: document.getElementById('edit-type').value.trim(), difficulty: document.getElementById('edit-diff').value, direction: document.getElementById('edit-grab').value, ideal: document.getElementById('edit-ideal').value };
         status.innerText = "SAVING...";
-        try {
-            await fetch('/save_full_edit', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ holds: holds, metadata: richMetadata })
-            });
-            status.innerText = "SAVED!"; cancelEdit(); selectHold(h);
-        } catch(e) { status.innerText = "SERVER ERROR"; }
+        try { await fetch('/save_full_edit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ holds: holds, metadata: richMetadata }) }); status.innerText = "SAVED!"; cancelEdit(); selectHold(h); } catch(e) { status.innerText = "ERROR"; }
     }
 
     function setMode(m) { appMode = m; document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active')); document.getElementById(`mode-${m}`).classList.add('active'); render(); }
-    svg.onclick = () => { if (calibMode) return; if (document.getElementById('edit-panel').style.display === 'block') return; selectedHoldId = null; document.getElementById('hold-details').style.display = 'none'; render(); };
+    svg.onclick = () => { if (calibMode || currentTool !== 'none' || document.getElementById('edit-panel').style.display === 'block') return; selectedHoldId = null; selectedLinkId = null; document.getElementById('hold-details').style.display = 'none'; document.getElementById('link-details').style.display = 'none'; render(); };
 </script>
 </body>
 </html>
