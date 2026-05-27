@@ -59,15 +59,14 @@
         .measure-text { fill: #00ff00; font-family: monospace; font-weight: bold; font-size: 18px; pointer-events: none; stroke: black; stroke-width: 0.5px; }
         .calib-line { stroke: #ff00ff; stroke-width: 6; stroke-opacity: 0.8; }
         .calib-text { fill: #ff00ff; font-family: monospace; font-weight: bold; font-size: 16px; pointer-events: none; stroke: black; stroke-width: 0.5px; } 
-
+        
         .assisted-line { stroke: white; stroke-width: 2; stroke-dasharray: 5,5; stroke-opacity: 0.5; pointer-events: none; }
         .route-dist-text { fill: white; font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; stroke: black; stroke-width: 0.3px; }
 
         .click-dot { fill: white; stroke: #007acc; stroke-width: 2; pointer-events: none; }
-
         .calib-dot { fill: #ff00ff; stroke: white; stroke-width: 2; }
 
-        .setup-list { background: #111; border: 1px solid #444; border-radius: 4px; padding: 10px; margin-top: 10px; max-height: 200px; overflow-y: auto; }
+        .setup-list { background: #111; border: 1px solid #444; border-radius: 4px; padding: 10px; margin-top: 10px; max-height: 200px; overflow-y: auto; }  
         .setup-item { display: flex; justify-content: space-between; align-items: center; padding: 6px; border-bottom: 1px solid #333; font-size: 11px; font-family: monospace; }
         .setup-item:last-child { border-bottom: none; }
         .delete-small { color: #ff4444; cursor: pointer; font-weight: bold; padding: 2px 6px; border: 1px solid #444; border-radius: 3px; background: #222; }
@@ -114,7 +113,7 @@
 
     <div class="box">
         <div style="font-weight:bold; margin-bottom:10px; font-size:13px;">Wall Setup:</div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">  
             <button class="tool-btn btn-blue" id="btn-boundary" onclick="toggleMode('boundary')">SET BOUNDARY</button>
             <button class="tool-btn btn-purple" id="btn-calibrate" onclick="toggleMode('calibrate')">CALIBRATE</button>
         </div>
@@ -122,11 +121,11 @@
 
     <div class="box">
         <div style="font-weight:bold; margin-bottom:10px; font-size:13px;">Measurement Tools:</div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">  
             <button class="tool-btn btn-green" id="btn-measure" onclick="toggleMode('measure')">ADD DISTANCE</button>
             <button class="tool-btn btn-red" id="btn-clear" onclick="toggleMode('clear')">CLEAR LINE</button>
         </div>
-        <div id="measure-status" style="font-family:monospace; color:#0f0; text-align:center; font-weight:bold; font-size:11px;">MODE: NAVIGATION</div>
+        <div id="measure-status" style="font-family:monospace; color:#0f0; text-align:center; font-weight:bold; font-size:11px;">MODE: NAVIGATION</div>      
     </div>
 
     <div class="box">
@@ -150,8 +149,8 @@
             </div>
 
             <div style="background:#222; padding:8px; border-radius:4px; margin-bottom:10px; text-align:center;">
-                <div style="font-size:9px; color:#aaa;">ESTIMATED VERTICAL LENGTH</div>
-                <div id="route-vert-length" style="font-size:16px; font-weight:bold; color:#0f0;">0.00m</div>
+                <div style="font-size:9px; color:#aaa;">ESTIMATED ROUTE DISTANCE</div>
+                <div id="route-dist-calc" style="font-size:16px; font-weight:bold; color:#0f0;">0.00m</div>
             </div>
 
             <div style="font-size:10px; color:#aaa; margin-bottom:8px; text-align:center;">SELECT HOLD TYPE (1-4)</div>
@@ -525,7 +524,7 @@
             item.onclick = () => { activeRoute = r; render(); };
             item.innerHTML = `
                 <div style="flex:1;">
-                    <div style="font-weight:bold; font-size:12px;">${r.name}</div>
+                    <div style="font-weight:bold; font-size:12px;">${r.name} (${r.grade || '?'})</div>
                     <div style="display:flex; gap:4px; margin-top:4px;">
                         <span class="type-indicator" style="background:${typeColors[1]};"></span>${stats[1]}
                         <span class="type-indicator" style="background:${typeColors[2]};"></span>${stats[2]}
@@ -561,12 +560,29 @@
             `;
             list.appendChild(item);
         });
+
+        // Calculate Estimated Distance
+        const startHolds = activeRoute.order?.filter(id => activeRoute.holds[id] === 1).map(id => holds.find(x => x.id === id));
+        const endHolds = activeRoute.order?.filter(id => activeRoute.holds[id] === 4).map(id => holds.find(x => x.id === id));
+        
+        if (startHolds?.length && endHolds?.length) {
+            let maxDistPx = 0;
+            startHolds.forEach(s => {
+                endHolds.forEach(e => {
+                    const d = Math.hypot(s.center.x - e.center.x, s.center.y - e.center.y);
+                    if (d > maxDistPx) maxDistPx = d;
+                });
+            });
+            document.getElementById('route-dist-calc').innerText = `${pixelsToMeters(maxDistPx).toFixed(2)}m`;
+        } else {
+            document.getElementById('route-dist-calc').innerText = `0.00m`;
+        }
     }
 
     function createNewRoute() {
-        const name = prompt("Route Name:", `Route ${allRoutes.length + 1}`);
-        if (!name) return;
-        activeRoute = { name: name, holds: {}, order: [] };
+        activeRoute = { name: `Route ${allRoutes.length + 1}`, grade: 'V0', holds: {}, order: [] };
+        document.getElementById('route-name-input').value = activeRoute.name;
+        document.getElementById('route-grade-input').value = activeRoute.grade;
         settingType = 1;
         toggleMode('manual-set');
         render();
@@ -574,6 +590,8 @@
 
     function editRoute(idx) {
         activeRoute = JSON.parse(JSON.stringify(allRoutes[idx])); // Deep copy
+        document.getElementById('route-name-input').value = activeRoute.name || '';
+        document.getElementById('route-grade-input').value = activeRoute.grade || 'V0';
         toggleMode('manual-set');
         render();
     }
@@ -612,6 +630,9 @@
 
     async function saveActiveRoute() {
         if (!activeRoute) return;
+        activeRoute.name = document.getElementById('route-name-input').value.trim();
+        activeRoute.grade = document.getElementById('route-grade-input').value;
+        
         const existingIdx = allRoutes.findIndex(r => r.name === activeRoute.name);
         if (existingIdx >= 0) allRoutes[existingIdx] = activeRoute;
         else allRoutes.push(activeRoute);
@@ -741,7 +762,7 @@
         return { x: transformed.x, y: transformed.y };
     }
 
-    function chooseRandomHold() { if (!holds.length) return; const r = holds[Math.floor(Math.random() * holds.length)]; selectHold(r); zoomToHold(); }
+    function chooseRandomHold() { if (!holds.length) return; const r = holds[Math.floor(Math.random() * holds.length)]; selectHold(r); }
     function zoomToHold() { const h = holds.find(x => x.id === selectedHoldId); if (!h) return; const vRect = viewport.getBoundingClientRect(); scale = 2.0; translateX = vRect.width/2 - h.center.x * scale; translateY = vRect.height/2 - h.center.y * scale; updateTransform(); }
 
     function startEdit() { 
