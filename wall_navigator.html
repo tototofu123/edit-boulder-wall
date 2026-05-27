@@ -159,7 +159,7 @@
     
     let holds = [], richMetadata = {}, calibrationData = [], measurements = [];
     let appMode = 'clean', currentTool = 'none', selectedHoldId = null, selectedLinkId = null;
-    let scale = 1.0, translateX = 0, translateY = 0, isDragging = false, lastX, lastY, clickQueue = [];
+    let scale = 1.0, translateX = 0, translateY = 0, isDragging = false, lastX, lastY, clickQueue = [], calibMode = false;
 
     const catNames = { 'C': 'Climbing', 'I': 'Insert', 'F': 'Feature' };
     const catMapFull = { 'C': 'climbing holds', 'I': 'insert holds', 'F': 'wall features' };
@@ -172,7 +172,7 @@
     function updateTransform() { wrapper.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`; }
 
     viewport.onwheel = (e) => { e.preventDefault(); const delta = e.deltaY > 0 ? 0.9 : 1.1; const oldScale = scale; scale = Math.min(Math.max(scale * delta, 0.01), 15); const vRect = viewport.getBoundingClientRect(); const mouseX = e.clientX - vRect.left, mouseY = e.clientY - vRect.top; translateX = mouseX - (mouseX - translateX) * (scale / oldScale); translateY = mouseY - (mouseY - translateY) * (scale / oldScale); updateTransform(); };
-    viewport.onmousedown = (e) => { if (currentTool !== 'none') return; if (e.target.tagName !== 'path' && e.target.tagName !== 'line') { isDragging = true; lastX = e.clientX; lastY = e.clientY; } };
+    viewport.onmousedown = (e) => { if (currentTool !== 'none' || calibMode) return; if (e.target.tagName !== 'path' && e.target.tagName !== 'line') { isDragging = true; lastX = e.clientX; lastY = e.clientY; } };
     window.onmousemove = (e) => { if (isDragging) { translateX += (e.clientX - lastX); translateY += (e.clientY - lastY); lastX = e.clientX; lastY = e.clientY; updateTransform(); } };
     window.onmouseup = () => isDragging = false;
 
@@ -199,7 +199,6 @@
 
     function render() {
         svg.innerHTML = '';
-        // 1. Draw Helper Lines (Calibration)
         calibrationData.forEach(c => {
             const l = document.createElementNS("http://www.w3.org/2000/svg", "line");
             l.setAttribute('x1', c.p1.x); l.setAttribute('y1', c.p1.y); l.setAttribute('x2', c.p2.x); l.setAttribute('y2', c.p2.y);
@@ -207,7 +206,6 @@
             svg.appendChild(l);
         });
 
-        // 2. Draw Measurements
         measurements.forEach((m, idx) => {
             const h1 = holds.find(x => x.id === m.h1Id), h2 = holds.find(x => x.id === m.h2Id);
             if (!h1 || !h2) return;
@@ -219,6 +217,7 @@
             if (selectedLinkId === idx) line.style.strokeOpacity = "1";
             line.onclick = (e) => {
                 e.stopPropagation();
+                if (calibMode) return; // 1. Block calibration click on lines
                 if (currentTool === 'clear') { measurements.splice(idx, 1); saveMeasurements(); return; }
                 if (currentTool === 'info') { showLinkInfo(idx); return; }
             };
@@ -232,7 +231,6 @@
             svg.appendChild(group);
         });
 
-        // 3. Draw Holds
         holds.forEach(h => {
             const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
             p.setAttribute('d', h.path);
@@ -245,7 +243,20 @@
                 p.style.strokeOpacity = '0'; p.style.fill = 'transparent';
             }
             if (isSelected) p.classList.add('highlight');
-            p.onclick = (e) => { e.stopPropagation(); if (currentTool === 'measure') { handleMeasureClick(h); return; } selectHold(h); };
+            p.onclick = (e) => { 
+                e.stopPropagation(); 
+                if (calibMode) return; // 1. Block calibration click on holds
+                
+                if (currentTool === 'clear') {
+                    // 2. Clear all lines connected to this hold
+                    measurements = measurements.filter(m => m.h1Id !== h.id && m.h2Id !== h.id);
+                    saveMeasurements();
+                    return;
+                }
+                
+                if (currentTool === 'measure') { handleMeasureClick(h); return; } 
+                selectHold(h); 
+            };
             svg.appendChild(p);
         });
     }
