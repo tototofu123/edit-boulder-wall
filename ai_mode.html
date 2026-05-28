@@ -59,21 +59,29 @@
         .checkbox-item { font-size: 10px; background: #333; padding: 4px 10px; border-radius: 15px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
 
         .ideal-line { stroke: rgba(255, 100, 255, 0.4); stroke-width: 15; stroke-linecap: round; pointer-events: none; }
-    </style>
-</head>
-<body>
 
-<div class="viewport" id="viewport">
-    <div id="canvas-wrapper">
+        .stickman-bone { stroke: #fff; stroke-width: 8; stroke-linecap: round; filter: drop-shadow(0 0 5px rgba(255,255,255,0.5)); }
+        .stickman-joint { fill: #fff; stroke: #000; stroke-width: 2; }
+        .stickman-head { fill: #fff; stroke: none; filter: drop-shadow(0 0 8px white); }
+        </style>
+        </head>
+        <body>
+
+        <div class="viewport" id="viewport">
+        <div id="canvas-wrapper">
         <img id="wall-img" src="Correct Real Wall Photo.jpeg">
         <svg id="overlay"></svg>
-    </div>
-</div>
+        <svg id="stickman-overlay" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:20;"></svg>
+        </div>
+        </div>
 
-<div class="sidebar">
-    <div class="status">AI ROUTE WORKSPACE</div>
+        <div class="sidebar">
+        <div class="status">AI ROUTE WORKSPACE</div>
 
-    <button class="tool-btn btn-purple" id="btn-toggle-config" onclick="toggleConfig()">CONFIGURE AI GENERATOR</button>
+        <div style="display:flex; gap:10px;">
+        <button class="tool-btn btn-purple" id="btn-toggle-config" onclick="toggleConfig()" style="flex:1;">CONFIGURE AI</button>
+        <button class="tool-btn btn-blue" id="btn-play-beta" onclick="playBeta()" style="flex:1; display:none;">PLAY BETA 🏃</button>
+        </div>
 
     <div id="ai-config" class="ai-config-panel box">
         <div class="form-group">
@@ -192,6 +200,7 @@
                     activeRoute = route;
                     routeCount++; // Increment on success
                     document.getElementById('route-details').style.display = 'block';
+                    document.getElementById('btn-play-beta').style.display = 'block';
                     feedbackCache = {}; 
                     selectedFeedbackId = null;
                     render();
@@ -360,6 +369,126 @@
         } catch(e) { console.error("Feedback save failed", e); }
     }
 
+    // --- STICKMAN BETA ENGINE ---
+    let simulator = null;
+    const stickSvg = document.getElementById('stickman-overlay');
+
+    function drawSkeleton(skeleton) {
+        stickSvg.innerHTML = '';
+        if (!skeleton) return;
+
+        function line(p1, p2) {
+            const l = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            l.setAttribute('x1', p1.x); l.setAttribute('y1', p1.y);
+            l.setAttribute('x2', p2.x); l.setAttribute('y2', p2.y);
+            l.setAttribute('class', 'stickman-bone');
+            stickSvg.appendChild(l);
+        }
+
+        function joint(p) {
+            const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            c.setAttribute('cx', p.x); c.setAttribute('cy', p.y);
+            c.setAttribute('r', 5);
+            c.setAttribute('class', 'stickman-joint');
+            stickSvg.appendChild(c);
+        }
+
+        // Spine & Shoulders
+        line(skeleton.shoulderL, skeleton.shoulderR);
+        line(skeleton.hipL, skeleton.hipR);
+        const midShoulder = { x: (skeleton.shoulderL.x + skeleton.shoulderR.x)/2, y: (skeleton.shoulderL.y + skeleton.shoulderR.y)/2 };
+        const midHip = { x: (skeleton.hipL.x + skeleton.hipR.x)/2, y: (skeleton.hipL.y + skeleton.hipR.y)/2 };
+        line(midShoulder, midHip);
+        
+        // Arms
+        line(skeleton.shoulderL, skeleton.handL);
+        line(skeleton.shoulderR, skeleton.handR);
+        
+        // Legs
+        line(skeleton.hipL, skeleton.footL);
+        line(skeleton.hipR, skeleton.footR);
+
+        // Head
+        const head = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        head.setAttribute('cx', skeleton.head.x); head.setAttribute('cy', skeleton.head.y);
+        head.setAttribute('r', 18);
+        head.setAttribute('class', 'stickman-head');
+        stickSvg.appendChild(head);
+
+        // Draw Joints
+        [skeleton.shoulderL, skeleton.shoulderR, skeleton.hipL, skeleton.hipR, skeleton.handL, skeleton.handR, skeleton.footL, skeleton.footR].forEach(joint);
+    }
+
+    let isPlayingBeta = false;
+    async function playBeta() {
+        if (!activeRoute || isPlayingBeta) return;
+        isPlayingBeta = true;
+        
+        const h = parseFloat(document.getElementById('ai-height').value);
+        const w = parseFloat(document.getElementById('ai-wingspan').value);
+        if (!window.StickmanSimulator) { alert("Beta Engine loading..."); return; }
+        
+        simulator = new window.StickmanSimulator(h, w, pixelsToMeters);
+        const startHold = holds.find(x => x.id === activeRoute.order[0]);
+        
+        let contacts = { handL: startHold.center, handR: startHold.center, footL: null, footR: null };
+        let currentSkeleton = simulator.getDefaultPose(startHold.center);
+        drawSkeleton(currentSkeleton);
+
+        // For each move in the route
+        for (let i = 0; i < activeRoute.order.length; i++) {
+            const holdId = activeRoute.order[i];
+            const hold = holds.find(x => x.id === holdId);
+            const type = activeRoute.holds[holdId];
+
+            if (type === 1 || type === 2 || type === 4) { // HAND MOVE
+                // Move hand that is furthest from the next hold
+                const dL = Math.hypot(contacts.handL.x - hold.center.x, contacts.handL.y - hold.center.y);
+                const dR = Math.hypot(contacts.handR.x - hold.center.x, contacts.handR.y - hold.center.y);
+                if (dL > dR) contacts.handL = hold.center;
+                else contacts.handR = hold.center;
+            } else if (type === 3) { // FOOT MOVE
+                const dL = contacts.footL ? Math.hypot(contacts.footL.x - hold.center.x, contacts.footL.y - hold.center.y) : 9999;
+                const dR = contacts.footR ? Math.hypot(contacts.footR.x - hold.center.x, contacts.footR.y - hold.center.y) : 9999;
+                if (dL > dR) contacts.footL = hold.center;
+                else contacts.footR = hold.center;
+            }
+
+            const targetSkeleton = simulator.solvePose(contacts);
+            await animateTo(currentSkeleton, targetSkeleton);
+            currentSkeleton = targetSkeleton;
+            await new Promise(r => setTimeout(r, 400));
+        }
+
+        isPlayingBeta = false;
+    }
+
+    function animateTo(start, end) {
+        return new Promise(resolve => {
+            const duration = 600;
+            const startTime = performance.now();
+            
+            function frame(now) {
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const ease = progress * (2 - progress); // Simple ease out
+
+                const intermediate = {};
+                for (let key in start) {
+                    intermediate[key] = {
+                        x: start[key].x + (end[key].x - start[key].x) * ease,
+                        y: start[key].y + (end[key].y - start[key].y) * ease
+                    };
+                }
+                drawSkeleton(intermediate);
+
+                if (progress < 1) requestAnimationFrame(frame);
+                else resolve();
+            }
+            requestAnimationFrame(frame);
+        });
+    }
+
     function pixelsToMeters(px) {
         if (!calibrationData.length) return px / 500;
         let sumScale = 0;
@@ -372,8 +501,10 @@
 
 </script>
 <script type="module">
-    import { generateTraverseRoute } from './dist/aiRouteGenerator.js?v=4';
+    import { generateTraverseRoute } from './dist/aiRouteGenerator.js?v=5';
+    import { StickmanSimulator } from './dist/stickman.js?v=5';
     window.generateTraverseRoute = generateTraverseRoute;
+    window.StickmanSimulator = StickmanSimulator;
 </script>
 </body>
 </html>
