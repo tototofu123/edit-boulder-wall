@@ -136,9 +136,9 @@
     
     let holds = [], richMetadata = {}, calibrationData = [], boundaryPoints = [];
     let scale = 1.0, translateX = 0, translateY = 0, isDragging = false, lastX, lastY;
-    let activeRoute = null;
-    let selectedFeedbackId = null; // Can be a hold ID or a line ID (id1_id2)
-    let feedbackCache = {}; // Stores comments keyed by selection ID
+    let activeRoute = null, routeCount = 0;
+    let selectedFeedbackId = null; 
+    let feedbackCache = {}; 
 
     const typeColors = { 1: '#00ff00', 2: '#007acc', 3: '#ff8800', 4: '#ff0000' };
     const typeNames = { 1: 'START', 2: 'HAND', 3: 'FOOT', 4: 'END' };
@@ -159,6 +159,11 @@
             richMetadata = await (await fetch('docs/holds_data.json')).json();
             calibrationData = await (await fetch('docs/calibration.json')).json().catch(()=>[]);
             boundaryPoints = await (await fetch('docs/wall_annotations.json')).json().catch(()=>[]);
+            
+            // Initialize routeCount from log
+            const logs = await (await fetch('docs/ai_generation_log.json')).json().catch(()=>[]);
+            routeCount = logs.filter(l => l.type === 'ai_generation').length;
+            
             render();
         } catch(e) { console.error("Data load failed", e); }
     }
@@ -169,7 +174,6 @@
     }
 
     async function generate() {
-        // Save any pending feedback first
         if (Object.keys(feedbackCache).length > 0) {
             await saveFeedbackLog();
         }
@@ -183,10 +187,12 @@
                 targetGradeNum: parseInt(document.getElementById('ai-grade').value),
                 targetGradeStr: 'V' + document.getElementById('ai-grade').value,
                 allowedCats: [],
+                routeCount: routeCount,
                 setActiveRoute: (route) => {
                     activeRoute = route;
+                    routeCount++; // Increment on success
                     document.getElementById('route-details').style.display = 'block';
-                    feedbackCache = {}; // Reset for new route
+                    feedbackCache = {}; 
                     selectedFeedbackId = null;
                     render();
                 },
