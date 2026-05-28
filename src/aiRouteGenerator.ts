@@ -162,8 +162,9 @@ export function generateTraverseRoute(ctx: RouteContext) {
             if (h.center.y < yLimitTop || h.center.y > yLimitBot) return false;
 
             const dxM = pixelsToMeters(dx);
-            if (isLeftToRight && dxM < -0.2) return false;
-            if (!isLeftToRight && dxM > 0.2) return false;
+            // Strictly enforce monotonic horizontal progress for hands to prevent zigzags
+            if (isLeftToRight && dxM <= 0) return false;
+            if (!isLeftToRight && dxM >= 0) return false;
 
             // Check if it's too close to ANY previously established handhold (prevents zigzag redundancy)
             let tooCloseToPrev = false;

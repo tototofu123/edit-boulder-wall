@@ -51,8 +51,8 @@
         .btn-red { background: #dc3545; }
 
         .hold-path { cursor: pointer; stroke-width: 3; fill: none; transition: stroke-opacity 0.2s, fill 0.2s; pointer-events: all; }
-        .hold-path.highlight { stroke: white !important; stroke-width: 10 !important; filter: drop-shadow(0 0 10px white); }
-        .hold-path.glow { stroke: white !important; stroke-width: 8 !important; stroke-opacity: 0.8 !important; }
+        .hold-path.highlight { stroke: white !important; stroke-width: 12 !important; filter: drop-shadow(0 0 15px white); }
+        .hold-path.glow { stroke: white !important; stroke-width: 10 !important; stroke-opacity: 0.8 !important; }
         
         .measure-line { cursor: pointer; stroke: #00ff00; stroke-width: 6; stroke-dasharray: 8,4; stroke-opacity: 0.6; }
         .measure-line:hover { stroke-opacity: 1; stroke-width: 10; }
@@ -60,8 +60,10 @@
         .calib-line { stroke: #ff00ff; stroke-width: 6; stroke-opacity: 0.8; }
         .calib-text { fill: #ff00ff; font-family: monospace; font-weight: bold; font-size: 16px; pointer-events: none; stroke: black; stroke-width: 0.5px; } 
         
-        .assisted-line { stroke: white; stroke-width: 2; stroke-dasharray: 5,5; stroke-opacity: 0.5; pointer-events: none; }
-        .route-dist-text { fill: white; font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; stroke: black; stroke-width: 0.3px; }
+        .assisted-line { stroke: white; stroke-width: 4; stroke-dasharray: 5,5; stroke-opacity: 1; pointer-events: none; }
+        .route-dist-text { fill: white; font-family: monospace; font-size: 16px; font-weight: bold; pointer-events: none; stroke: black; stroke-width: 1px; }
+
+        .route-hold-label { fill: white; font-family: monospace; font-size: 24px; font-weight: bold; pointer-events: none; stroke: black; stroke-width: 2px; filter: drop-shadow(0 0 5px black); }
 
         .click-dot { fill: white; stroke: #007acc; stroke-width: 2; pointer-events: none; }
         .calib-dot { fill: #ff00ff; stroke: white; stroke-width: 2; }
@@ -446,6 +448,23 @@
         }
 
         // 2. Holds
+        let routeHoldLabels = {};
+        let labelNodes = [];
+        if (activeRoute && activeRoute.order) {
+            let counts = { 1: 0, 2: 0, 3: 0 };
+            activeRoute.order.forEach(id => {
+                const t = activeRoute.holds[id];
+                if (t === 1) { counts[1]++; routeHoldLabels[id] = `S${counts[1]}`; }
+                else if (t === 2) { counts[2]++; routeHoldLabels[id] = `${counts[2]}`; }
+                else if (t === 3) { counts[3]++; routeHoldLabels[id] = `F${counts[3]}`; }
+                else if (t === 4) { routeHoldLabels[id] = `Top`; }
+            });
+            if (counts[1] === 1) {
+                const sId = activeRoute.order.find(id => activeRoute.holds[id] === 1);
+                if (sId) routeHoldLabels[sId] = 'S';
+            }
+        }
+
         if (currentTool !== 'calibrate') {
             holds.forEach(h => {
                 const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -465,8 +484,9 @@
                     p.style.fill = (isSelected || isMeasuringFirst) ? 'transparent' : colors[h.cat] + "40"; 
                     if (routeType) {
                         p.style.stroke = typeColors[routeType];
-                        p.style.strokeWidth = '8';
+                        p.style.strokeWidth = '12';
                         p.style.fill = 'transparent';
+                        p.style.filter = 'drop-shadow(0 0 8px ' + typeColors[routeType] + ')';
                     }
                 } else {
                     p.style.strokeOpacity = '0'; p.style.fill = 'transparent';
@@ -487,7 +507,21 @@
                 }
                 
                 svg.appendChild(p);
+
+                if (routeType && routeHoldLabels[h.id]) {
+                    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                    let ly = h.center.y - 30; // Above hold
+                    if (ly < 40) ly = h.center.y + 40; // Avoid top edge cut-off
+                    text.setAttribute('x', h.center.x);
+                    text.setAttribute('y', ly);
+                    text.setAttribute('class', 'route-hold-label');
+                    text.setAttribute('text-anchor', 'middle');
+                    text.textContent = routeHoldLabels[h.id];
+                    labelNodes.push(text);
+                }
             });
+            
+            labelNodes.forEach(t => svg.appendChild(t));
         }
 
         // 3. Calibration (Hide in route modes)
@@ -632,11 +666,18 @@
         activeRoute.order?.forEach((holdId, i) => {
             const h = holds.find(x => x.id === holdId);
             const type = activeRoute.holds[holdId];
+            const [x, y] = h.cell.split(',').map(n => parseInt(n) + 1);
+            const id5 = `${h.cat}${x}${y}${h.num.toString().padStart(2, '0')}`;
             const item = document.createElement('div');
             item.className = 'setup-item';
+            item.style.cursor = 'pointer';
+            item.onclick = () => { selectHold(h); };
             item.innerHTML = `
-                <span style="color:${typeColors[type]}">${i+1}. ${typeNames[type]} (${h.cell})</span>
-                <span class="delete-small" onclick="event.stopPropagation(); handleRouteHoldClick(${holdId}, true);">DEL</span>
+                <span style="color:${typeColors[type]}">${i+1}. ${typeNames[type]} (${id5})</span>
+                <div>
+                    <span class="edit-small" onclick="event.stopPropagation(); selectedHoldId='${h.id}'; startEdit();">EDIT</span>
+                    <span class="delete-small" onclick="event.stopPropagation(); handleRouteHoldClick('${holdId}', true);">DEL</span>
+                </div>
             `;
             list.appendChild(item);
         });
