@@ -126,6 +126,7 @@
             <button class="tool-btn btn-blue" id="btn-boundary" onclick="toggleMode('boundary')">SET BOUNDARY</button>
             <button class="tool-btn btn-purple" id="btn-calibrate" onclick="toggleMode('calibrate')">CALIBRATE</button>
         </div>
+        <button class="tool-btn btn-red" id="btn-audit" onclick="toggleMode('audit')">DATA AUDIT MODE (A)</button>
     </div>
 
     <div class="box">
@@ -326,8 +327,19 @@
         if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT') return;
         if (e.key === 'p' || e.key === 'P') toggleMode('manual-set');
         if (e.key === 'o' || e.key === 'O') toggleMode('ai-set');
+        if (e.key === 'a' || e.key === 'A') toggleMode('audit');
         if (currentTool === 'manual-set') {
             if (['1', '2', '3', '4', '5'].includes(e.key)) setSettingType(parseInt(e.key));
+        }
+        if (currentTool === 'audit' && selectedHoldId) {
+            if (['1', '2', '3', '4', '5'].includes(e.key)) {
+                const h = holds.find(x => x.id === selectedHoldId);
+                const meta = (richMetadata[h.cell] || {})[`${catMapFull[h.cat]}${h.num}`] || {};
+                meta.difficulty = e.key;
+                if (!richMetadata[h.cell]) richMetadata[h.cell] = {};
+                richMetadata[h.cell][`${catMapFull[h.cat]}${h.num}`] = meta;
+                saveEdit(); // Auto-save on keypress
+            }
         }
     };
 
