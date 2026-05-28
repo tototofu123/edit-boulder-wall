@@ -222,29 +222,33 @@ export function generateTraverseRoute(ctx: RouteContext) {
     }
 
     if (routeHandHolds.length > 1) {
-        // Find the absolute highest hold in the route to be the END hold.
-        // Highest on wall = smallest Y pixel value.
-        let highestHand = routeHandHolds[1];
-        for (let i = 2; i < routeHandHolds.length; i++) {
-            if (routeHandHolds[i].center.y < highestHand.center.y) {
-                highestHand = routeHandHolds[i];
+        // Enforce the end hold is higher than start hold. If the last one isn't, walk back.
+        let validEndFound = false;
+        let endIdx = routeHandHolds.length - 1;
+        for (; endIdx > 0; endIdx--) {
+            if (routeHandHolds[endIdx].center.y < start1.center.y) {
+                validEndFound = true;
+                break;
             }
         }
         
-        // Strip out any handholds that came AFTER the highest hold in the sequence.
-        const highestIdx = routeHandHolds.indexOf(highestHand);
-        const holdsToRemove = routeHandHolds.slice(highestIdx + 1);
+        // If we couldn't find a strictly higher hold, just accept the last one to avoid destroying the route
+        if (!validEndFound) {
+            endIdx = routeHandHolds.length - 1;
+        }
+
+        const finalHand = routeHandHolds[endIdx];
         
         // We must remove these extra hands AND their feet from the order array
-        // To do this cleanly, we rebuild the generatedOrder array up to highestHand
-        let newOrder = [];
-        let newHolds = {};
+        // To do this cleanly, we rebuild the generatedOrder array up to finalHand
+        let newOrder: string[] = [];
+        let newHolds: Record<string, number> = {};
         
         for (let id of generatedOrder) {
             newOrder.push(id);
             newHolds[id] = generatedHolds[id];
-            if (id === highestHand.id) {
-                break; // Stop including holds once we hit the highest hand
+            if (id === finalHand.id) {
+                break; // Stop including holds once we hit the final hand
             }
         }
         
@@ -252,10 +256,10 @@ export function generateTraverseRoute(ctx: RouteContext) {
         generatedHolds = newHolds;
 
         // Ensure the final hand is designated as END
-        generatedHolds[highestHand.id] = 4; // 4 = End
+        generatedHolds[finalHand.id] = 4; // 4 = End
         
         // Add one final foot to match the end hold, placed BEFORE the end hold in the list for neatness
-        const endFoot = findFeetForHands(highestHand, null);
+        const endFoot = findFeetForHands(finalHand, null);
         if (endFoot && !generatedHolds[endFoot.id]) {
             generatedHolds[endFoot.id] = 3;
             // Insert it right before the END hold
@@ -272,4 +276,56 @@ export function generateTraverseRoute(ctx: RouteContext) {
 
     setActiveRoute(route);
     render();
+
+    // Re-calculate the actual total distance for the log based on final holds
+    let finalActualDistM = 0;
+    const finalHandIds = generatedOrder.filter(id => generatedHolds[id] === 2 || generatedHolds[id] === 1 || generatedHolds[id] === 4);
+    for (let i = 0; i < finalHandIds.length - 1; i++) {
+        const h1 = holds.find(x => x.id === finalHandIds[i])!;
+        const h2 = holds.find(x => x.id === finalHandIds[i+1])!;
+        finalActualDistM += pixelsToMeters(Math.hypot(h1.center.x - h2.center.x, h1.center.y - h2.center.y));
+    }
+
+    // Build the auto-log
+    const logData = {
+        timestamp: new Date().toISOString(),
+        inputs: {
+            height,
+            wingspan,
+            targetLen,
+            targetGradeStr
+        },
+        outputs: {
+            estimatedRouteDistanceMeters: finalActualDistM,
+            holds: generatedOrder.map((id, index) => {
+                const h = holds.find(x => x.id === id)!;
+                const type = generatedHolds[id];
+                
+                // Calculate distance to next hold in order (if it exists)
+                let distToNextPx = null;
+                let distToNextM = null;
+                if (index < generatedOrder.length - 1) {
+                    const nextH = holds.find(x => x.id === generatedOrder[index+1])!;
+                    distToNextPx = Math.hypot(h.center.x - nextH.center.x, h.center.y - nextH.center.y);
+                    distToNextM = pixelsToMeters(distToNextPx);
+                }
+
+                return {
+                    id: h.id,
+                    type: type,
+                    cell: h.cell,
+                    cat: h.cat,
+                    num: h.num,
+                    center: h.center,
+                    distToNextMeters: distToNextM
+                };
+            })
+        }
+    };
+
+    fetch('/save_auto_log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(logData)
+    }).catch(err => console.error('Failed to save auto log:', err));
 }

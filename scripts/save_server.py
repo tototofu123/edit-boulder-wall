@@ -202,6 +202,29 @@ class SaveHandler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.dumps({'status': 'success'}).encode())
 
+        elif self.path == '/save_auto_log':
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            data = json.loads(post_data)
+
+            log_path = 'docs/ai_generation_log.json'
+            existing_logs = []
+            if os.path.exists(log_path):
+                try:
+                    with open(log_path, 'r') as f:
+                        existing_logs = json.load(f)
+                except:
+                    pass
+
+            existing_logs.append(data)
+            with open(log_path, 'w') as f:
+                json.dump(existing_logs, f, indent=4)
+
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({'status': 'success'}).encode())
+
         elif self.path == '/save_routes':
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)

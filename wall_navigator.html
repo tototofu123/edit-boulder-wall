@@ -61,9 +61,9 @@
         .calib-text { fill: #ff00ff; font-family: monospace; font-weight: bold; font-size: 16px; pointer-events: none; stroke: black; stroke-width: 0.5px; } 
         
         .assisted-line { stroke: white; stroke-width: 4; stroke-dasharray: 5,5; stroke-opacity: 1; pointer-events: none; }
-        .route-dist-text { fill: white; font-family: monospace; font-size: 16px; font-weight: bold; pointer-events: none; stroke: black; stroke-width: 1px; }
+        .route-dist-text { fill: white; font-family: monospace; font-size: 20px; font-weight: bold; pointer-events: none; stroke: black; stroke-width: 1px; }
 
-        .route-hold-label { fill: white; font-family: monospace; font-size: 24px; font-weight: bold; pointer-events: none; stroke: black; stroke-width: 2px; filter: drop-shadow(0 0 5px black); }
+        .route-hold-label { fill: white; font-family: monospace; font-size: 40px; font-weight: bold; pointer-events: none; stroke: black; stroke-width: 4px; filter: drop-shadow(0 0 8px black); }
 
         .click-dot { fill: white; stroke: #007acc; stroke-width: 2; pointer-events: none; }
         .calib-dot { fill: #ff00ff; stroke: white; stroke-width: 2; }
@@ -148,18 +148,19 @@
             <div style="font-size:11px; color:#6f42c1; font-weight:bold; margin-bottom:10px; border-bottom:1px solid #6f42c1; padding-bottom:5px;">AI GENERATION CONFIG</div>
             
             <div class="ai-grid">
-                <div class="form-group"><label>User Height (m)</label><input type="number" id="ai-height" value="1.75" step="0.01"></div>
-                <div class="form-group"><label>Wingspan (m)</label><input type="number" id="ai-wingspan" value="1.80" step="0.01"></div>
-                <div class="form-group">
-                    <label>Target Grade</label>
-                    <select id="ai-grade">
-                        <option value="V0">V0</option><option value="V1">V1</option><option value="V2">V2</option>
-                        <option value="V3">V3</option><option value="V4">V4</option><option value="V5">V5</option>
-                        <option value="V6">V6</option><option value="V7">V7</option><option value="V8">V8</option>
-                        <option value="V9">V9</option><option value="V10">V10</option><option value="V11">V11</option>
-                    </select>
+                <div class="form-group"><label>User Height: <span id="ai-height-val" style="color:white">1.75m</span></label>
+                    <input type="range" id="ai-height" min="1.0" max="2.0" step="0.01" value="1.75" oninput="document.getElementById('ai-height-val').innerText = parseFloat(this.value).toFixed(2) + 'm'">
                 </div>
-                <div class="form-group"><label>Length (m)</label><input type="number" id="ai-length" value="3.0" step="0.1"></div>
+                <div class="form-group"><label>Wingspan: <span id="ai-wingspan-val" style="color:white">1.80m</span></label>
+                    <input type="range" id="ai-wingspan" min="1.0" max="2.0" step="0.01" value="1.80" oninput="document.getElementById('ai-wingspan-val').innerText = parseFloat(this.value).toFixed(2) + 'm'">
+                </div>
+                <div class="form-group">
+                    <label>Target Grade: <span id="ai-grade-val" style="color:white">V4</span></label>
+                    <input type="range" id="ai-grade" min="0" max="11" step="1" value="4" oninput="document.getElementById('ai-grade-val').innerText = 'V' + this.value">
+                </div>
+                <div class="form-group"><label>Length: <span id="ai-length-val" style="color:white">3.0m</span></label>
+                    <input type="range" id="ai-length" min="2.0" max="6.0" step="0.1" value="3.0" oninput="document.getElementById('ai-length-val').innerText = parseFloat(this.value).toFixed(1) + 'm'">
+                </div>
             </div>
 
             <div class="form-group">
