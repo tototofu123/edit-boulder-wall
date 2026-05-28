@@ -50,7 +50,9 @@ export function generateTraverseRoute(ctx: RouteContext) {
         if (!allowedCats.includes(h.cat)) return false;
         if (!isPointInPoly(h.center, boundaryPoints)) return false;
         const { grade } = getHoldGrade(h);
-        return grade <= targetGradeNum + 2; // Allow slightly harder holds for crux
+        // Strict grade filtering: no crazy hard holds on easy routes
+        const maxAllowed = targetGradeNum <= 2 ? targetGradeNum : targetGradeNum + 1;
+        return grade <= maxAllowed;
     });
 
     if (candidates.length < 5) {
@@ -96,6 +98,10 @@ export function generateTraverseRoute(ctx: RouteContext) {
         const climberX = h2 ? (h1.center.x + h2.center.x) / 2 : h1.center.x;
         const climberY = (h2 ? (h1.center.y + h2.center.y) / 2 : h1.center.y) + (height * 0.4 / pixelsToMeters(1));
 
+        // The absolute highest hand being reached for (smallest Y)
+        const highestHandY = h2 ? Math.min(h1.center.y, h2.center.y) : h1.center.y;
+        const maxReachPx = (height + (wingspan * 0.35)) / pixelsToMeters(1);
+
         const footNeighbors = holds.filter(h => {
             if (h.id === h1.id || (h2 && h.id === h2.id)) return false; 
             
@@ -104,8 +110,11 @@ export function generateTraverseRoute(ctx: RouteContext) {
             const distPx = Math.hypot(dx, dy);
             const distM = pixelsToMeters(distPx);
             
-            // Reachable distance for feet (max ~ 0.7 * height)
-            if (distM > height * 0.7) return false;
+            // Minimum foot distance to prevent cramping
+            if (distM < height * 0.35) return false;
+
+            // Maximum reach: foot cannot be further from the HIGHEST hand than (Height + 35% Wingspan)
+            if ((h.center.y - highestHandY) > maxReachPx) return false;
 
             // Angle check: down is 90 degrees. +/- 60 degrees is 30 to 150 degrees.
             const angle = Math.atan2(dy, dx) * 180 / Math.PI; 
@@ -145,7 +154,8 @@ export function generateTraverseRoute(ctx: RouteContext) {
 
     let routeHandHolds = [start1];
 
-    while (totalDistM < targetLen && safety < 30) {
+    // Aim for +10% to give us room to safely chop back to an optimal end hold
+    while (totalDistM < (targetLen * 1.1) && safety < 40) {
         safety++;
         
         const handNeighbors = candidates.filter(h => {
