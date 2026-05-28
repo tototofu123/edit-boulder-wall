@@ -226,6 +226,31 @@
             <button class="tool-btn btn-green" style="margin-top:10px; margin-bottom:0;" onclick="saveActiveRoute()">SAVE ROUTE</button>
         </div>
 
+        <div id="test-log-panel" style="display: none; background: #1a1e2a; padding: 15px; border-radius: 8px; border: 1px solid #28a745; margin-top: 10px;">
+            <div style="font-size:11px; color:#28a745; font-weight:bold; margin-bottom:10px; border-bottom:1px solid #28a745; padding-bottom:5px;">TESTING LOG (FORERUNNING)</div>
+            <div class="form-group">
+                <label>Grade Accuracy</label>
+                <select id="test-grade-match">
+                    <option value="correct">Grade feels correct</option>
+                    <option value="softer">Grade is SOFTER than set</option>
+                    <option value="stiffer">Grade is STIFFER than set</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Movement Flow</label>
+                <select id="test-flow">
+                    <option value="good">Flow feels organic</option>
+                    <option value="awkward">Movement is awkward</option>
+                    <option value="broken">Beta is broken (skipped holds)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Notes / Awkward Hold #</label>
+                <input type="text" id="test-notes" placeholder="e.g. Hold 3 is too far">
+            </div>
+            <button class="tool-btn btn-green" onclick="submitTestLog()">SUBMIT TRAINING FEEDBACK</button>
+        </div>
+
         <button class="tool-btn btn-blue" id="btn-new-route" onclick="createNewRoute()">ADD NEW ROUTE +</button>
         <div id="route-list" style="margin-top:10px;">
             <div style="padding:10px; color:#666; font-style:italic; text-align:center;">No routes saved</div>
@@ -787,6 +812,35 @@
         await saveAllRoutes();
         toggleMode('none');
         status.innerText = "ROUTE SAVED";
+        
+        // Show test log panel after saving a route
+        document.getElementById('test-log-panel').style.display = 'block';
+    }
+
+    async function submitTestLog() {
+        if (!activeRoute) return;
+        const feedback = {
+            timestamp: new Date().toISOString(),
+            routeName: activeRoute.name,
+            setGrade: activeRoute.grade,
+            userGradeMatch: document.getElementById('test-grade-match').value,
+            userFlowRating: document.getElementById('test-flow').value,
+            notes: document.getElementById('test-notes').value,
+            routeData: activeRoute // Include full route for training
+        };
+
+        status.innerText = "SAVING FEEDBACK...";
+        try {
+            await fetch('/save_auto_log', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'feedback', data: feedback })
+            });
+            status.innerText = "FEEDBACK SAVED!";
+            document.getElementById('test-log-panel').style.display = 'none';
+        } catch(e) {
+            status.innerText = "ERROR SAVING";
+        }
     }
 
     async function saveAllRoutes() {
