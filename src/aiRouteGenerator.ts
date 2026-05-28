@@ -297,11 +297,13 @@ export function generateTraverseRoute(ctx: RouteContext) {
         }
     }
 
+    const routeId = Date.now().toString().slice(-4);
     const route = { 
-        name: `AI TRAVERSE ${isLeftToRight ? 'L->R' : 'R->L'}`, 
+        name: `AI TRAVERSE ${routeId}`, 
         grade: targetGradeStr, 
         holds: generatedHolds, 
-        order: generatedOrder 
+        order: generatedOrder,
+        idealLine: idealLine
     };
 
     setActiveRoute(route);

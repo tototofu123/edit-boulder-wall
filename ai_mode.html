@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI ROUTE WORKSPACE</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #0f0f12; color: #e1e1e6; display: flex; height: 100vh; overflow: hidden; }
+        
+        .viewport { flex: 1; position: relative; background: #000; overflow: hidden; cursor: grab; }
+        .viewport:active { cursor: grabbing; }
+
+        #canvas-wrapper { position: absolute; transform-origin: 0 0; will-change: transform; }
+        #wall-img { display: block; user-select: none; -webkit-user-drag: none; }
+        #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: all; }
+        
+        .sidebar { width: 450px; background: #19191e; border-left: 1px solid #333; display: flex; flex-direction: column; gap: 15px; padding: 20px; overflow-y: auto; box-shadow: -5px 0 20px rgba(0,0,0,0.5); }
+        .status { background: #6f42c1; padding: 12px; color: white; font-family: monospace; font-size: 14px; font-weight: bold; text-align: center; border-radius: 4px; letter-spacing: 1px; }
+        
+        .box { background: #25252d; padding: 15px; border-radius: 6px; border: 1px solid #333; }
+        .box-title { font-weight: bold; margin-bottom: 12px; font-size: 14px; color: #999; text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 5px; }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 11px; color: #aaa; text-transform: uppercase; margin-bottom: 5px; }
+        .form-group input[type="range"] { width: 100%; height: 6px; background: #444; border-radius: 3px; outline: none; }
+        
+        .tool-btn { width: 100%; padding: 12px; border: none; color: white; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; margin-bottom: 8px; }
+        .btn-purple { background: #6f42c1; }
+        .btn-purple:hover { background: #5a32a3; }
+        .btn-green { background: #28a745; }
+        .btn-blue { background: #007acc; }
+
+        .ai-config-panel { display: none; margin-top: 10px; border-top: 1px solid #444; padding-top: 15px; }
+        
+        .hold-path { cursor: pointer; stroke-width: 4; fill: none; pointer-events: all; }
+        .hold-path.route { stroke-width: 14; filter: drop-shadow(0 0 10px rgba(255,255,255,0.3)); }
+        .hold-path.selected { stroke: white !important; stroke-width: 16 !important; filter: drop-shadow(0 0 15px white); }
+
+        .assisted-line { stroke: white; stroke-width: 5; stroke-dasharray: 6,6; cursor: pointer; pointer-events: all; }
+        .assisted-line.selected { stroke: #00ff00; stroke-width: 10; stroke-dasharray: none; filter: drop-shadow(0 0 10px #0f0); }
+        .route-dist-text { fill: white; font-family: monospace; font-size: 22px; font-weight: bold; pointer-events: none; stroke: black; stroke-width: 1.5px; }
+
+        .route-hold-label { fill: white; font-family: monospace; font-size: 45px; font-weight: bold; pointer-events: none; stroke: black; stroke-width: 5px; filter: drop-shadow(0 0 10px black); }
+
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .stat-card { background: #111; padding: 10px; border-radius: 4px; text-align: center; }
+        .stat-val { font-size: 20px; font-weight: bold; color: #0f0; font-family: monospace; }
+        .stat-label { font-size: 9px; color: #666; text-transform: uppercase; margin-top: 4px; }
+
+        .hold-list { background: #111; border: 1px solid #333; border-radius: 4px; margin-top: 10px; max-height: 250px; overflow-y: auto; }
+        .hold-item { display: flex; flex-direction: column; padding: 10px; border-bottom: 1px solid #222; font-family: monospace; font-size: 11px; cursor: pointer; }
+        .hold-item:hover { background: #1a1a1a; }
+        .hold-item.selected { border-left: 4px solid #6f42c1; background: #1a1a2a; }
+        
+        .feedback-box { background: #1a1e2a; border: 1px solid #28a745; padding: 15px; border-radius: 6px; margin-top: 15px; display: none; }
+        .feedback-box textarea { width: 100%; height: 60px; background: #000; border: 1px solid #333; color: white; padding: 8px; font-size: 12px; resize: none; box-sizing: border-box; margin-top: 10px; }
+        
+        .checkbox-group { display: flex; gap: 10px; margin-top: 10px; }
+        .checkbox-item { font-size: 10px; background: #333; padding: 4px 10px; border-radius: 15px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+
+        .ideal-line { stroke: rgba(255, 100, 255, 0.4); stroke-width: 15; stroke-linecap: round; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+<div class="viewport" id="viewport">
+    <div id="canvas-wrapper">
+        <img id="wall-img" src="Correct Real Wall Photo.jpeg">
+        <svg id="overlay"></svg>
+    </div>
+</div>
+
+<div class="sidebar">
+    <div class="status">AI ROUTE WORKSPACE</div>
+
+    <button class="tool-btn btn-purple" id="btn-toggle-config" onclick="toggleConfig()">CONFIGURE AI GENERATOR</button>
+
+    <div id="ai-config" class="ai-config-panel box">
+        <div class="form-group">
+            <label>User Height: <span id="val-height" style="color:white">1.70m</span></label>
+            <input type="range" id="ai-height" min="1.0" max="2.0" step="0.01" value="1.70" oninput="document.getElementById('val-height').innerText = parseFloat(this.value).toFixed(2) + 'm'">
+        </div>
+        <div class="form-group">
+            <label>Wingspan: <span id="val-wingspan" style="color:white">1.70m</span></label>
+            <input type="range" id="ai-wingspan" min="1.0" max="2.0" step="0.01" value="1.70" oninput="document.getElementById('val-wingspan').innerText = parseFloat(this.value).toFixed(2) + 'm'">
+        </div>
+        <div class="form-group">
+            <label>Target Grade: <span id="val-grade" style="color:white">V4</span></label>
+            <input type="range" id="ai-grade" min="0" max="11" step="1" value="4" oninput="document.getElementById('val-grade').innerText = 'V' + this.value">
+        </div>
+        <div class="form-group">
+            <label>Route Length: <span id="val-length" style="color:white">4.0m</span></label>
+            <input type="range" id="ai-length" min="2.0" max="6.0" step="0.1" value="4.0" oninput="document.getElementById('val-length').innerText = parseFloat(this.value).toFixed(1) + 'm'">
+        </div>
+
+        <label style="font-size:10px; color:#aaa;">HOLD CATEGORIES</label>
+        <div class="checkbox-group">
+            <label class="checkbox-item"><input type="checkbox" id="ai-cat-c" checked> Climbing</label>
+            <label class="checkbox-item"><input type="checkbox" id="ai-cat-i" checked> Insert</label>
+            <label class="checkbox-item"><input type="checkbox" id="ai-cat-f"> Feature</label>
+        </div>
+
+        <button class="tool-btn btn-purple" style="margin-top:20px;" onclick="generate()">GENERATE NEW ROUTE</button>
+    </div>
+
+    <div class="box" id="route-details" style="display:none;">
+        <div class="box-title">Active Route Stats</div>
+        <div id="route-id-name" style="font-family:monospace; font-weight:bold; color:white; font-size:16px;">-</div>
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="stat-val" id="stat-dist">0.00m</div>
+                <div class="stat-label">Estimated Distance</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val" id="stat-holds">0</div>
+                <div class="stat-label">Total Holds</div>
+            </div>
+        </div>
+
+        <div class="box-title" style="margin-top:20px;">Movement Sequence</div>
+        <div id="seq-list" class="hold-list"></div>
+    </div>
+
+    <div id="feedback-panel" class="feedback-box">
+        <div style="font-size:11px; color:#28a745; font-weight:bold; text-transform:uppercase;">Report Problem for <span id="feedback-target">Selection</span></div>
+        <textarea id="feedback-text" placeholder="Explain what is wrong with this move/hold..."></textarea>
+        <div style="font-size:9px; color:#666; margin-top:5px;">Comments will be saved automatically when you generate a new route.</div>
+    </div>
+</div>
+
+<script>
+    const img = document.getElementById('wall-img');
+    const svg = document.getElementById('overlay');
+    const wrapper = document.getElementById('canvas-wrapper');
+    const viewport = document.getElementById('viewport');
+    
+    let holds = [], richMetadata = {}, calibrationData = [], boundaryPoints = [];
+    let scale = 1.0, translateX = 0, translateY = 0, isDragging = false, lastX, lastY;
+    let activeRoute = null;
+    let selectedFeedbackId = null; // Can be a hold ID or a line ID (id1_id2)
+    let feedbackCache = {}; // Stores comments keyed by selection ID
+
+    const typeColors = { 1: '#00ff00', 2: '#007acc', 3: '#ff8800', 4: '#ff0000' };
+    const typeNames = { 1: 'START', 2: 'HAND', 3: 'FOOT', 4: 'END' };
+    const catMapFull = { 'C': 'climbing holds', 'I': 'insert holds', 'F': 'wall features' };
+
+    img.onload = () => { svg.setAttribute('viewBox', `0 0 ${img.naturalWidth} ${img.naturalHeight}`); loadData(); setTimeout(initFit, 100); };
+    function initFit() { const vRect = viewport.getBoundingClientRect(); scale = Math.min(vRect.width / img.naturalWidth, vRect.height / img.naturalHeight); translateX = (vRect.width - img.naturalWidth * scale) / 2; translateY = (vRect.height - img.naturalHeight * scale) / 2; updateTransform(); }
+    function updateTransform() { wrapper.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`; }
+
+    viewport.onwheel = (e) => { e.preventDefault(); const delta = e.deltaY > 0 ? 0.9 : 1.1; const oldScale = scale; scale = Math.min(Math.max(scale * delta, 0.01), 15); const vRect = viewport.getBoundingClientRect(); const mouseX = e.clientX - vRect.left, mouseY = e.clientY - vRect.top; translateX = mouseX - (mouseX - translateX) * (scale / oldScale); translateY = mouseY - (mouseY - translateY) * (scale / oldScale); updateTransform(); };
+    viewport.onmousedown = (e) => { if (e.target.tagName === 'img' || e.target.tagName === 'svg') { isDragging = true; lastX = e.clientX; lastY = e.clientY; } };
+    window.onmousemove = (e) => { if (isDragging) { translateX += (e.clientX - lastX); translateY += (e.clientY - lastY); lastX = e.clientX; lastY = e.clientY; updateTransform(); } };
+    window.onmouseup = () => isDragging = false;
+
+    async function loadData() {
+        try {
+            holds = await (await fetch('docs/hold_annotations.json')).json();
+            richMetadata = await (await fetch('docs/holds_data.json')).json();
+            calibrationData = await (await fetch('docs/calibration.json')).json().catch(()=>[]);
+            boundaryPoints = await (await fetch('docs/wall_annotations.json')).json().catch(()=>[]);
+            render();
+        } catch(e) { console.error("Data load failed", e); }
+    }
+
+    function toggleConfig() {
+        const p = document.getElementById('ai-config');
+        p.style.display = p.style.display === 'block' ? 'none' : 'block';
+    }
+
+    async function generate() {
+        // Save any pending feedback first
+        if (Object.keys(feedbackCache).length > 0) {
+            await saveFeedbackLog();
+        }
+
+        if (window.generateTraverseRoute) {
+            const ctx = {
+                holds, richMetadata, catMapFull, boundaryPoints, pixelsToMeters,
+                height: parseFloat(document.getElementById('ai-height').value),
+                wingspan: parseFloat(document.getElementById('ai-wingspan').value),
+                targetLen: parseFloat(document.getElementById('ai-length').value),
+                targetGradeNum: parseInt(document.getElementById('ai-grade').value),
+                targetGradeStr: 'V' + document.getElementById('ai-grade').value,
+                allowedCats: [],
+                setActiveRoute: (route) => {
+                    activeRoute = route;
+                    document.getElementById('route-details').style.display = 'block';
+                    feedbackCache = {}; // Reset for new route
+                    selectedFeedbackId = null;
+                    render();
+                },
+                render: () => { render(); }
+            };
+            if (document.getElementById('ai-cat-c').checked) ctx.allowedCats.push('C');
+            if (document.getElementById('ai-cat-i').checked) ctx.allowedCats.push('I');
+            if (document.getElementById('ai-cat-f').checked) ctx.allowedCats.push('F');
+            
+            window.generateTraverseRoute(ctx);
+        }
+    }
+
+    function render() {
+        svg.innerHTML = '';
+        if (!activeRoute) return;
+
+        // 1. Draw Ideal Line
+        if (activeRoute.idealLine) {
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute('x1', activeRoute.idealLine.p1.x); line.setAttribute('y1', activeRoute.idealLine.p1.y);
+            line.setAttribute('x2', activeRoute.idealLine.p2.x); line.setAttribute('y2', activeRoute.idealLine.p2.y);
+            line.setAttribute('class', 'ideal-line');
+            svg.appendChild(line);
+        }
+
+        // 2. Draw Connection Lines
+        const handOrder = activeRoute.order.filter(id => activeRoute.holds[id] !== 3);
+        for (let i = 0; i < handOrder.length - 1; i++) {
+            const h1 = holds.find(x => x.id === handOrder[i]);
+            const h2 = holds.find(x => x.id === handOrder[i+1]);
+            if (!h1 || !h2) continue;
+            
+            const lineId = `${h1.id}_${h2.id}`;
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute('x1', h1.center.x); line.setAttribute('y1', h1.center.y);
+            line.setAttribute('x2', h2.center.x); line.setAttribute('y2', h2.center.y);
+            line.setAttribute('class', `assisted-line ${selectedFeedbackId === lineId ? 'selected' : ''}`);
+            line.onclick = (e) => { e.stopPropagation(); selectFeedback(lineId, `Move: ${i+1} -> ${i+2}`); };
+            svg.appendChild(line);
+
+            const distPx = Math.hypot(h1.center.x - h2.center.x, h1.center.y - h2.center.y);
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute('x', (h1.center.x + h2.center.x)/2); text.setAttribute('y', (h1.center.y + h2.center.y)/2 - 10);
+            text.setAttribute('class', 'route-dist-text');
+            text.textContent = `${pixelsToMeters(distPx).toFixed(2)}m`;
+            svg.appendChild(text);
+        }
+
+        // 3. Draw Route Holds and Labels
+        let labelCounts = { 1:0, 2:0, 3:0 };
+        activeRoute.order.forEach(id => {
+            const h = holds.find(x => x.id === id);
+            const type = activeRoute.holds[id];
+            const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            p.setAttribute('d', h.path);
+            p.setAttribute('class', `hold-path route ${selectedFeedbackId === id ? 'selected' : ''}`);
+            p.style.stroke = typeColors[type];
+            p.onclick = (e) => { e.stopPropagation(); selectFeedback(id, `Hold: ${id}`); };
+            svg.appendChild(p);
+
+            // Labels
+            let label = "";
+            if (type === 1) { labelCounts[1]++; label = `S${labelCounts[1] > 1 ? labelCounts[1] : ''}`; }
+            else if (type === 2) { labelCounts[2]++; label = `${labelCounts[2]}`; }
+            else if (type === 3) { labelCounts[3]++; label = `F${labelCounts[3]}`; }
+            else if (type === 4) { label = "Top"; }
+
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute('x', h.center.x); 
+            text.setAttribute('y', h.center.y - 40);
+            text.setAttribute('class', 'route-hold-label');
+            text.setAttribute('text-anchor', 'middle');
+            text.textContent = label;
+            svg.appendChild(text);
+        });
+
+        updateSidebarDetails();
+    }
+
+    function updateSidebarDetails() {
+        if (!activeRoute) return;
+        const handOrder = activeRoute.order.filter(id => activeRoute.holds[id] !== 3);
+        
+        document.getElementById('route-id-name').innerText = `${activeRoute.name} (${activeRoute.grade})`;
+        document.getElementById('stat-holds').innerText = activeRoute.order.length;
+
+        // Calculate total dist
+        let totalDist = 0;
+        for (let i = 0; i < handOrder.length - 1; i++) {
+            const h1 = holds.find(x => x.id === handOrder[i]);
+            const h2 = holds.find(x => x.id === handOrder[i+1]);
+            totalDist += pixelsToMeters(Math.hypot(h1.center.x - h2.center.x, h1.center.y - h2.center.y));
+        }
+        document.getElementById('stat-dist').innerText = totalDist.toFixed(2) + "m";
+
+        const list = document.getElementById('seq-list');
+        list.innerHTML = "";
+        
+        activeRoute.order.forEach((id, i) => {
+            const h = holds.find(x => x.id === id);
+            const type = activeRoute.holds[id];
+            const item = document.createElement('div');
+            item.className = `hold-item ${selectedFeedbackId === id ? 'selected' : ''}`;
+            item.onclick = () => selectFeedback(id, `Hold: ${id}`);
+            
+            let extra = "";
+            if (type !== 3) { // If Hand
+                const nextHandId = activeRoute.order.slice(i+1).find(nid => activeRoute.holds[nid] !== 3);
+                if (nextHandId) {
+                    const nh = holds.find(x => x.id === nextHandId);
+                    const d = pixelsToMeters(Math.hypot(h.center.x - nh.center.x, h.center.y - nh.center.y));
+                    extra = `<span style="color:#666">Next Hand: <b>${d.toFixed(2)}m</b></span>`;
+                }
+            } else { // If Foot
+                // Find associated hand (previous or current move)
+                extra = `<span style="color:#888 italic">Associated Footing</span>`;
+            }
+
+            const [cx, cy] = h.cell.split(',').map(n => parseInt(n) + 1);
+            const id5 = `${h.cat}${cx}${cy}${h.num.toString().padStart(2, '0')}`;
+
+            item.innerHTML = `
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                    <b style="color:${typeColors[type]}">${typeNames[type]}</b>
+                    <span style="color:#aaa">${id5}</span>
+                </div>
+                ${extra}
+            `;
+            list.appendChild(item);
+        });
+    }
+
+    function selectFeedback(id, label) {
+        // Save current text to cache before switching
+        if (selectedFeedbackId) {
+            feedbackCache[selectedFeedbackId] = document.getElementById('feedback-text').value;
+        }
+
+        selectedFeedbackId = id;
+        document.getElementById('feedback-panel').style.display = 'block';
+        document.getElementById('feedback-target').innerText = label;
+        document.getElementById('feedback-text').value = feedbackCache[id] || "";
+        render();
+    }
+
+    async function saveFeedbackLog() {
+        // Sync current open text box to cache
+        if (selectedFeedbackId) {
+            feedbackCache[selectedFeedbackId] = document.getElementById('feedback-text').value;
+        }
+
+        const logEntry = {
+            timestamp: new Date().toISOString(),
+            route: activeRoute,
+            problems: feedbackCache
+        };
+
+        try {
+            await fetch('/save_auto_log', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'ai_mode_feedback', data: logEntry })
+            });
+        } catch(e) { console.error("Feedback save failed", e); }
+    }
+
+    function pixelsToMeters(px) {
+        if (!calibrationData.length) return px / 500;
+        let sumScale = 0;
+        calibrationData.forEach(c => { 
+            const pxDist = Math.hypot(c.p1.x - c.p2.x, c.p1.y - c.p2.y); 
+            sumScale += (c.lengthMeters / pxDist); 
+        });
+        return px * (sumScale / calibrationData.length);
+    }
+
+</script>
+<script type="module">
+    import { generateTraverseRoute } from './dist/aiRouteGenerator.js?v=4';
+    window.generateTraverseRoute = generateTraverseRoute;
+</script>
+</body>
+</html>
