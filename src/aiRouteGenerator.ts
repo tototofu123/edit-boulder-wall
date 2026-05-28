@@ -154,6 +154,20 @@ export function generateTraverseRoute(ctx: RouteContext) {
 
     let routeHandHolds = [start1];
 
+    // Generate an ideal smooth line to follow
+    const idealEndXPx = start1.center.x + (isLeftToRight ? 1 : -1) * (targetLen / pixelsToMeters(1));
+    const idealEndYPx = start1.center.y - (Math.random() * 1.5 / pixelsToMeters(1)); // Traverses usually go slightly up
+    const idealLine = { p1: start1.center, p2: { x: idealEndXPx, y: idealEndYPx } };
+
+    // Distance from point to line segment
+    function distToSegment(p: {x:number, y:number}, v: {x:number, y:number}, w: {x:number, y:number}) {
+        const l2 = Math.pow(v.x - w.x, 2) + Math.pow(v.y - w.y, 2);
+        if (l2 == 0) return Math.hypot(p.x - v.x, p.y - v.y);
+        let t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
+        t = Math.max(0, Math.min(1, t));
+        return Math.hypot(p.x - (v.x + t * (w.x - v.x)), p.y - (v.y + t * (w.y - v.y)));
+    }
+
     // Aim for +10% to give us room to safely chop back to an optimal end hold
     while (totalDistM < (targetLen * 1.1) && safety < 40) {
         safety++;
@@ -198,6 +212,12 @@ export function generateTraverseRoute(ctx: RouteContext) {
             
             scoreA -= isLeftToRight ? dxA : -dxA;
             scoreB -= isLeftToRight ? dxB : -dxB;
+
+            // Penalize deviation from the ideal smooth line
+            const distLineA = pixelsToMeters(distToSegment(a.center, idealLine.p1, idealLine.p2));
+            const distLineB = pixelsToMeters(distToSegment(b.center, idealLine.p1, idealLine.p2));
+            scoreA += distLineA * 5; // Heavy penalty for wandering off the line
+            scoreB += distLineB * 5;
 
             // Encourage moving HIGHER than the start hold later in the route
             const progress = totalDistM / targetLen;

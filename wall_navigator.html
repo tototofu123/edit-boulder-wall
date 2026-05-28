@@ -549,7 +549,31 @@
             });
         }
 
-        // 4. Assisted Lines
+        // 4. Assisted Lines and Ideal Line
+        if (activeRoute && activeRoute.idealLine) {
+            const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute('x1', activeRoute.idealLine.p1.x); line.setAttribute('y1', activeRoute.idealLine.p1.y);
+            line.setAttribute('x2', activeRoute.idealLine.p2.x); line.setAttribute('y2', activeRoute.idealLine.p2.y);
+            line.setAttribute('stroke', 'rgba(255, 100, 255, 0.5)'); // Pinkish semi-transparent
+            line.setAttribute('stroke-width', '15');
+            line.setAttribute('stroke-linecap', 'round');
+            line.setAttribute('pointer-events', 'none');
+            group.appendChild(line);
+            
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute('x', (activeRoute.idealLine.p1.x + activeRoute.idealLine.p2.x)/2);
+            text.setAttribute('y', (activeRoute.idealLine.p1.y + activeRoute.idealLine.p2.y)/2 - 15);
+            text.setAttribute('fill', '#ff64ff');
+            text.setAttribute('font-family', 'monospace');
+            text.setAttribute('font-weight', 'bold');
+            text.setAttribute('pointer-events', 'none');
+            text.textContent = "AI DESIRED FLOW";
+            group.appendChild(text);
+            
+            svg.appendChild(group);
+        }
+
         if (activeRoute && activeRoute.order && activeRoute.order.length > 1) {
             const filteredOrder = activeRoute.order.filter(id => activeRoute.holds[id] !== 3);
             for (let i = 0; i < filteredOrder.length - 1; i++) {
