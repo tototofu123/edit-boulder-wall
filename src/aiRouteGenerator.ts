@@ -156,17 +156,17 @@ export function generateTraverseRoute(ctx: RouteContext) {
             const distPx = Math.hypot(dx, dy);
             const distM = pixelsToMeters(distPx);
             
-            // Enforce minimum distance to prevent clustered, redundant holds (0.4m to wingspan*0.9)
+            // Enforce minimum distance to prevent clustered, redundant holds
             if (distM < 0.4 || distM > wingspan * 0.9) return false;
-
             if (h.center.y < yLimitTop || h.center.y > yLimitBot) return false;
 
             const dxM = pixelsToMeters(dx);
-            // Strictly enforce monotonic horizontal progress for hands to prevent zigzags
-            if (isLeftToRight && dxM <= 0) return false;
-            if (!isLeftToRight && dxM >= 0) return false;
+            
+            // ENFORCE TRAVERSE: Must make significant horizontal progress
+            if (isLeftToRight && dxM < 0.15) return false;
+            if (!isLeftToRight && dxM > -0.15) return false;
 
-            // Check if it's too close to ANY previously established handhold (prevents zigzag redundancy)
+            // Check if it's too close to ANY previously established handhold
             let tooCloseToPrev = false;
             for (let prev of routeHandHolds) {
                 const prevDistM = pixelsToMeters(Math.hypot(h.center.x - prev.center.x, h.center.y - prev.center.y));
@@ -189,7 +189,7 @@ export function generateTraverseRoute(ctx: RouteContext) {
             scoreA -= isLeftToRight ? dxA : -dxA;
             scoreB -= isLeftToRight ? dxB : -dxB;
 
-            // Encourage moving HIGHER than the start hold, especially later in the route
+            // Encourage moving HIGHER than the start hold later in the route
             const progress = totalDistM / targetLen;
             if (progress > 0.4) {
                 const dyA = pixelsToMeters(a.center.y - start1.center.y); // Negative is higher
@@ -206,40 +206,60 @@ export function generateTraverseRoute(ctx: RouteContext) {
 
         const nextHand = handNeighbors[0];
         
-        generatedHolds[nextHand.id] = 2; // 2 = Hand
-        generatedOrder.push(nextHand.id);
-        routeHandHolds.push(nextHand);
-        
-        totalDistM += pixelsToMeters(Math.hypot(nextHand.center.x - currentHold.center.x, nextHand.center.y - currentHold.center.y));
-
+        // Find foot for this move
         const nextFoot = findFeetForHands(currentHold, nextHand);
         if (nextFoot && !generatedHolds[nextFoot.id]) {
             generatedHolds[nextFoot.id] = 3; // 3 = Foot
             generatedOrder.push(nextFoot.id);
         }
 
+        generatedHolds[nextHand.id] = 2; // 2 = Hand
+        generatedOrder.push(nextHand.id);
+        routeHandHolds.push(nextHand);
+        
+        totalDistM += pixelsToMeters(Math.hypot(nextHand.center.x - currentHold.center.x, nextHand.center.y - currentHold.center.y));
         currentHold = nextHand;
     }
 
     if (routeHandHolds.length > 1) {
-        // Enforce the end hold is higher than start hold. If the last one isn't, walk back.
-        let endIdx = routeHandHolds.length - 1;
-        while (endIdx > 1 && routeHandHolds[endIdx].center.y >= start1.center.y) {
-            // Remove the hold and any immediately following feet
-            const removedHandId = routeHandHolds[endIdx].id;
-            delete generatedHolds[removedHandId];
-            generatedOrder = generatedOrder.filter(id => id !== removedHandId);
-            endIdx--;
+        // Find the absolute highest hold in the route to be the END hold.
+        // Highest on wall = smallest Y pixel value.
+        let highestHand = routeHandHolds[1];
+        for (let i = 2; i < routeHandHolds.length; i++) {
+            if (routeHandHolds[i].center.y < highestHand.center.y) {
+                highestHand = routeHandHolds[i];
+            }
         }
-
-        const finalHand = routeHandHolds[endIdx];
-        generatedHolds[finalHand.id] = 4; // 4 = End
         
-        // Final End Foot (for matching the end hold)
-        const endFoot = findFeetForHands(finalHand, null);
+        // Strip out any handholds that came AFTER the highest hold in the sequence.
+        const highestIdx = routeHandHolds.indexOf(highestHand);
+        const holdsToRemove = routeHandHolds.slice(highestIdx + 1);
+        
+        // We must remove these extra hands AND their feet from the order array
+        // To do this cleanly, we rebuild the generatedOrder array up to highestHand
+        let newOrder = [];
+        let newHolds = {};
+        
+        for (let id of generatedOrder) {
+            newOrder.push(id);
+            newHolds[id] = generatedHolds[id];
+            if (id === highestHand.id) {
+                break; // Stop including holds once we hit the highest hand
+            }
+        }
+        
+        generatedOrder = newOrder;
+        generatedHolds = newHolds;
+
+        // Ensure the final hand is designated as END
+        generatedHolds[highestHand.id] = 4; // 4 = End
+        
+        // Add one final foot to match the end hold, placed BEFORE the end hold in the list for neatness
+        const endFoot = findFeetForHands(highestHand, null);
         if (endFoot && !generatedHolds[endFoot.id]) {
             generatedHolds[endFoot.id] = 3;
-            generatedOrder.push(endFoot.id);
+            // Insert it right before the END hold
+            generatedOrder.splice(generatedOrder.length - 1, 0, endFoot.id);
         }
     }
 
