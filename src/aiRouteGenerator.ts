@@ -90,36 +90,38 @@ export function generateTraverseRoute(ctx: RouteContext) {
         const highestHandY = h2 ? Math.min(h1.center.y, h2.center.y) : h1.center.y;
         const maxReachPx = (height + (wingspan * 0.35)) / pixelsToMeters(1);
 
-        const footNeighbors = holds.filter(h => {
-            if (h.id === h1.id || (h2 && h.id === h2.id)) return false; 
-            const dx = h.center.x - climberX;
-            const dy = h.center.y - climberY; 
-            const distPx = Math.hypot(dx, dy);
-            const distM = pixelsToMeters(distPx);
-            
-            // For the finish (Top), we allow a slightly more cramped or wide footing to ensure we find ONE.
-            if (!isFinal) {
-                if (distM < height * 0.35) return false;
-            } else {
-                if (distM < height * 0.2) return false;
-            }
+        function search(strict: boolean, angleTolerance: number, minReachMult: number) {
+            return holds.filter(h => {
+                if (h.id === h1.id || (h2 && h.id === h2.id)) return false; 
+                const dx = h.center.x - climberX, dy = h.center.y - climberY; 
+                const distPx = Math.hypot(dx, dy), distM = pixelsToMeters(distPx);
+                
+                if (strict && distM < height * minReachMult) return false;
+                if ((h.center.y - highestHandY) > maxReachPx) return false;
+                
+                const angle = Math.atan2(dy, dx) * 180 / Math.PI; 
+                if (angle < (90 - angleTolerance) || angle > (90 + angleTolerance)) return false;
+                return true;
+            });
+        }
 
-            if ((h.center.y - highestHandY) > maxReachPx) return false;
-            const angle = Math.atan2(dy, dx) * 180 / Math.PI; 
-            
-            // Widen angle for final foot (90 +/- 75 degrees)
-            const tolerance = isFinal ? 75 : 60;
-            if (angle < (90 - tolerance) || angle > (90 + tolerance)) return false;
+        // Try 1: Strict (good ergonomics)
+        let results = search(true, isFinal ? 75 : 60, isFinal ? 0.2 : 0.35);
+        
+        // Try 2: Loose (wider angle, closer distance)
+        if (results.length === 0) results = search(false, 85, 0.1);
+        
+        // Try 3: Emergency (Any hold below the hands)
+        if (results.length === 0) {
+            results = holds.filter(h => h.id !== h1.id && (!h2 || h.id !== h2.id) && h.center.y > highestHandY);
+        }
 
-            return true;
-        });
-
-        if (footNeighbors.length > 0) {
-            footNeighbors.sort((a, b) => {
+        if (results.length > 0) {
+            results.sort((a, b) => {
                 const diffA = getHoldGrade(a).diffNum, diffB = getHoldGrade(b).diffNum;
                 return targetGradeNum < 3 ? diffA - diffB : diffB - diffA;
             });
-            return footNeighbors[0];
+            return results[0];
         }
         return null;
     }
@@ -137,7 +139,7 @@ export function generateTraverseRoute(ctx: RouteContext) {
     let attempts = 0;
     let finalRouteResult: any = null;
 
-    while (attempts < 10) {
+    while (attempts < 30) {
         attempts++;
         const start1 = heightCandidates[Math.floor(Math.random() * Math.min(10, heightCandidates.length))];
         
@@ -163,17 +165,17 @@ export function generateTraverseRoute(ctx: RouteContext) {
         const idealLine = { p1: start1.center, p2: { x: idealEndXPx, y: idealEndYPx } };
 
         // Generate handholds until we hit the threshold
-        while (totalDistM < (targetLen * 1.05) && safety < 40) {
+        while (totalDistM < (targetLen * 1.05) && safety < 50) {
             safety++;
             const neighbors = candidates.filter(h => {
                 if (generatedHolds[h.id]) return false;
                 const dx = h.center.x - currentHold.center.x, dy = h.center.y - currentHold.center.y;
                 const distM = pixelsToMeters(Math.hypot(dx, dy));
-                if (distM < 0.4 || distM > wingspan * 0.9) return false;
+                if (distM < 0.4 || distM > wingspan * 0.95) return false;
                 if (h.center.y < yLimitTop || h.center.y > yLimitBot) return false;
                 const dxM = pixelsToMeters(dx);
-                if (isLeftToRight && dxM < 0.1) return false;
-                if (!isLeftToRight && dxM > -0.1) return false;
+                if (isLeftToRight && dxM < 0.05) return false; // More lenient forward progress
+                if (!isLeftToRight && dxM > -0.05) return false;
                 if (routeHandHolds.some(prev => pixelsToMeters(Math.hypot(h.center.x - prev.center.x, h.center.y - prev.center.y)) < 0.35)) return false;
                 return true;
             });
@@ -182,16 +184,19 @@ export function generateTraverseRoute(ctx: RouteContext) {
 
             neighbors.sort((a, b) => {
                 let sA = Math.abs(getHoldGrade(a).grade - targetGradeNum) * 2, sB = Math.abs(getHoldGrade(b).grade - targetGradeNum) * 2;
-                sA += pixelsToMeters(distToSegment(a.center, idealLine.p1, idealLine.p2)) * 6;
-                sB += pixelsToMeters(distToSegment(b.center, idealLine.p1, idealLine.p2)) * 6;
+                const linePenalty = attempts > 15 ? 3 : 6; // Loosen line penalty if struggling
+                sA += pixelsToMeters(distToSegment(a.center, idealLine.p1, idealLine.p2)) * linePenalty;
+                sB += pixelsToMeters(distToSegment(b.center, idealLine.p1, idealLine.p2)) * linePenalty;
                 return (sA + Math.random()) - (sB + Math.random());
             });
 
             const nextH = neighbors[0];
             const nextFoot = findFeetForHands(currentHold, nextH);
-            if (nextFoot && !generatedHolds[nextFoot.id]) {
-                generatedHolds[nextFoot.id] = 3; 
-                generatedOrder.push(nextFoot.id);
+            if (nextFoot) {
+                if (!generatedHolds[nextFoot.id]) {
+                    generatedHolds[nextFoot.id] = 3; 
+                    generatedOrder.push(nextFoot.id);
+                }
             }
 
             generatedHolds[nextH.id] = 2; // 2 = Hand
@@ -200,26 +205,21 @@ export function generateTraverseRoute(ctx: RouteContext) {
             totalDistM += pixelsToMeters(Math.hypot(nextH.center.x - currentHold.center.x, nextH.center.y - currentHold.center.y));
             currentHold = nextH;
 
-            // Strict break if we are in the target zone (+/- 5%)
-            if (totalDistM >= targetLen * 0.95 && totalDistM <= targetLen * 1.05) {
-                break; 
-            }
+            if (totalDistM >= targetLen * 0.95 && totalDistM <= targetLen * 1.05) break; 
         }
 
         // Final check on length and height
         if (totalDistM >= targetLen * 0.95 && totalDistM <= targetLen * 1.05) {
             let finalIdx = routeHandHolds.length - 1;
-            // Backtrack slightly to find a higher end hold if necessary, but keep length within bounds
             while (finalIdx > 1 && routeHandHolds[finalIdx].center.y >= start1.center.y) {
                 const tempDist = totalDistM - pixelsToMeters(Math.hypot(routeHandHolds[finalIdx].center.x - routeHandHolds[finalIdx-1].center.x, routeHandHolds[finalIdx].center.y - routeHandHolds[finalIdx-1].center.y));
-                if (tempDist < targetLen * 0.95) break; // Don't backtrack if it makes route too short
+                if (tempDist < targetLen * 0.95) break; 
                 finalIdx--;
                 totalDistM = tempDist;
             }
 
             const finalHand = routeHandHolds[finalIdx];
             if (finalHand.center.y < start1.center.y) {
-                // Rebuild order to clean up
                 let newOrder: string[] = [], newHolds: Record<string, number> = {};
                 for (let id of generatedOrder) {
                     newOrder.push(id); newHolds[id] = generatedHolds[id];
