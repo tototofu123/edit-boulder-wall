@@ -20,14 +20,18 @@ class SaveHandler(http.server.BaseHTTPRequestHandler):
             self.path = DEFAULT_PAGE
 
         try:
+            # Strip query parameters if present
+            path_no_query = self.path.split('?')[0]
             # Decode URL characters (e.g. %20 -> space)
-            decoded_path = urllib.parse.unquote(self.path.lstrip('/'))
+            decoded_path = urllib.parse.unquote(path_no_query.lstrip('/'))
             file_path = os.path.join(os.getcwd(), decoded_path)
 
             if os.path.exists(file_path) and os.path.isfile(file_path):        
                 self.send_response(200)
                 if file_path.endswith('.html'):
                     self.send_header('Content-type', 'text/html')
+                elif file_path.endswith('.js'):
+                    self.send_header('Content-type', 'application/javascript')
                 elif file_path.endswith('.png'):
                     self.send_header('Content-type', 'image/png')
                 elif file_path.endswith('.jpg') or file_path.endswith('.jpeg'):

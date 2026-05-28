@@ -383,119 +383,30 @@
     }
 
     function generateAIRoute() {
-        const height = parseFloat(document.getElementById('ai-height').value);
-        const wingspan = parseFloat(document.getElementById('ai-wingspan').value);
-        const targetLen = parseFloat(document.getElementById('ai-length').value);
-        const targetGradeStr = document.getElementById('ai-grade').value;
-        const targetGradeNum = parseInt(targetGradeStr.replace('V', ''));
-        const style = document.getElementById('ai-style').value;
-        const prefType = document.getElementById('ai-pref-type').value;
-
-        const allowedCats = [];
-        if (document.getElementById('ai-cat-c').checked) allowedCats.push('C');
-        if (document.getElementById('ai-cat-i').checked) allowedCats.push('I');
-        if (document.getElementById('ai-cat-f').checked) allowedCats.push('F');
-
-        // Difficulty mapping: 1->V1, 2->V3, 3->V4, 4->V6, 5->V8
-        const gradeMap = { 1: 1, 2: 3, 3: 4, 4: 6, 5: 8 };
-
-        function isDifficultyMatch(h) {
-            const meta = (richMetadata[h.cell] || {})[`${catMapFull[h.cat]}${h.num}`] || {};
-            const hDiff = parseInt(meta.difficulty || 1);
-            const hGrade = gradeMap[hDiff] || 0;
-            // Filter: Target grade V5 means use holds up to V5-V6
-            return hGrade <= targetGradeNum + 1;
+        if (window.generateTraverseRoute) {
+            const ctx = {
+                holds, richMetadata, catMapFull, boundaryPoints, pixelsToMeters,
+                height: parseFloat(document.getElementById('ai-height').value),
+                wingspan: parseFloat(document.getElementById('ai-wingspan').value),
+                targetLen: parseFloat(document.getElementById('ai-length').value),
+                targetGradeNum: parseInt(document.getElementById('ai-grade').value.replace('V', '')),
+                targetGradeStr: document.getElementById('ai-grade').value,
+                allowedCats: [],
+                setActiveRoute: (route) => {
+                    activeRoute = route;
+                    document.getElementById('route-name-input').value = activeRoute.name;
+                    document.getElementById('route-grade-input').value = activeRoute.grade;
+                },
+                render
+            };
+            if (document.getElementById('ai-cat-c').checked) ctx.allowedCats.push('C');
+            if (document.getElementById('ai-cat-i').checked) ctx.allowedCats.push('I');
+            if (document.getElementById('ai-cat-f').checked) ctx.allowedCats.push('F');
+            
+            window.generateTraverseRoute(ctx);
+        } else {
+            alert("AI Route Generator not loaded yet. Please wait a moment.");
         }
-
-        const candidates = holds.filter(h => {
-            if (!allowedCats.includes(h.cat)) return false;
-            if (!isPointInPoly(h.center, boundaryPoints)) return false;
-            return isDifficultyMatch(h);
-        });
-
-        if (candidates.length < 5) { alert("Not enough suitable holds in boundary!"); return; }
-
-        let generatedHolds = {}, generatedOrder = [];
-        const sortedByY = [...candidates].sort((a, b) => b.center.y - a.center.y);
-        
-        // Start hold: within reach height (approx 1.2m from bottom image if no floor, or just reachable)
-        // Tall people can start low. Let's pick from bottom 30% of wall candidates.
-        const bottomCandidates = sortedByY.slice(0, Math.ceil(candidates.length * 0.3));
-        const start1 = bottomCandidates[Math.floor(Math.random() * bottomCandidates.length)];
-        
-        generatedHolds[start1.id] = 1;
-        generatedOrder.push(start1.id);
-
-        let currentHold = start1;
-        let totalDist = 0;
-        let safety = 0;
-
-        while (totalDist < targetLen && safety < 15) {
-            safety++;
-            let reachMultiplier = style === 'dyno' ? 0.9 : (style === 'foot-focused' ? 0.4 : 0.6);
-            const maxReachPx = (wingspan * reachMultiplier) / pixelsToMeters(1);
-            
-            // Reachable holds: Any direction (not just up) to allow horizontal routes
-            const handNeighbors = candidates.filter(h => {
-                if (generatedHolds[h.id]) return false;
-                const d = Math.hypot(h.center.x - currentHold.center.x, h.center.y - currentHold.center.y);
-                // Biometric reach: wingspan * multiplier
-                return d < maxReachPx;
-            });
-
-            if (!handNeighbors.length) break;
-
-            let next;
-            const preferred = handNeighbors.filter(h => {
-                const meta = (richMetadata[h.cell] || {})[`${catMapFull[h.cat]}${h.num}`] || {};
-                return meta.type?.toLowerCase() === prefType;
-            });
-            next = preferred.length ? preferred[Math.floor(Math.random() * preferred.length)] : handNeighbors[Math.floor(Math.random() * handNeighbors.length)];
-            
-            generatedHolds[next.id] = 2;
-            generatedOrder.push(next.id);
-            
-            // PHYSICS: Foot placement (4-8 o'clock below center)
-            const climberX = (currentHold.center.x + next.center.x) / 2;
-            const climberY = (currentHold.center.y + next.center.y) / 2 + (height * 0.4 / pixelsToMeters(1)); 
-            
-            const footNeighbors = holds.filter(h => {
-                if (generatedHolds[h.id]) return false;
-                const dx = h.center.x - climberX;
-                const dy = h.center.y - climberY;
-                const d = Math.hypot(dx, dy);
-                const angle = Math.atan2(dy, dx) * 180 / Math.PI; 
-                // Reachable feet: 0.7 * user height
-                return d < (height * 0.7 / pixelsToMeters(1)) && angle > 45 && angle < 135; 
-            });
-
-            if (footNeighbors.length) {
-                const foot = footNeighbors[Math.floor(Math.random() * footNeighbors.length)];
-                generatedHolds[foot.id] = 3;
-                generatedOrder.push(foot.id);
-            }
-
-            const stepDist = Math.hypot(next.center.x - currentHold.center.x, next.center.y - currentHold.center.y);
-            totalDist += pixelsToMeters(stepDist);
-            currentHold = next;
-        }
-
-        if (generatedOrder.length > 1) {
-            const lastHandId = [...generatedOrder].reverse().find(id => generatedHolds[id] === 2);
-            if (lastHandId) generatedHolds[lastHandId] = 4;
-        }
-
-        activeRoute = { 
-            name: `AI ROUTE ${style.toUpperCase()}`, 
-            grade: targetGradeStr, 
-            holds: generatedHolds, 
-            order: generatedOrder 
-        };
-        
-        // Populate inputs so user can edit details after generation
-        document.getElementById('route-name-input').value = activeRoute.name;
-        document.getElementById('route-grade-input').value = activeRoute.grade;
-        render();
     }
 
     function toggleDrawFlow() { alert("Flow Drawing coming soon!"); }
@@ -903,6 +814,10 @@
     }
 
     function setMode(m) { appMode = m; document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active')); document.getElementById(`mode-${m}`).classList.add('active'); render(); }
+</script>
+<script type="module">
+    import { generateTraverseRoute } from './dist/aiRouteGenerator.js?v=3';
+    window.generateTraverseRoute = generateTraverseRoute;
 </script>
 </body>
 </html>
