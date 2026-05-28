@@ -51,13 +51,14 @@ export function generateTraverseRoute(ctx: RouteContext) {
         if (!allowedCats.includes(h.cat)) return false;
         if (!isPointInPoly(h.center, boundaryPoints)) return false;
         const { grade } = getHoldGrade(h);
-        // Strict grade filtering: no crazy hard holds on easy routes
-        const maxAllowed = targetGradeNum <= 2 ? targetGradeNum : targetGradeNum + 1;
+        // Correct Grade filter: V0/V1 should allow grade 1 (Diff 1) holds.
+        const effectiveTarget = Math.max(1, targetGradeNum);
+        const maxAllowed = effectiveTarget <= 3 ? effectiveTarget : effectiveTarget + 1;
         return grade <= maxAllowed;
     });
 
     if (candidates.length < 5) {
-        alert("Not enough suitable holds in boundary!");
+        alert("Not enough suitable holds in boundary! Check if your boundary includes enough 'Climbing' holds.");
         return;
     }
 
@@ -83,7 +84,7 @@ export function generateTraverseRoute(ctx: RouteContext) {
     heightCandidates.sort((a, b) => isLeftToRight ? a.center.x - b.center.x : b.center.x - a.center.x);
 
     // Helper: Find a foot for a single hold (static start/end) or between two holds (movement)
-    function findFeetForHands(h1: Hold, h2: Hold | null) {
+    function findFeetForHands(h1: Hold, h2: Hold | null, isFinal: boolean = false) {
         const climberX = h2 ? (h1.center.x + h2.center.x) / 2 : h1.center.x;
         const climberY = (h2 ? (h1.center.y + h2.center.y) / 2 : h1.center.y) + (height * 0.4 / pixelsToMeters(1));
         const highestHandY = h2 ? Math.min(h1.center.y, h2.center.y) : h1.center.y;
@@ -95,10 +96,21 @@ export function generateTraverseRoute(ctx: RouteContext) {
             const dy = h.center.y - climberY; 
             const distPx = Math.hypot(dx, dy);
             const distM = pixelsToMeters(distPx);
-            if (distM < height * 0.35) return false;
+            
+            // For the finish (Top), we allow a slightly more cramped or wide footing to ensure we find ONE.
+            if (!isFinal) {
+                if (distM < height * 0.35) return false;
+            } else {
+                if (distM < height * 0.2) return false;
+            }
+
             if ((h.center.y - highestHandY) > maxReachPx) return false;
             const angle = Math.atan2(dy, dx) * 180 / Math.PI; 
-            if (angle < 30 || angle > 150) return false;
+            
+            // Widen angle for final foot (90 +/- 75 degrees)
+            const tolerance = isFinal ? 75 : 60;
+            if (angle < (90 - tolerance) || angle > (90 + tolerance)) return false;
+
             return true;
         });
 
@@ -214,7 +226,7 @@ export function generateTraverseRoute(ctx: RouteContext) {
                     if (id === finalHand.id) break;
                 }
                 newHolds[finalHand.id] = 4; // Top
-                const endFoot = findFeetForHands(finalHand, null);
+                const endFoot = findFeetForHands(finalHand, null, true);
                 if (endFoot && !newHolds[endFoot.id]) {
                     newHolds[endFoot.id] = 3;
                     newOrder.splice(newOrder.length - 1, 0, endFoot.id);
