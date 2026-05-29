@@ -42,6 +42,10 @@ def direction_label(direction):
     return labels.get(normalized, f'{normalized}°')
 
 
+def truthy(value):
+    return str(value).strip().lower() in ('1', 'true', 'yes', 'y', 'on')
+
+
 def infer_foot_rating(meta):
     hold_type = str(meta.get('type', '')).lower()
     base_difficulty = int(clamp(safe_number(meta.get('difficulty', 1), 1), 1, 5))
@@ -140,6 +144,7 @@ def build_hold_spec_rows(metadata):
             'boxSize': hold.get('boxSize', 0),
             'idealUsage': ideal_usage,
             'ideal': ideal_usage,
+            'audited': truthy(meta.get('audited', False) or meta.get('transferred', False)),
         })
 
     rows.sort(key=lambda row: (
@@ -156,7 +161,7 @@ def write_hold_spec_files(metadata):
     with open('docs/HOLD_SPEC.json', 'w') as f:
         json.dump(rows, f, indent=4)
 
-    fieldnames = ['id', 'cell', 'cat', 'num', 'category', 'type', 'baseDifficulty', 'handDifficulty', 'footDifficulty', 'footRating', 'footLabel', 'generalUsability', 'direction', 'directionLabel', 'center_x', 'center_y', 'boxSize', 'idealUsage', 'ideal']
+    fieldnames = ['id', 'cell', 'cat', 'num', 'category', 'type', 'baseDifficulty', 'handDifficulty', 'footDifficulty', 'footRating', 'footLabel', 'generalUsability', 'direction', 'directionLabel', 'center_x', 'center_y', 'boxSize', 'idealUsage', 'ideal', 'audited']
     with open('docs/HOLD_SPEC.csv', 'w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
@@ -323,9 +328,9 @@ class SaveHandler(http.server.BaseHTTPRequestHandler):
                     for hold_key in sorted(cell_holds.keys()):
                         csv_rows.append(cell_holds[hold_key])
                 
-                fieldnames = ['cell_x', 'cell_y', 'category', 'num', 'type', 'difficulty', 'direction', 'ideal']
+                fieldnames = ['cell_x', 'cell_y', 'category', 'num', 'type', 'difficulty', 'handDifficulty', 'footDifficulty', 'footRating', 'generalUsability', 'direction', 'idealUsage', 'ideal', 'audited']
                 with open('docs/holds_data.csv', 'w', newline='') as f:
-                    writer = csv.DictWriter(f, fieldnames=fieldnames)
+                    writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction='ignore')
                     writer.writeheader()
                     writer.writerows(csv_rows)
                 write_hold_spec_files(data['metadata'])

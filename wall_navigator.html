@@ -291,6 +291,7 @@
             <button onclick="startEdit()" class="tool-btn btn-blue" style="flex:1; margin-bottom:0;">EDIT DATA</button>
             <button onclick="zoomToHold()" class="tool-btn btn-purple" style="flex:1; margin-bottom:0;">ZOOM TO</button>
         </div>
+        <div id="audit-progress" style="margin-top:12px; font-size:11px; color:#ffcc66; text-align:center; display:none;"></div>
     </div>
 
     <!-- DUAL HOLD LINK INFO -->
@@ -440,10 +441,15 @@
         const nextHold = auditOrder[auditOrderIndex];
         const panel = document.getElementById('edit-panel');
         if (panel.style.display === 'block' && selectedHoldId) {
-            saveEdit(true).finally(() => selectHold(nextHold, true));
+            saveEdit(true).finally(() => {
+                selectHold(nextHold, true);
+                zoomToHold();
+                startEdit();
+            });
             return;
         }
         selectHold(nextHold, true);
+        zoomToHold();
     }
 
     function focusAuditField(step) {
@@ -512,6 +518,7 @@
         else if (currentTool === 'ai-set') status.innerText = "AI GENERATION MODE";
         else status.innerText = "WALL WORKSPACE";
         
+        updateAuditProgress();
         render();
     }
 
@@ -986,6 +993,7 @@
             if (holdIndex >= 0) auditOrderIndex = holdIndex;
             zoomToHold();
         }
+        updateAuditProgress();
         render();
     }
 
@@ -1079,6 +1087,11 @@
         document.getElementById('edit-foot-diff').value = String(resolved.footDifficulty || Math.min(10, Math.max(1, (resolved.footRating || 3) * 2)));
         document.getElementById('edit-general-usability').value = String(resolved.generalUsability || 5);
         document.getElementById('edit-ideal').value = resolved.idealUsage || meta.idealUsage || meta.ideal || "General";
+        auditFieldIndex = 0;
+        setTimeout(() => {
+            const firstField = document.getElementById(auditFields[0]);
+            if (firstField) firstField.focus();
+        }, 0);
     }
     function cancelEdit() { document.getElementById('edit-panel').style.display = 'none'; document.getElementById('hold-details').style.display = 'block'; }
     async function saveEdit(silent = false) {
@@ -1094,7 +1107,7 @@
         const generalUsability = document.getElementById('edit-general-usability').value;
         const idealUsage = document.getElementById('edit-ideal').value;
         const typeValue = document.getElementById('edit-type').value.trim() || 'uncategorized';
-        richMetadata[newCell][newKey] = { cell_x: parseInt(newCell.split(',')[0]), cell_y: parseInt(newCell.split(',')[1]), category: catMapFull[newCat], num: newNum.toString(), type: typeValue, difficulty: String(Math.max(1, Math.min(5, Math.round(Number(handDifficulty) / 2)))), handDifficulty, footDifficulty, footRating: String(Math.max(1, Math.min(5, Math.round(Number(footDifficulty) / 2)))), generalUsability, direction: document.getElementById('edit-grab').value, idealUsage, ideal: idealUsage };
+        richMetadata[newCell][newKey] = { cell_x: parseInt(newCell.split(',')[0]), cell_y: parseInt(newCell.split(',')[1]), category: catMapFull[newCat], num: newNum.toString(), type: typeValue, difficulty: String(Math.max(1, Math.min(5, Math.round(Number(handDifficulty) / 2)))), handDifficulty, footDifficulty, footRating: String(Math.max(1, Math.min(5, Math.round(Number(footDifficulty) / 2)))), generalUsability, direction: document.getElementById('edit-grab').value, idealUsage, ideal: idealUsage, audited: 'true' };
         if (holdSpec.length) {
             const existing = holdSpec.find(spec => String(spec.id) === String(h.id) || (spec.cell === oldCell && spec.cat === oldCat && Number(spec.num) === Number(oldNum)));
             if (existing) {
@@ -1112,12 +1125,14 @@
                 existing.directionLabel = clockMap[existing.direction] ? clockMap[existing.direction] : String(existing.direction);
                 existing.idealUsage = idealUsage;
                 existing.ideal = idealUsage;
+                existing.audited = true;
             }
         }
         status.innerText = silent ? "AUTO-SAVING..." : "SAVING...";
         try {
             await fetch('/save_full_edit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ holds: holds, metadata: richMetadata }) });
             status.innerText = silent ? "AUTO-SAVED!" : "SAVED!";
+            updateAuditProgress();
             if (!silent) {
                 cancelEdit();
                 selectHold(h);
@@ -1128,6 +1143,19 @@
     }
 
     function setMode(m) { appMode = m; document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active')); document.getElementById(`mode-${m}`).classList.add('active'); render(); }
+
+    function updateAuditProgress() {
+        const progress = document.getElementById('audit-progress');
+        if (!progress) return;
+        if (currentTool !== 'audit') {
+            progress.style.display = 'none';
+            return;
+        }
+        const total = holdSpec.length || holds.length;
+        const remaining = holdSpec.length ? holdSpec.filter(spec => !spec.audited).length : total;
+        progress.style.display = 'block';
+        progress.textContent = `${remaining} / ${total} holds not yet transferred`;
+    }
 </script>
 <script type="module">
     import { generateTraverseRoute } from './dist/aiRouteGenerator.js?v=4';

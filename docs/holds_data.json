@@ -9,15 +9,6 @@
             "difficulty": "3",
             "direction": "45"
         },
-        "climbing holds1": {
-            "cell_x": 0,
-            "cell_y": 0,
-            "category": "climbing holds",
-            "num": "1",
-            "type": "jug",
-            "difficulty": "3",
-            "direction": "0"
-        },
         "climbing holds2": {
             "cell_x": 0,
             "cell_y": 0,
@@ -134,6 +125,22 @@
             "type": "uncategorized",
             "difficulty": "3",
             "direction": "45"
+        },
+        "climbing holds1": {
+            "cell_x": 0,
+            "cell_y": 0,
+            "category": "climbing holds",
+            "num": "1",
+            "type": "jug",
+            "difficulty": "3",
+            "handDifficulty": "6",
+            "footDifficulty": "2",
+            "footRating": "1",
+            "generalUsability": "1",
+            "direction": "180",
+            "idealUsage": "General",
+            "ideal": "General",
+            "audited": "true"
         }
     },
     "0,2": {
