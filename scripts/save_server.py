@@ -5,6 +5,122 @@ import os
 import urllib.parse
 import sys
 
+
+FOOT_LABELS = ['Heaven', 'Good', 'Mid', 'Bad', 'Hell']
+
+
+def clamp(value, minimum, maximum):
+    return max(minimum, min(maximum, value))
+
+
+def safe_number(value, fallback):
+    try:
+        parsed = float(value)
+        if parsed != parsed:
+            return fallback
+        return parsed
+    except Exception:
+        return fallback
+
+
+def foot_label_from_rating(rating):
+    return FOOT_LABELS[clamp(int(round(safe_number(rating, 3))), 1, 5) - 1]
+
+
+def direction_label(direction):
+    normalized = int(round(safe_number(direction, 180))) % 360
+    labels = {
+        0: 'up',
+        45: 'up-right',
+        90: 'right',
+        135: 'down-right',
+        180: 'down',
+        225: 'down-left',
+        270: 'left',
+        315: 'up-left',
+    }
+    return labels.get(normalized, f'{normalized}°')
+
+
+def infer_foot_rating(meta):
+    hold_type = str(meta.get('type', '')).lower()
+    base_difficulty = int(clamp(safe_number(meta.get('difficulty', 1), 1), 1, 5))
+    hand_difficulty = int(clamp(safe_number(meta.get('handDifficulty', base_difficulty * 2), base_difficulty * 2), 1, 10))
+    box_size = safe_number(meta.get('boxSize', 0), 0)
+    size_bonus = -1 if box_size >= 90 else 0 if box_size >= 70 else 1
+
+    if hold_type == 'jug':
+        return int(clamp(1 + size_bonus, 1, 5))
+    if hold_type == 'sloper':
+        return int(clamp(3 + size_bonus, 1, 5))
+    if hold_type in ('crimp', 'jib', 'pocket'):
+        return int(clamp(4 + size_bonus + max(0, base_difficulty - 2), 1, 5))
+    if hold_type == 'pinch':
+        return int(clamp(3 + size_bonus + max(0, base_difficulty - 3), 1, 5))
+    return int(clamp(round(hand_difficulty / 2) + size_bonus, 1, 5))
+
+
+def build_hold_spec_rows(metadata):
+    hold_annotations_path = 'docs/hold_annotations.json'
+    if not os.path.exists(hold_annotations_path):
+        return []
+
+    with open(hold_annotations_path, 'r') as f:
+        holds = json.load(f)
+
+    rows = []
+    for hold in holds:
+        cell = hold.get('cell', '')
+        cat = hold.get('cat', '')
+        num = hold.get('num', 0)
+        full_cat = {'C': 'climbing holds', 'I': 'insert holds', 'F': 'wall features'}.get(cat, '')
+        meta = (metadata.get(cell, {}) or {}).get(f'{full_cat}{num}', {}) if full_cat else {}
+
+        base_difficulty = int(clamp(safe_number(meta.get('difficulty', 1), 1), 1, 5))
+        hand_difficulty = int(clamp(safe_number(meta.get('handDifficulty', base_difficulty * 2), base_difficulty * 2), 1, 10))
+        foot_rating = int(clamp(safe_number(meta.get('footRating', infer_foot_rating({**meta, 'difficulty': base_difficulty, 'handDifficulty': hand_difficulty, 'boxSize': hold.get('boxSize', 0)})), 3), 1, 5))
+        direction = int(clamp(safe_number(meta.get('direction', 180), 180), 0, 359))
+        center = hold.get('center') or {}
+
+        rows.append({
+            'id': hold.get('id'),
+            'cell': cell,
+            'cat': cat,
+            'num': num,
+            'category': full_cat,
+            'type': meta.get('type', 'uncategorized'),
+            'baseDifficulty': base_difficulty,
+            'handDifficulty': hand_difficulty,
+            'footRating': foot_rating,
+            'footLabel': foot_label_from_rating(foot_rating),
+            'direction': direction,
+            'directionLabel': direction_label(direction),
+            'center_x': center.get('x'),
+            'center_y': center.get('y'),
+            'boxSize': hold.get('boxSize', 0),
+            'ideal': meta.get('ideal', 'General'),
+        })
+
+    rows.sort(key=lambda row: (
+        int(safe_number(str(row.get('cell', '0,0')).split(',')[1] if ',' in str(row.get('cell', '0,0')) else 0, 0)),
+        int(safe_number(str(row.get('cell', '0,0')).split(',')[0] if ',' in str(row.get('cell', '0,0')) else 0, 0)),
+        row.get('cat', ''),
+        int(safe_number(row.get('num', 0), 0)),
+    ))
+    return rows
+
+
+def write_hold_spec_files(metadata):
+    rows = build_hold_spec_rows(metadata)
+    with open('docs/HOLD_SPEC.json', 'w') as f:
+        json.dump(rows, f, indent=4)
+
+    fieldnames = ['id', 'cell', 'cat', 'num', 'category', 'type', 'baseDifficulty', 'handDifficulty', 'footRating', 'footLabel', 'direction', 'directionLabel', 'center_x', 'center_y', 'boxSize', 'ideal']
+    with open('docs/HOLD_SPEC.csv', 'w', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
 # Get configuration from command line arguments
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
 DEFAULT_PAGE = sys.argv[2] if len(sys.argv) > 2 else '/climbing_categorizer.html'
@@ -53,6 +169,7 @@ class SaveHandler(http.server.BaseHTTPRequestHandler):
             # Save JSON
             with open('docs/holds_data.json', 'w') as f:
                 json.dump(data['json'], f, indent=4)
+            write_hold_spec_files(data['json'])
 
             # Save CSV
             if data['csv']:
@@ -170,6 +287,7 @@ class SaveHandler(http.server.BaseHTTPRequestHandler):
                     writer = csv.DictWriter(f, fieldnames=fieldnames)
                     writer.writeheader()
                     writer.writerows(csv_rows)
+                write_hold_spec_files(data['metadata'])
 
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
