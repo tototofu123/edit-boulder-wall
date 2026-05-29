@@ -30,6 +30,87 @@ function directionLabel(direction) {
     };
     return labels[normalized] || `${normalized}°`;
 }
+const WEIGHT_CONFIG = {
+    route: {
+        targetHandDifficultyBase: 2,
+        targetHandDifficultySlope: 0.75,
+        maxHandDifficulty: 10,
+        maxMoveRatio: 1.02,
+        idealMoveRatioMin: 0.4,
+        idealMoveRatioMax: 0.85,
+        idealMoveRatioCenter: 0.62,
+        crampedMoveFloorRatio: 0.4,
+        crampedMovePenaltyBase: 28,
+        crampedMovePenaltyMultiplier: 260,
+        longMovePenaltyBase: 65,
+        longMovePenaltyMultiplier: 360,
+        moveDirectionWeight: 18,
+        gradeWeight: 9,
+        lowGradeFavorMultiplier: 0.85,
+        highGradePenaltyMultiplier: 1.1,
+        lineWeightEarly: 6,
+        lineWeightLate: 3,
+        progressWeight: 28,
+        shortMoveTriggerRatio: 0.4,
+        shortMoveSpamBase: 40,
+        shortMoveSpamGrowth: 2,
+        shortMoveHardnessOffset: 4,
+        startHeightMinMeters: 1.0,
+        startHeightMaxMeters: 1.8,
+        startPoolSizeMin: 12,
+        startPoolBase: 10,
+        startPoolDensityMultiplier: 30,
+        startBiasExponent: 0.7,
+        yLimitTopBaseMeters: 4.0,
+        yLimitTopDensityMeters: 1.0,
+        yLimitBottomBaseMeters: 0.15,
+        yLimitBottomBufferMeters: 0.3,
+        yLimitBottomDensityMeters: 0.12,
+        minStepBaseMeters: 0.08,
+        minStepDensityMeters: 0.08,
+        maxStepWingspanMultiplier: 1.02,
+        minForwardBaseMeters: 0.02,
+        minForwardDensityMeters: 0.03,
+        finishDropMinMeters: 0.12,
+        finishDropTargetMeters: 0.28,
+        finishDropDensityMeters: 0.05,
+        finishFootDistanceWeightX: 6,
+        finishFootDistanceWeightY: 3,
+        finishFootQualityWeight: 12,
+        finishFootQualityEasyTarget: 1.5,
+        finishFootQualityMidTarget: 2.5,
+        finishFootQualityHardTarget: 3.2,
+        finishRecycleBonus: 18,
+        finishSizeBonusLarge: 5,
+        finishSizeBonusMid: 2,
+        finishTypePenaltyEasy: 8,
+        finishOppositeSideThreshold: 0.7,
+        finishBodyYOffsetMeters: 0.32,
+        finishSecondFootMinSpreadMeters: 0.18,
+        finishSecondFootFavorUsedBonus: 10,
+        footRecycleGradeThreshold: 3,
+        footRecycleBonus: 18,
+        footBodyYOffsetMeters: 0.32,
+        footMinDropEasyMeters: 0.18,
+        footMinDropHardMeters: 0.45,
+        footMaxDropHardMeters: 1.7,
+        footMaxDropMultiplier: 1.05,
+        footFinalMinDropMeters: 0.12,
+        footFinalTargetMeters: 0.28,
+        footFinalDropDensityMeters: 0.05,
+        footDistanceWeightX: 10,
+        footDistanceWeightY: 5,
+        footDistanceWeightXFinal: 6,
+        footDistanceWeightYFinal: 3,
+        footTypePenaltyEasy: 8,
+        footSizeBonusLarge: 5,
+        footSizeBonusMid: 2,
+        footSearchJitter: 1.25,
+        handSearchJitter: 1.5,
+        scoreAlignmentMultiplier: 1,
+        moveMaxReachRatio: 1.02
+    }
+};
 // Helper to check if point is in polygon
 function isPointInPoly(pt, poly) {
     let isInside = false;
@@ -121,21 +202,20 @@ export function generateTraverseRoute(ctx) {
         heightCandidates = candidates;
     // Sort by proximity to the starting edge
     heightCandidates.sort((a, b) => isLeftToRight ? a.center.x - b.center.x : b.center.x - a.center.x);
-    const targetHandDifficulty = clamp(2 + targetGradeNum * 0.75, 2, 10);
+    const targetHandDifficulty = clamp(WEIGHT_CONFIG.route.targetHandDifficultyBase + targetGradeNum * WEIGHT_CONFIG.route.targetHandDifficultySlope, WEIGHT_CONFIG.route.targetHandDifficultyBase, WEIGHT_CONFIG.route.maxHandDifficulty);
     function moveDistanceCost(distM) {
         const spanM = Math.max(0.01, wingspan);
         const ratio = distM / spanM;
-        if (ratio > 1.02)
+        if (ratio > WEIGHT_CONFIG.route.maxMoveRatio)
             return Infinity;
-        if (ratio >= 0.4 && ratio <= 0.85) {
-            const center = 0.62;
-            return Math.pow(ratio - center, 2) * 45;
+        if (ratio >= WEIGHT_CONFIG.route.idealMoveRatioMin && ratio <= WEIGHT_CONFIG.route.idealMoveRatioMax) {
+            return Math.pow(ratio - WEIGHT_CONFIG.route.idealMoveRatioCenter, 2) * 45;
         }
-        if (ratio < 0.4) {
-            const cramped = 0.4 - ratio;
-            return 28 + Math.pow(cramped, 2) * 260;
+        if (ratio < WEIGHT_CONFIG.route.crampedMoveFloorRatio) {
+            const cramped = WEIGHT_CONFIG.route.crampedMoveFloorRatio - ratio;
+            return WEIGHT_CONFIG.route.crampedMovePenaltyBase + Math.pow(cramped, 2) * WEIGHT_CONFIG.route.crampedMovePenaltyMultiplier;
         }
-        return 65 + Math.pow(ratio - 0.85, 2) * 360;
+        return WEIGHT_CONFIG.route.longMovePenaltyBase + Math.pow(ratio - WEIGHT_CONFIG.route.idealMoveRatioMax, 2) * WEIGHT_CONFIG.route.longMovePenaltyMultiplier;
     }
     function holdDirectionCost(spec, dxM, dyM) {
         const moveLen = Math.hypot(dxM, dyM);
@@ -144,23 +224,28 @@ export function generateTraverseRoute(ctx) {
         const moveVec = { x: dxM / moveLen, y: dyM / moveLen };
         const holdVec = directionVector(spec.direction);
         const alignment = clamp(holdVec.x * moveVec.x + holdVec.y * moveVec.y, -1, 1);
-        return (1 - alignment) * 18;
+        return (1 - alignment) * WEIGHT_CONFIG.route.moveDirectionWeight;
     }
     function gradeCost(spec) {
         const diff = Math.abs(spec.handDifficulty - targetHandDifficulty);
-        const gradeBias = targetGradeNum <= 2 ? (spec.handDifficulty <= targetHandDifficulty ? 0.85 : 1.1) : 1;
-        return diff * 9 * gradeBias;
+        const gradeBias = targetGradeNum <= 2
+            ? (spec.handDifficulty <= targetHandDifficulty ? WEIGHT_CONFIG.route.lowGradeFavorMultiplier : WEIGHT_CONFIG.route.highGradePenaltyMultiplier)
+            : 1;
+        return diff * WEIGHT_CONFIG.route.gradeWeight * gradeBias;
     }
     function lineCost(pt, idealLine, attempts) {
-        const lineWeight = attempts > 15 ? 3 : 6;
+        const lineWeight = attempts > 15 ? WEIGHT_CONFIG.route.lineWeightLate : WEIGHT_CONFIG.route.lineWeightEarly;
         return pixelsToMeters(distToSegment(pt, idealLine.p1, idealLine.p2)) * lineWeight;
     }
     function shortMoveSpamCost(consecutiveShortMoves, spec) {
         if (consecutiveShortMoves < 3)
             return 0;
-        const base = Math.pow(2, consecutiveShortMoves - 2) * 40;
-        const hardnessOffset = Math.max(0, spec.handDifficulty - targetHandDifficulty) * 4;
+        const base = Math.pow(WEIGHT_CONFIG.route.shortMoveSpamGrowth, consecutiveShortMoves - 2) * WEIGHT_CONFIG.route.shortMoveSpamBase;
+        const hardnessOffset = Math.max(0, spec.handDifficulty - targetHandDifficulty) * WEIGHT_CONFIG.route.shortMoveHardnessOffset;
         return Math.max(0, base - hardnessOffset);
+    }
+    function getFootPoolFromHands(routeHands, h1, h2) {
+        return routeHands.filter(prev => prev.id !== h1.id && (!h2 || prev.id !== h2.id));
     }
     function scoreHandCandidate(candidate, currentHold, idealLine, attempts, consecutiveShortMoves) {
         const spec = resolveHoldSpec(candidate);
@@ -187,25 +272,34 @@ export function generateTraverseRoute(ctx) {
         const spec = resolveHoldSpec(candidate);
         const highestHandY = h2 ? Math.min(h1.center.y, h2.center.y) : h1.center.y;
         const bodyX = h2 ? (h1.center.x + h2.center.x) / 2 : h1.center.x;
-        const bodyY = highestHandY + (height * 0.32 / pixelsToMeters(1));
+        const bodyY = highestHandY + (height * WEIGHT_CONFIG.route.footBodyYOffsetMeters / pixelsToMeters(1));
         const dxM = pixelsToMeters(candidate.center.x - bodyX);
         const dyM = pixelsToMeters(candidate.center.y - bodyY);
         const belowHands = pixelsToMeters(candidate.center.y - highestHandY);
-        if (!isFinal && belowHands < Math.max(0.18, 0.45 - densityFactor * 0.1))
+        if (!isFinal && belowHands < Math.max(WEIGHT_CONFIG.route.footMinDropEasyMeters, WEIGHT_CONFIG.route.footMinDropHardMeters - densityFactor * 0.1))
             return Infinity;
-        if (!isFinal && belowHands > Math.max(1.7, wingspan * 1.05))
+        if (!isFinal && belowHands > Math.max(WEIGHT_CONFIG.route.footMaxDropHardMeters, wingspan * WEIGHT_CONFIG.route.footMaxDropMultiplier))
             return Infinity;
-        if (isFinal && belowHands < Math.max(0.12, 0.28 - densityFactor * 0.05))
+        if (isFinal && belowHands < Math.max(WEIGHT_CONFIG.route.footFinalMinDropMeters, WEIGHT_CONFIG.route.footFinalTargetMeters - densityFactor * WEIGHT_CONFIG.route.footFinalDropDensityMeters))
             return Infinity;
-        const distanceCost = Math.abs(dxM) * (isFinal ? 6 : 10) + Math.abs(dyM) * (isFinal ? 3 : 5);
-        const footQualityCost = Math.abs(spec.footRating - (targetGradeNum <= 2 ? 1.5 : targetGradeNum <= 5 ? 2.5 : 3.2)) * 12;
-        const recycledBonus = preferRecycledHands && routeHands.some(prev => prev.id === candidate.id) ? -18 : 0;
-        const sizeBonus = spec.boxSize >= 85 ? -5 : spec.boxSize >= 65 ? -2 : 0;
-        const typePenalty = spec.footRating >= 4 && targetGradeNum <= 2 ? 8 : 0;
-        return distanceCost + footQualityCost + typePenalty + sizeBonus + recycledBonus + (Math.random() * 1.25);
+        const distanceCost = Math.abs(dxM) * (isFinal ? WEIGHT_CONFIG.route.footDistanceWeightXFinal : WEIGHT_CONFIG.route.footDistanceWeightX) + Math.abs(dyM) * (isFinal ? WEIGHT_CONFIG.route.footDistanceWeightYFinal : WEIGHT_CONFIG.route.footDistanceWeightY);
+        const targetFootRating = targetGradeNum <= 2 ? WEIGHT_CONFIG.route.finishFootQualityEasyTarget : targetGradeNum <= 5 ? WEIGHT_CONFIG.route.finishFootQualityMidTarget : WEIGHT_CONFIG.route.finishFootQualityHardTarget;
+        const footQualityCost = Math.abs(spec.footRating - targetFootRating) * WEIGHT_CONFIG.route.finishFootQualityWeight;
+        const recycledBonus = preferRecycledHands && routeHands.some(prev => prev.id === candidate.id) ? -WEIGHT_CONFIG.route.finishRecycleBonus : 0;
+        const sizeBonus = spec.boxSize >= 85 ? -WEIGHT_CONFIG.route.finishSizeBonusLarge : spec.boxSize >= 65 ? -WEIGHT_CONFIG.route.finishSizeBonusMid : 0;
+        const typePenalty = spec.footRating >= 4 && targetGradeNum <= 2 ? WEIGHT_CONFIG.route.finishTypePenaltyEasy : 0;
+        return distanceCost + footQualityCost + typePenalty + sizeBonus + recycledBonus + (Math.random() * WEIGHT_CONFIG.route.footSearchJitter);
     }
     function findFeetForHands(h1, h2, routeHands, isFinal = false) {
-        const preferRecycledHands = targetGradeNum >= 3;
+        const preferRecycledHands = targetGradeNum >= WEIGHT_CONFIG.route.footRecycleGradeThreshold;
+        const recycledPool = preferRecycledHands ? getFootPoolFromHands(routeHands, h1, h2) : [];
+        const rankedRecycled = recycledPool
+            .map(candidate => ({ candidate, score: scoreFootCandidate(candidate, h1, h2, isFinal, true, routeHands) }))
+            .filter(entry => Number.isFinite(entry.score))
+            .sort((a, b) => a.score - b.score);
+        if (rankedRecycled.length > 0) {
+            return rankedRecycled[0].candidate;
+        }
         const pool = candidates.filter(h => h.id !== h1.id && (!h2 || h.id !== h2.id));
         const ranked = pool
             .map(candidate => ({ candidate, score: scoreFootCandidate(candidate, h1, h2, isFinal, preferRecycledHands, routeHands) }))
@@ -233,7 +327,7 @@ export function generateTraverseRoute(ctx) {
             const spread = Math.abs(pixelsToMeters(entry.candidate.center.x - bodyX));
             const firstSpread = Math.abs(pixelsToMeters(first.center.x - bodyX));
             const oppositeSide = (entry.candidate.center.x - bodyX) * (first.center.x - bodyX) <= 0;
-            return oppositeSide || spread > firstSpread * 0.7 || firstSpec.footRating <= 2;
+            return oppositeSide || spread > firstSpread * WEIGHT_CONFIG.route.finishOppositeSideThreshold || firstSpec.footRating <= 2;
         });
         if (second && second.candidate.id !== first.id) {
             chosen.push(second.candidate);
@@ -241,10 +335,10 @@ export function generateTraverseRoute(ctx) {
         return chosen;
     }
     function pickStartCandidate() {
-        const poolSize = Math.min(heightCandidates.length, Math.max(12, Math.round(10 + densityFactor * 30)));
+        const poolSize = Math.min(heightCandidates.length, Math.max(WEIGHT_CONFIG.route.startPoolSizeMin, Math.round(WEIGHT_CONFIG.route.startPoolBase + densityFactor * WEIGHT_CONFIG.route.startPoolDensityMultiplier)));
         const pool = heightCandidates.slice(0, poolSize);
         // Bias toward edge candidates, but keep enough randomness that repeated generations vary.
-        const bias = Math.pow(Math.random(), 0.7);
+        const bias = Math.pow(Math.random(), WEIGHT_CONFIG.route.startBiasExponent);
         const jitter = Math.min(pool.length - 1, Math.floor(bias * pool.length));
         const routeJitter = routeCount % Math.max(1, pool.length);
         return pool[(jitter + routeJitter) % pool.length];
@@ -268,6 +362,8 @@ export function generateTraverseRoute(ctx) {
         let generatedHolds = {};
         let generatedOrder = [];
         let routeHandHolds = [start1];
+        let holdsUsed = [start1];
+        let handToFootArray = [start1];
         generatedHolds[start1.id] = 1; // 1 = Start
         generatedOrder.push(start1.id);
         const startFoot = findFeetForHands(start1, null, routeHandHolds);
@@ -275,12 +371,13 @@ export function generateTraverseRoute(ctx) {
             continue;
         generatedHolds[startFoot.id] = 3;
         generatedOrder.push(startFoot.id);
+        holdsUsed.push(startFoot);
         let currentHold = start1;
         let totalDistM = 0;
         let safety = 0;
         let consecutiveShortMoves = 0;
-        const yLimitTop = maxY - ((4.0 + densityFactor * 1.0) / pixelsToMeters(1));
-        const yLimitBot = maxY - (Math.max(0.15, 0.3 - densityFactor * 0.12) / pixelsToMeters(1));
+        const yLimitTop = maxY - ((WEIGHT_CONFIG.route.yLimitTopBaseMeters + densityFactor * WEIGHT_CONFIG.route.yLimitTopDensityMeters) / pixelsToMeters(1));
+        const yLimitBot = maxY - (Math.max(WEIGHT_CONFIG.route.yLimitBottomBaseMeters, WEIGHT_CONFIG.route.yLimitBottomBufferMeters - densityFactor * WEIGHT_CONFIG.route.yLimitBottomDensityMeters) / pixelsToMeters(1));
         const idealEndXPx = start1.center.x + (isLeftToRight ? 1 : -1) * (targetLen / pixelsToMeters(1));
         const idealEndYPx = start1.center.y - (0.5 / pixelsToMeters(1)); // Average climb up 0.5m
         const idealLine = { p1: start1.center, p2: { x: idealEndXPx, y: idealEndYPx } };
@@ -292,14 +389,14 @@ export function generateTraverseRoute(ctx) {
                     return false;
                 const dx = h.center.x - currentHold.center.x, dy = h.center.y - currentHold.center.y;
                 const distM = pixelsToMeters(Math.hypot(dx, dy));
-                const minStep = Math.max(0.08, 0.18 - densityFactor * 0.08);
-                const maxStep = wingspan * 1.02;
+                const minStep = Math.max(WEIGHT_CONFIG.route.minStepBaseMeters, WEIGHT_CONFIG.route.minStepBaseMeters + WEIGHT_CONFIG.route.minStepDensityMeters * (1 - densityFactor));
+                const maxStep = wingspan * WEIGHT_CONFIG.route.maxStepWingspanMultiplier;
                 if (distM < minStep || distM > maxStep)
                     return false;
                 if (h.center.y < yLimitTop || h.center.y > yLimitBot)
                     return false;
                 const dxM = pixelsToMeters(dx);
-                const minForward = Math.max(0.02, 0.05 - densityFactor * 0.03);
+                const minForward = Math.max(WEIGHT_CONFIG.route.minForwardBaseMeters, WEIGHT_CONFIG.route.minForwardBaseMeters + WEIGHT_CONFIG.route.minForwardDensityMeters * (1 - densityFactor));
                 if (isLeftToRight && dxM < minForward)
                     return false; // More lenient forward progress
                 if (!isLeftToRight && dxM > -minForward)
@@ -311,7 +408,7 @@ export function generateTraverseRoute(ctx) {
             neighbors.sort((a, b) => {
                 const sA = scoreHandCandidate(a, currentHold, idealLine, attempts, consecutiveShortMoves);
                 const sB = scoreHandCandidate(b, currentHold, idealLine, attempts, consecutiveShortMoves);
-                return (sA + Math.random()) - (sB + Math.random());
+                return (sA + Math.random() * WEIGHT_CONFIG.route.handSearchJitter) - (sB + Math.random() * WEIGHT_CONFIG.route.handSearchJitter);
             });
             let nextH = null;
             let nextFoot = null;
@@ -326,14 +423,17 @@ export function generateTraverseRoute(ctx) {
             if (!nextH || !nextFoot)
                 break;
             const moveDistM = pixelsToMeters(Math.hypot(nextH.center.x - currentHold.center.x, nextH.center.y - currentHold.center.y));
-            consecutiveShortMoves = moveDistM < wingspan * 0.4 ? consecutiveShortMoves + 1 : 0;
+            consecutiveShortMoves = moveDistM < wingspan * WEIGHT_CONFIG.route.shortMoveTriggerRatio ? consecutiveShortMoves + 1 : 0;
             if (!generatedHolds[nextFoot.id]) {
                 generatedHolds[nextFoot.id] = 3;
                 generatedOrder.push(nextFoot.id);
+                holdsUsed.push(nextFoot);
             }
             generatedHolds[nextH.id] = 2; // 2 = Hand
             generatedOrder.push(nextH.id);
             routeHandHolds.push(nextH);
+            handToFootArray.push(nextH);
+            holdsUsed.push(nextH);
             totalDistM += pixelsToMeters(Math.hypot(nextH.center.x - currentHold.center.x, nextH.center.y - currentHold.center.y));
             currentHold = nextH;
             if (totalDistM >= targetLen * 0.95 && totalDistM <= targetLen * 1.05)
@@ -365,6 +465,7 @@ export function generateTraverseRoute(ctx) {
                         if (!newHolds[endFoot.id]) {
                             newHolds[endFoot.id] = 3;
                             newOrder.push(endFoot.id);
+                            holdsUsed.push(endFoot);
                         }
                     }
                 }
