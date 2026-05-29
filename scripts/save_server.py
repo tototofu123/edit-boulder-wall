@@ -60,6 +60,41 @@ def infer_foot_rating(meta):
     return int(clamp(round(hand_difficulty / 2) + size_bonus, 1, 5))
 
 
+def infer_foot_difficulty(meta):
+    return int(clamp(infer_foot_rating(meta) * 2, 1, 10))
+
+
+def infer_general_usability(meta):
+    hold_type = str(meta.get('type', '')).lower()
+    base_difficulty = int(clamp(safe_number(meta.get('difficulty', 1), 1), 1, 5))
+    hand_difficulty = int(clamp(safe_number(meta.get('handDifficulty', base_difficulty * 2), base_difficulty * 2), 1, 10))
+    foot_difficulty = int(clamp(safe_number(meta.get('footDifficulty', infer_foot_difficulty(meta)), infer_foot_difficulty(meta)), 1, 10))
+    box_size = safe_number(meta.get('boxSize', 0), 0)
+
+    if hold_type == 'jug':
+        return int(clamp(1 + (0 if box_size >= 70 else 1), 1, 10))
+    if hold_type == 'sloper':
+        return int(clamp(4 + base_difficulty, 1, 10))
+    if hold_type in ('crimp', 'jib', 'pocket'):
+        return int(clamp(6 + max(base_difficulty, hand_difficulty // 2), 1, 10))
+    if hold_type == 'pinch':
+        return int(clamp(5 + max(1, base_difficulty), 1, 10))
+    return int(clamp(round((hand_difficulty + foot_difficulty) / 2), 1, 10))
+
+
+def infer_ideal_usage(meta):
+    hold_type = str(meta.get('type', '')).lower()
+    foot_difficulty = int(clamp(safe_number(meta.get('footDifficulty', infer_foot_difficulty(meta)), infer_foot_difficulty(meta)), 1, 10))
+    hand_difficulty = int(clamp(safe_number(meta.get('handDifficulty', 2), 2), 1, 10))
+    if hold_type == 'jug' or hand_difficulty <= 3:
+        return 'General'
+    if foot_difficulty <= 3:
+        return 'Feet'
+    if hand_difficulty <= foot_difficulty:
+        return 'Hand'
+    return 'Not Ideal'
+
+
 def build_hold_spec_rows(metadata):
     hold_annotations_path = 'docs/hold_annotations.json'
     if not os.path.exists(hold_annotations_path):
@@ -79,8 +114,11 @@ def build_hold_spec_rows(metadata):
         base_difficulty = int(clamp(safe_number(meta.get('difficulty', 1), 1), 1, 5))
         hand_difficulty = int(clamp(safe_number(meta.get('handDifficulty', base_difficulty * 2), base_difficulty * 2), 1, 10))
         foot_rating = int(clamp(safe_number(meta.get('footRating', infer_foot_rating({**meta, 'difficulty': base_difficulty, 'handDifficulty': hand_difficulty, 'boxSize': hold.get('boxSize', 0)})), 3), 1, 5))
+        foot_difficulty = int(clamp(safe_number(meta.get('footDifficulty', infer_foot_difficulty({**meta, 'difficulty': base_difficulty, 'handDifficulty': hand_difficulty, 'boxSize': hold.get('boxSize', 0)})), infer_foot_difficulty({**meta, 'difficulty': base_difficulty, 'handDifficulty': hand_difficulty, 'boxSize': hold.get('boxSize', 0)})), 1, 10))
+        general_usability = int(clamp(safe_number(meta.get('generalUsability', infer_general_usability({**meta, 'difficulty': base_difficulty, 'handDifficulty': hand_difficulty, 'footDifficulty': foot_difficulty, 'boxSize': hold.get('boxSize', 0)})), infer_general_usability({**meta, 'difficulty': base_difficulty, 'handDifficulty': hand_difficulty, 'footDifficulty': foot_difficulty, 'boxSize': hold.get('boxSize', 0)})), 1, 10))
         direction = int(clamp(safe_number(meta.get('direction', 180), 180), 0, 359))
         center = hold.get('center') or {}
+        ideal_usage = meta.get('idealUsage', meta.get('ideal', infer_ideal_usage({**meta, 'difficulty': base_difficulty, 'handDifficulty': hand_difficulty, 'footDifficulty': foot_difficulty, 'boxSize': hold.get('boxSize', 0)})))
 
         rows.append({
             'id': hold.get('id'),
@@ -91,14 +129,17 @@ def build_hold_spec_rows(metadata):
             'type': meta.get('type', 'uncategorized'),
             'baseDifficulty': base_difficulty,
             'handDifficulty': hand_difficulty,
+            'footDifficulty': foot_difficulty,
             'footRating': foot_rating,
             'footLabel': foot_label_from_rating(foot_rating),
+            'generalUsability': general_usability,
             'direction': direction,
             'directionLabel': direction_label(direction),
             'center_x': center.get('x'),
             'center_y': center.get('y'),
             'boxSize': hold.get('boxSize', 0),
-            'ideal': meta.get('ideal', 'General'),
+            'idealUsage': ideal_usage,
+            'ideal': ideal_usage,
         })
 
     rows.sort(key=lambda row: (
@@ -115,7 +156,7 @@ def write_hold_spec_files(metadata):
     with open('docs/HOLD_SPEC.json', 'w') as f:
         json.dump(rows, f, indent=4)
 
-    fieldnames = ['id', 'cell', 'cat', 'num', 'category', 'type', 'baseDifficulty', 'handDifficulty', 'footRating', 'footLabel', 'direction', 'directionLabel', 'center_x', 'center_y', 'boxSize', 'ideal']
+    fieldnames = ['id', 'cell', 'cat', 'num', 'category', 'type', 'baseDifficulty', 'handDifficulty', 'footDifficulty', 'footRating', 'footLabel', 'generalUsability', 'direction', 'directionLabel', 'center_x', 'center_y', 'boxSize', 'idealUsage', 'ideal']
     with open('docs/HOLD_SPEC.csv', 'w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()

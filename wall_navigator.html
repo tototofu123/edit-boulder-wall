@@ -111,7 +111,7 @@
 <div class="sidebar">
     <div class="status" id="status">WALL WORKSPACE</div>
 
-    <div class="box">
+    <div class="box" id="view-controls-box">
         <div style="font-weight:bold; margin-bottom:10px; font-size:13px;">View Controls:</div>
         <div class="mode-selector">
             <div class="mode-btn active" id="mode-clean" onclick="setMode('clean')">CLEAN</div>
@@ -120,7 +120,7 @@
         <button class="tool-btn btn-purple" style="margin-top:8px;" onclick="chooseRandomHold()">RANDOM HOLD</button>
     </div>
 
-    <div class="box">
+    <div class="box" id="wall-setup-box">
         <div style="font-weight:bold; margin-bottom:10px; font-size:13px;">Wall Setup:</div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">  
             <button class="tool-btn btn-blue" id="btn-boundary" onclick="toggleMode('boundary')">SET BOUNDARY</button>
@@ -129,7 +129,7 @@
         <button class="tool-btn btn-red" id="btn-audit" onclick="toggleMode('audit')">DATA AUDIT MODE (A)</button>
     </div>
 
-    <div class="box">
+    <div class="box" id="measurement-tools-box">
         <div style="font-weight:bold; margin-bottom:10px; font-size:13px;">Measurement Tools:</div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">  
             <button class="tool-btn btn-green" id="btn-measure" onclick="toggleMode('measure')">ADD DISTANCE</button>
@@ -138,7 +138,7 @@
         <div id="measure-status" style="font-family:monospace; color:#0f0; text-align:center; font-weight:bold; font-size:11px;">MODE: NAVIGATION</div>      
     </div>
 
-    <div class="box">
+    <div class="box" id="route-setting-box">
         <div style="font-weight:bold; margin-bottom:10px; font-size:13px;">Route Setting:</div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-bottom:10px;">
             <button class="tool-btn btn-purple" id="btn-manual-set" onclick="toggleMode('manual-set')">MANUAL SET (P)</button>
@@ -309,12 +309,12 @@
         <div class="form-group"><label>Hold Cell (x,y)</label><input type="text" id="edit-cell"></div>
         <div class="form-group"><label>Category</label><select id="edit-cat"><option value="C">Climbing</option><option value="I">Insert</option><option value="F">Feature</option></select></div>
         <div class="form-group"><label>Hold Number</label><input type="number" id="edit-num"></div>
-        <div class="form-group"><label>Hold Type</label><input type="text" id="edit-type"></div>
-        <div class="form-group"><label>Base Difficulty (1-5)</label><select id="edit-diff"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div>
-        <div class="form-group"><label>Hand Difficulty (1-10)</label><input type="number" id="edit-hand-diff" min="1" max="10" step="1"></div>
-        <div class="form-group"><label>Foot Rating</label><select id="edit-foot-rating"><option value="1">Heaven</option><option value="2">Good</option><option value="3">Mid</option><option value="4">Bad</option><option value="5">Hell</option></select></div>
+        <div class="form-group"><label>Hold Type</label><select id="edit-type"></select></div>
         <div class="form-group"><label>Grab Position</label><select id="edit-grab"><option value="0">0°</option><option value="45">45°</option><option value="90">90°</option><option value="135">135°</option><option value="180">180°</option><option value="225">225°</option><option value="270">270°</option><option value="315">315°</option></select></div>
-        <div class="form-group"><label>Ideal Usage</label><select id="edit-ideal"><option value="General">General</option><option value="Hand Prefer">Hand Prefer</option><option value="Feet Prefer">Feet Prefer</option></select></div>
+        <div class="form-group"><label>Hand Difficulty (1-10)</label><input type="number" id="edit-hand-diff" min="1" max="10" step="1"></div>
+        <div class="form-group"><label>Feet Difficulty (1-10)</label><input type="number" id="edit-foot-diff" min="1" max="10" step="1"></div>
+        <div class="form-group"><label>General Usability (1-10)</label><input type="number" id="edit-general-usability" min="1" max="10" step="1"></div>
+        <div class="form-group"><label>Ideal Usage</label><select id="edit-ideal"><option value="General">General</option><option value="Hand">Hand</option><option value="Feet">Feet</option><option value="Not Ideal">Not Ideal</option></select></div>
         <div style="display:flex; gap:10px;"><button class="save-btn" onclick="saveEdit()">SAVE</button><button class="cancel-btn" onclick="cancelEdit()">CANCEL</button></div>
     </div>
 </div>
@@ -328,6 +328,11 @@
     const mStatus = document.getElementById('measure-status');
     
     let holds = [], richMetadata = {}, holdSpec = [], calibrationData = [], measurements = [], boundaryPoints = [], allRoutes = [];
+    let holdTypeOptions = ['uncategorized'];
+    let auditOrder = [];
+    let auditOrderIndex = -1;
+    let auditFields = ['edit-cat', 'edit-num', 'edit-type', 'edit-grab', 'edit-hand-diff', 'edit-foot-diff', 'edit-general-usability', 'edit-ideal'];
+    let auditFieldIndex = 0;
     let appMode = 'clean', currentTool = 'none', selectedHoldId = null, selectedLinkId = null;
     let scale = 1.0, translateX = 0, translateY = 0, isDragging = false, lastX, lastY, clickQueue = [];
     let activeRoute = null, settingType = 1;
@@ -351,7 +356,24 @@
     window.onmouseup = () => isDragging = false;
 
     window.onkeydown = (e) => {
-        if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT') return;
+        const activeTag = document.activeElement.tagName;
+        if (currentTool !== 'audit' && (activeTag === 'INPUT' || activeTag === 'SELECT')) return;
+
+        if (currentTool === 'audit') {
+            if (e.key === 'p' || e.key === 'P') {
+                if (auditOrder.length) setAuditSelectedHoldByIndex(auditOrderIndex + 1);
+                return;
+            }
+            if (e.key === 'o' || e.key === 'O') {
+                if (auditOrder.length) setAuditSelectedHoldByIndex(auditOrderIndex - 1);
+                return;
+            }
+            if (e.key === 'ArrowDown') { e.preventDefault(); focusAuditField(1); return; }
+            if (e.key === 'ArrowUp') { e.preventDefault(); focusAuditField(-1); return; }
+            if (e.key === 'ArrowLeft') { e.preventDefault(); adjustAuditField(-1); return; }
+            if (e.key === 'ArrowRight') { e.preventDefault(); adjustAuditField(1); return; }
+        }
+
         if (e.key === 'p' || e.key === 'P') toggleMode('manual-set');
         if (e.key === 'o' || e.key === 'O') toggleMode('ai-set');
         if (e.key === 'a' || e.key === 'A') toggleMode('audit');
@@ -359,13 +381,14 @@
             if (['1', '2', '3', '4', '5'].includes(e.key)) setSettingType(parseInt(e.key));
         }
         if (currentTool === 'audit' && selectedHoldId) {
-            if (['1', '2', '3', '4', '5'].includes(e.key)) {
-                const h = holds.find(x => x.id === selectedHoldId);
-                const meta = (richMetadata[h.cell] || {})[`${catMapFull[h.cat]}${h.num}`] || {};
-                meta.difficulty = e.key;
-                if (!richMetadata[h.cell]) richMetadata[h.cell] = {};
-                richMetadata[h.cell][`${catMapFull[h.cat]}${h.num}`] = meta;
-                saveEdit(); // Auto-save on keypress
+            if (['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'].includes(e.key)) {
+                const value = e.key === '0' ? '10' : e.key;
+                const field = document.getElementById(auditFields[auditFieldIndex]);
+                if (field && field.type === 'number') {
+                    field.value = value;
+                    field.dispatchEvent(new Event('input', { bubbles: true }));
+                    commitAuditEdits();
+                }
             }
         }
     };
@@ -379,9 +402,85 @@
             measurements = await (await fetch('docs/measurements.json')).json().catch(()=>[]);
             boundaryPoints = await (await fetch('docs/wall_annotations.json')).json().catch(()=>[]);
             allRoutes = await (await fetch('docs/all_routes.json')).json().catch(()=>[]);
+            refreshHoldTypeOptions();
+            rebuildAuditOrder();
             render();
             status.innerText = `READY: ${holds.length} HOLDS`;
         } catch(e) { status.innerText = "DATA LOAD ERROR"; }
+    }
+
+    function refreshHoldTypeOptions() {
+        const types = new Set(['uncategorized']);
+        holdSpec.forEach(spec => { if (spec?.type) types.add(String(spec.type)); });
+        holds.forEach(h => {
+            const meta = (richMetadata[h.cell] || {})[`${catMapFull[h.cat]}${h.num}`] || {};
+            if (meta.type) types.add(String(meta.type));
+        });
+        holdTypeOptions = Array.from(types).sort((a, b) => a.localeCompare(b));
+        const typeSelect = document.getElementById('edit-type');
+        if (typeSelect) {
+            typeSelect.innerHTML = holdTypeOptions.map(type => `<option value="${type}">${type}</option>`).join('');
+        }
+    }
+
+    function rebuildAuditOrder() {
+        auditOrder = [...holds].sort((a, b) => {
+            const [ax, ay] = a.cell.split(',').map(n => parseInt(n, 10) || 0);
+            const [bx, by] = b.cell.split(',').map(n => parseInt(n, 10) || 0);
+            if (ax !== bx) return ax - bx;
+            if (ay !== by) return ay - by;
+            if (a.cat !== b.cat) return a.cat.localeCompare(b.cat);
+            return a.num - b.num;
+        });
+    }
+
+    function setAuditSelectedHoldByIndex(nextIndex) {
+        if (!auditOrder.length) return;
+        auditOrderIndex = (nextIndex + auditOrder.length) % auditOrder.length;
+        const nextHold = auditOrder[auditOrderIndex];
+        const panel = document.getElementById('edit-panel');
+        if (panel.style.display === 'block' && selectedHoldId) {
+            saveEdit(true).finally(() => selectHold(nextHold, true));
+            return;
+        }
+        selectHold(nextHold, true);
+    }
+
+    function focusAuditField(step) {
+        const panel = document.getElementById('edit-panel');
+        if (panel.style.display !== 'block') return;
+        auditFieldIndex = (auditFieldIndex + step + auditFields.length) % auditFields.length;
+        const field = document.getElementById(auditFields[auditFieldIndex]);
+        if (field) field.focus();
+    }
+
+    function adjustAuditField(delta) {
+        const field = document.getElementById(auditFields[auditFieldIndex]);
+        if (!field) return;
+        if (field.tagName === 'SELECT') {
+            const nextIndex = (field.selectedIndex + delta + field.options.length) % field.options.length;
+            field.selectedIndex = nextIndex;
+            field.dispatchEvent(new Event('change', { bubbles: true }));
+            commitAuditEdits();
+            return;
+        }
+        if (field.type === 'number') {
+            const min = field.min !== '' ? Number(field.min) : -Infinity;
+            const max = field.max !== '' ? Number(field.max) : Infinity;
+            const step = field.step !== '' && field.step !== 'any' ? Number(field.step) : 1;
+            const current = Number(field.value || 0);
+            field.value = String(Math.max(min, Math.min(max, current + step * delta)));
+            field.dispatchEvent(new Event('input', { bubbles: true }));
+            commitAuditEdits();
+            return;
+        }
+    }
+
+    function commitAuditEdits() {
+        if (currentTool !== 'audit' || !selectedHoldId) return;
+        const panel = document.getElementById('edit-panel');
+        if (panel.style.display !== 'block') return;
+        saveEdit(true);
     }
 
     function toggleMode(m) {
@@ -396,6 +495,9 @@
         document.getElementById('set-type-controls').style.display = (currentTool === 'manual-set' || currentTool === 'ai-set') ? 'block' : 'none';
         document.getElementById('ai-controls').style.display = (currentTool === 'ai-set') ? 'block' : 'none';
         document.getElementById('setup-management-box').style.display = (currentTool === 'manual-set' || currentTool === 'ai-set' || activeRoute) ? 'none' : 'block';
+        document.getElementById('view-controls-box').style.display = currentTool === 'audit' ? 'none' : 'block';
+        document.getElementById('measurement-tools-box').style.display = currentTool === 'audit' ? 'none' : 'block';
+        document.getElementById('route-setting-box').style.display = currentTool === 'audit' ? 'none' : 'block';
         
         if (currentTool === 'manual-set' && !activeRoute) createNewRoute();
 
@@ -520,6 +622,11 @@
                     p.style.strokeOpacity = '0.3';
                     p.style.fill = 'transparent';
                     p.style.pointerEvents = 'none';
+                } else if (currentTool === 'audit') {
+                    p.style.strokeOpacity = isSelected ? '1' : '0.55';
+                    p.style.fill = 'transparent';
+                    p.style.stroke = isSelected ? '#ff4dff' : '#9a9a9a';
+                    p.style.strokeWidth = isSelected ? '12' : '5';
                 } else if (appMode === 'messy' || isSelected || isMeasuringFirst || routeType) {
                     p.style.strokeOpacity = '1';
                     p.style.fill = (isSelected || isMeasuringFirst) ? 'transparent' : colors[h.cat] + "40"; 
@@ -537,6 +644,9 @@
                 
                 if (currentTool === 'manual-set' || currentTool === 'ai-set') {
                     p.onclick = (e) => { e.stopPropagation(); handleRouteHoldClick(h.id); };
+                } else if (currentTool === 'audit') {
+                    p.style.cursor = 'pointer';
+                    p.onclick = (e) => { e.stopPropagation(); selectHold(h); };
                 } else if (currentTool === 'measure') {
                     p.onmouseenter = () => p.classList.add('glow');
                     p.onmouseleave = () => p.classList.remove('glow');
@@ -851,7 +961,7 @@
         render();
     }
 
-    function selectHold(h) {
+    function selectHold(h, fromAuditNav = false) {
         selectedHoldId = h.id; selectedLinkId = null;
         document.getElementById('hold-details').style.display = 'block';
         document.getElementById('edit-panel').style.display = 'none';
@@ -870,7 +980,12 @@
         document.getElementById('val-id-cat').innerText = h.cat;
         document.getElementById('val-id-cell').innerText = h.cell;
         document.getElementById('val-id-num').innerText = h.num;
-        document.getElementById('val-all-details').innerText = `${resolved.type} / Base ${resolved.baseDifficulty} / Hand ${handDiff} / Foot ${resolved.footLabel} / ${resolved.direction}° / ${meta.ideal || "General"}`;
+        document.getElementById('val-all-details').innerText = `${resolved.type} / Base ${resolved.baseDifficulty} / Hand ${handDiff} / Foot ${resolved.footLabel} / ${resolved.direction}° / ${resolved.idealUsage || meta.idealUsage || meta.ideal || "General"}`;
+        if (currentTool === 'audit' && !fromAuditNav) {
+            const holdIndex = auditOrder.findIndex(item => item.id === h.id);
+            if (holdIndex >= 0) auditOrderIndex = holdIndex;
+            zoomToHold();
+        }
         render();
     }
 
@@ -899,15 +1014,21 @@
         const spec = holdSpec.find(s => String(s.id) === String(h.id) || (s.cell === h.cell && s.cat === h.cat && Number(s.num) === Number(h.num))) || {};
         const baseDifficulty = spec.baseDifficulty ?? parseInt(meta.difficulty || '1', 10);
         const handDifficulty = spec.handDifficulty ?? parseInt(meta.handDifficulty || String(baseDifficulty * 2), 10);
-        const footRating = spec.footRating ?? parseInt(meta.footRating || '3', 10);
+        const footDifficulty = spec.footDifficulty ?? parseInt(meta.footDifficulty || String(Math.max(1, Math.min(10, (spec.footRating ?? parseInt(meta.footRating || '3', 10)) * 2))), 10);
+        const generalUsability = spec.generalUsability ?? parseInt(meta.generalUsability || '5', 10);
+        const idealUsage = spec.idealUsage ?? meta.idealUsage ?? meta.ideal ?? 'General';
+        const footRating = spec.footRating ?? parseInt(meta.footRating || String(Math.max(1, Math.min(5, Math.round(footDifficulty / 2)))), 10);
         return {
             meta,
             spec,
             baseDifficulty,
             handDifficulty,
+            footDifficulty,
             footRating,
+            generalUsability,
             footLabel: ['Heaven', 'Good', 'Mid', 'Bad', 'Hell'][Math.max(0, Math.min(4, footRating - 1))],
             direction: spec.direction ?? parseInt(meta.direction || '180', 10),
+            idealUsage,
             type: spec.type || meta.type || 'uncategorized'
         };
     }
@@ -952,13 +1073,15 @@
         const resolved = getHoldSpecForHold(h);
         const meta = resolved.meta;
         document.getElementById('edit-cell').value = h.cell; document.getElementById('edit-cat').value = h.cat; document.getElementById('edit-num').value = h.num;
-        document.getElementById('edit-type').value = resolved.type || ""; document.getElementById('edit-diff').value = String(resolved.baseDifficulty || 1);
+        document.getElementById('edit-type').value = resolved.type || "uncategorized";
+        document.getElementById('edit-grab').value = String(resolved.direction || 180);
         document.getElementById('edit-hand-diff').value = String(resolved.handDifficulty || Math.min(10, (resolved.baseDifficulty || 1) * 2));
-        document.getElementById('edit-foot-rating').value = String(resolved.footRating || 3);
-        document.getElementById('edit-grab').value = String(resolved.direction || 180); document.getElementById('edit-ideal').value = meta.ideal || "General";
+        document.getElementById('edit-foot-diff').value = String(resolved.footDifficulty || Math.min(10, Math.max(1, (resolved.footRating || 3) * 2)));
+        document.getElementById('edit-general-usability').value = String(resolved.generalUsability || 5);
+        document.getElementById('edit-ideal').value = resolved.idealUsage || meta.idealUsage || meta.ideal || "General";
     }
     function cancelEdit() { document.getElementById('edit-panel').style.display = 'none'; document.getElementById('hold-details').style.display = 'block'; }
-    async function saveEdit() {
+    async function saveEdit(silent = false) {
         const h = holds.find(x => x.id === selectedHoldId);
         const oldCell = h.cell, oldCat = h.cat, oldNum = h.num, oldKey = `${catMapFull[oldCat]}${oldNum}`;
         const newCell = document.getElementById('edit-cell').value.trim(), newCat = document.getElementById('edit-cat').value, newNum = parseInt(document.getElementById('edit-num').value);
@@ -966,12 +1089,42 @@
         if (richMetadata[oldCell]) delete richMetadata[oldCell][oldKey];
         if (!richMetadata[newCell]) richMetadata[newCell] = {};
         const newKey = `${catMapFull[newCat]}${newNum}`;
-        const baseDifficulty = document.getElementById('edit-diff').value;
         const handDifficulty = document.getElementById('edit-hand-diff').value;
-        const footRating = document.getElementById('edit-foot-rating').value;
-        richMetadata[newCell][newKey] = { cell_x: parseInt(newCell.split(',')[0]), cell_y: parseInt(newCell.split(',')[1]), category: catMapFull[newCat], num: newNum.toString(), type: document.getElementById('edit-type').value.trim(), difficulty: baseDifficulty, handDifficulty, footRating, direction: document.getElementById('edit-grab').value, ideal: document.getElementById('edit-ideal').value };
-        status.innerText = "SAVING...";
-        try { await fetch('/save_full_edit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ holds: holds, metadata: richMetadata }) }); status.innerText = "SAVED!"; cancelEdit(); selectHold(h); } catch(e) { status.innerText = "ERROR"; }
+        const footDifficulty = document.getElementById('edit-foot-diff').value;
+        const generalUsability = document.getElementById('edit-general-usability').value;
+        const idealUsage = document.getElementById('edit-ideal').value;
+        const typeValue = document.getElementById('edit-type').value.trim() || 'uncategorized';
+        richMetadata[newCell][newKey] = { cell_x: parseInt(newCell.split(',')[0]), cell_y: parseInt(newCell.split(',')[1]), category: catMapFull[newCat], num: newNum.toString(), type: typeValue, difficulty: String(Math.max(1, Math.min(5, Math.round(Number(handDifficulty) / 2)))), handDifficulty, footDifficulty, footRating: String(Math.max(1, Math.min(5, Math.round(Number(footDifficulty) / 2)))), generalUsability, direction: document.getElementById('edit-grab').value, idealUsage, ideal: idealUsage };
+        if (holdSpec.length) {
+            const existing = holdSpec.find(spec => String(spec.id) === String(h.id) || (spec.cell === oldCell && spec.cat === oldCat && Number(spec.num) === Number(oldNum)));
+            if (existing) {
+                existing.cell = newCell;
+                existing.cat = newCat;
+                existing.num = newNum;
+                existing.type = typeValue;
+                existing.baseDifficulty = Math.max(1, Math.min(5, Math.round(Number(handDifficulty) / 2)));
+                existing.handDifficulty = Number(handDifficulty);
+                existing.footDifficulty = Number(footDifficulty);
+                existing.footRating = Math.max(1, Math.min(5, Math.round(Number(footDifficulty) / 2)));
+                existing.generalUsability = Number(generalUsability);
+                existing.footLabel = ['Heaven', 'Good', 'Mid', 'Bad', 'Hell'][Math.max(0, Math.min(4, Math.round(Number(footDifficulty) / 2) - 1))];
+                existing.direction = Number(document.getElementById('edit-grab').value);
+                existing.directionLabel = clockMap[existing.direction] ? clockMap[existing.direction] : String(existing.direction);
+                existing.idealUsage = idealUsage;
+                existing.ideal = idealUsage;
+            }
+        }
+        status.innerText = silent ? "AUTO-SAVING..." : "SAVING...";
+        try {
+            await fetch('/save_full_edit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ holds: holds, metadata: richMetadata }) });
+            status.innerText = silent ? "AUTO-SAVED!" : "SAVED!";
+            if (!silent) {
+                cancelEdit();
+                selectHold(h);
+            }
+        } catch(e) {
+            status.innerText = "ERROR";
+        }
     }
 
     function setMode(m) { appMode = m; document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active')); document.getElementById(`mode-${m}`).classList.add('active'); render(); }
