@@ -144,7 +144,6 @@ def build_hold_spec_rows(metadata):
             'boxSize': hold.get('boxSize', 0),
             'idealUsage': ideal_usage,
             'ideal': ideal_usage,
-            'audited': truthy(meta.get('audited', False) or meta.get('transferred', False)),
         })
 
     rows.sort(key=lambda row: (
@@ -161,7 +160,7 @@ def write_hold_spec_files(metadata):
     with open('docs/HOLD_SPEC.json', 'w') as f:
         json.dump(rows, f, indent=4)
 
-    fieldnames = ['id', 'cell', 'cat', 'num', 'category', 'type', 'baseDifficulty', 'handDifficulty', 'footDifficulty', 'footRating', 'footLabel', 'generalUsability', 'direction', 'directionLabel', 'center_x', 'center_y', 'boxSize', 'idealUsage', 'ideal', 'audited']
+    fieldnames = ['id', 'cell', 'cat', 'num', 'category', 'type', 'baseDifficulty', 'handDifficulty', 'footDifficulty', 'footRating', 'footLabel', 'generalUsability', 'direction', 'directionLabel', 'center_x', 'center_y', 'boxSize', 'idealUsage', 'ideal']
     with open('docs/HOLD_SPEC.csv', 'w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()

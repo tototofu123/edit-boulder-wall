@@ -1,14 +1,5 @@
 {
     "0,0": {
-        "wall features1": {
-            "cell_x": 0,
-            "cell_y": 0,
-            "category": "wall features",
-            "num": "1",
-            "type": "crimp",
-            "difficulty": "3",
-            "direction": "45"
-        },
         "climbing holds2": {
             "cell_x": 0,
             "cell_y": 0,
@@ -36,15 +27,6 @@
             "difficulty": "1",
             "direction": "225"
         },
-        "climbing holds5": {
-            "cell_x": 0,
-            "cell_y": 0,
-            "category": "climbing holds",
-            "num": "5",
-            "type": "jug",
-            "difficulty": "1",
-            "direction": "180"
-        },
         "insert holds1": {
             "cell_x": 0,
             "cell_y": 0,
@@ -70,15 +52,6 @@
             "num": "10",
             "type": "jug",
             "difficulty": "1",
-            "direction": "225"
-        },
-        "climbing holds6": {
-            "cell_x": 0,
-            "cell_y": 0,
-            "category": "climbing holds",
-            "num": "6",
-            "type": "jib",
-            "difficulty": "4",
             "direction": "225"
         },
         "climbing holds7": {
@@ -141,6 +114,52 @@
             "idealUsage": "General",
             "ideal": "General",
             "audited": "true"
+        },
+        "climbing holds5": {
+            "cell_x": 0,
+            "cell_y": 0,
+            "category": "climbing holds",
+            "num": "5",
+            "type": "jug",
+            "difficulty": "1",
+            "handDifficulty": "2",
+            "footDifficulty": "4",
+            "footRating": "2",
+            "generalUsability": "2",
+            "direction": "180",
+            "idealUsage": "General",
+            "ideal": "General",
+            "audited": "true"
+        },
+        "wall features1": {
+            "cell_x": 0,
+            "cell_y": 0,
+            "category": "wall features",
+            "num": "1",
+            "type": "crimp",
+            "difficulty": "3",
+            "handDifficulty": "6",
+            "footDifficulty": "10",
+            "footRating": "5",
+            "generalUsability": "9",
+            "direction": "45",
+            "idealUsage": "Hand",
+            "ideal": "Hand"
+        },
+        "climbing holds6": {
+            "cell_x": 0,
+            "cell_y": 0,
+            "category": "climbing holds",
+            "num": "6",
+            "type": "jib",
+            "difficulty": "4",
+            "handDifficulty": "8",
+            "footDifficulty": "10",
+            "footRating": "5",
+            "generalUsability": "10",
+            "direction": "225",
+            "idealUsage": "Hand",
+            "ideal": "Hand"
         }
     },
     "0,2": {
@@ -197,15 +216,6 @@
             "type": "pinch",
             "difficulty": "3",
             "direction": "135"
-        },
-        "climbing holds4": {
-            "cell_x": 0,
-            "cell_y": 2,
-            "category": "climbing holds",
-            "num": "4",
-            "type": "jug",
-            "difficulty": "2",
-            "direction": "90"
         },
         "climbing holds5": {
             "cell_x": 0,
@@ -395,6 +405,22 @@
             "type": "jib",
             "difficulty": "5",
             "direction": "180"
+        },
+        "climbing holds4": {
+            "cell_x": 0,
+            "cell_y": 2,
+            "category": "climbing holds",
+            "num": "4",
+            "type": "jug",
+            "difficulty": "2",
+            "handDifficulty": "4",
+            "footDifficulty": "4",
+            "footRating": "2",
+            "generalUsability": "2",
+            "direction": "90",
+            "idealUsage": "General",
+            "ideal": "General",
+            "audited": "true"
         }
     },
     "0,1": {

@@ -18,8 +18,7 @@
         "center_y": 1510.2805786132812,
         "boxSize": 103.5018310546875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": true
+        "ideal": "General"
     },
     {
         "id": 1779864118528,
@@ -40,8 +39,7 @@
         "center_y": 1503.3399658203125,
         "boxSize": 88.52001953125,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864120773,
@@ -62,8 +60,7 @@
         "center_y": 1474.6824340820312,
         "boxSize": 64.3201904296875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864124115,
@@ -84,8 +81,7 @@
         "center_y": 1364.5101318359375,
         "boxSize": 86.60945129394531,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864127074,
@@ -106,8 +102,7 @@
         "center_y": 1372.4705200195312,
         "boxSize": 56.0413818359375,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864129327,
@@ -128,8 +123,7 @@
         "center_y": 1249.8798828125,
         "boxSize": 51.58355712890625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864132296,
@@ -150,8 +144,7 @@
         "center_y": 1249.2430419921875,
         "boxSize": 64.95709228515625,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864156305,
@@ -172,8 +165,7 @@
         "center_y": 1128.8814086914062,
         "boxSize": 81.51478576660156,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864160105,
@@ -194,8 +186,7 @@
         "center_y": 1134.9313354492188,
         "boxSize": 103.16714477539062,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779864163240,
@@ -216,8 +207,7 @@
         "center_y": 1137.1602172851562,
         "boxSize": 68.1412353515625,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864187056,
@@ -238,8 +228,7 @@
         "center_y": 1333.9420166015625,
         "boxSize": 45.215240478515625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864190610,
@@ -260,8 +249,7 @@
         "center_y": 1299.2345581054688,
         "boxSize": 81.51480102539062,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864194545,
@@ -282,8 +270,7 @@
         "center_y": 1185.5596313476562,
         "boxSize": 82.151611328125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864170961,
@@ -304,8 +291,7 @@
         "center_y": 1485.5086059570312,
         "boxSize": 86.60946655273438,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864175414,
@@ -326,8 +312,7 @@
         "center_y": 1215.8092651367188,
         "boxSize": 80.87796020507812,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864213618,
@@ -348,8 +333,7 @@
         "center_y": 1481.0008544921875,
         "boxSize": 48.3994140625,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864216672,
@@ -370,8 +354,7 @@
         "center_y": 1495.0111694335938,
         "boxSize": 45.2152099609375,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864219788,
@@ -392,8 +375,7 @@
         "center_y": 1503.2900390625,
         "boxSize": 52.220458984375,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864223914,
@@ -414,8 +396,7 @@
         "center_y": 1431.6461791992188,
         "boxSize": 91.06732177734375,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864227746,
@@ -436,8 +417,7 @@
         "center_y": 1314.1502685546875,
         "boxSize": 50.94677734375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864231882,
@@ -458,8 +438,7 @@
         "center_y": 1283.900634765625,
         "boxSize": 78.9674072265625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864236131,
@@ -480,8 +459,7 @@
         "center_y": 1128.1947021484375,
         "boxSize": 67.50439453125,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864240098,
@@ -502,8 +480,7 @@
         "center_y": 1138.702392578125,
         "boxSize": 112.71966552734375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864242938,
@@ -524,8 +501,7 @@
         "center_y": 1191.2412719726562,
         "boxSize": 59.8624267578125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864246120,
@@ -546,8 +522,7 @@
         "center_y": 1136.4735107421875,
         "boxSize": 86.6094970703125,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864281776,
@@ -568,8 +543,7 @@
         "center_y": 1367.9627685546875,
         "boxSize": 129.27734375,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779864286504,
@@ -590,8 +564,7 @@
         "center_y": 1281.034912109375,
         "boxSize": 91.70416259765625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864255662,
@@ -612,8 +585,7 @@
         "center_y": 1256.1983032226562,
         "boxSize": 86.60943603515625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864271914,
@@ -634,8 +606,7 @@
         "center_y": 1403.3070678710938,
         "boxSize": 84.69891357421875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864299271,
@@ -656,8 +627,7 @@
         "center_y": 1499.5460205078125,
         "boxSize": 92.8114013671875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864301402,
@@ -678,8 +648,7 @@
         "center_y": 1513.0681762695312,
         "boxSize": 50.40087890625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864305232,
@@ -700,8 +669,7 @@
         "center_y": 1517.0633544921875,
         "boxSize": 102.031005859375,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864309504,
@@ -722,8 +690,7 @@
         "center_y": 1391.0611572265625,
         "boxSize": 80.5184326171875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864311986,
@@ -744,8 +711,7 @@
         "center_y": 1393.21240234375,
         "boxSize": 64.5377197265625,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864316728,
@@ -766,8 +732,7 @@
         "center_y": 1315.7671508789062,
         "boxSize": 54.0887451171875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864320002,
@@ -788,8 +753,7 @@
         "center_y": 1229.7168579101562,
         "boxSize": 68.2255859375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864323181,
@@ -810,8 +774,7 @@
         "center_y": 1153.1935424804688,
         "boxSize": 79.90380859375,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864326752,
@@ -832,8 +795,7 @@
         "center_y": 1145.81787109375,
         "boxSize": 63.923095703125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864343719,
@@ -854,8 +816,7 @@
         "center_y": 1442.6913452148438,
         "boxSize": 171.4859619140625,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779864346978,
@@ -876,8 +837,7 @@
         "center_y": 1386.7586669921875,
         "boxSize": 93.426025390625,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779864349636,
@@ -898,8 +858,7 @@
         "center_y": 1344.9627685546875,
         "boxSize": 25.200439453125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864357139,
@@ -920,8 +879,7 @@
         "center_y": 1260.1417846679688,
         "boxSize": 100.8017578125,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779864362432,
@@ -942,8 +900,7 @@
         "center_y": 1203.594482421875,
         "boxSize": 130.3046875,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779864365895,
@@ -964,8 +921,7 @@
         "center_y": 1162.7205200195312,
         "boxSize": 44.25439453125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864333947,
@@ -986,8 +942,7 @@
         "center_y": 1321.91357421875,
         "boxSize": 86.05029296875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864337883,
@@ -1008,8 +963,7 @@
         "center_y": 1213.1214599609375,
         "boxSize": 81.747802734375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864373161,
@@ -1030,8 +984,7 @@
         "center_y": 1510.0269165039062,
         "boxSize": 62.0513916015625,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864375994,
@@ -1052,8 +1005,7 @@
         "center_y": 1517.858642578125,
         "boxSize": 64.461181640625,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864378426,
@@ -1074,8 +1026,7 @@
         "center_y": 1522.376953125,
         "boxSize": 49.400146484375,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864381962,
@@ -1096,8 +1047,7 @@
         "center_y": 1394.6594848632812,
         "boxSize": 47.5927734375,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864385048,
@@ -1118,8 +1068,7 @@
         "center_y": 1392.8521728515625,
         "boxSize": 59.6416015625,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864389866,
@@ -1140,8 +1089,7 @@
         "center_y": 1325.6800537109375,
         "boxSize": 42.1707763671875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864392991,
@@ -1162,8 +1110,7 @@
         "center_y": 1232.0005493164062,
         "boxSize": 98.80029296875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864397385,
@@ -1184,8 +1131,7 @@
         "center_y": 1162.4185791015625,
         "boxSize": 100.6075439453125,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864400033,
@@ -1206,8 +1152,7 @@
         "center_y": 1163.0210571289062,
         "boxSize": 55.424560546875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864414398,
@@ -1228,8 +1173,7 @@
         "center_y": 1429.2998657226562,
         "boxSize": 149.4053955078125,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779864417992,
@@ -1250,8 +1194,7 @@
         "center_y": 1395.261962890625,
         "boxSize": 77.1124267578125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864420040,
@@ -1272,8 +1215,7 @@
         "center_y": 1347.367919921875,
         "boxSize": 24.7000732421875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864425364,
@@ -1294,8 +1236,7 @@
         "center_y": 1260.616455078125,
         "boxSize": 108.4393310546875,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779864430641,
@@ -1316,8 +1257,7 @@
         "center_y": 1209.1077880859375,
         "boxSize": 127.717529296875,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779864433225,
@@ -1338,8 +1278,7 @@
         "center_y": 1168.7442016601562,
         "boxSize": 51.2073974609375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864403977,
@@ -1360,8 +1299,7 @@
         "center_y": 1330.4996337890625,
         "boxSize": 86.75146484375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864407359,
@@ -1382,8 +1320,7 @@
         "center_y": 1223.8675537109375,
         "boxSize": 91.571044921875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864631961,
@@ -1404,8 +1341,7 @@
         "center_y": 1061.3643188476562,
         "boxSize": 83.65087890625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864635361,
@@ -1426,8 +1362,7 @@
         "center_y": 893.1261901855469,
         "boxSize": 51.8135986328125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864638671,
@@ -1448,8 +1383,7 @@
         "center_y": 951.4945678710938,
         "boxSize": 71.7899169921875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864718057,
@@ -1470,8 +1404,7 @@
         "center_y": 660.5892333984375,
         "boxSize": 52.4378662109375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864722051,
@@ -1492,8 +1425,7 @@
         "center_y": 738.3096618652344,
         "boxSize": 65.54733276367188,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864725762,
@@ -1514,8 +1446,7 @@
         "center_y": 745.80078125,
         "boxSize": 69.29290771484375,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864729342,
@@ -1536,8 +1467,7 @@
         "center_y": 671.5137939453125,
         "boxSize": 46.19525146484375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864751681,
@@ -1558,8 +1488,7 @@
         "center_y": 1053.5015869140625,
         "boxSize": 60.748291015625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864761007,
@@ -1580,8 +1509,7 @@
         "center_y": 1044.8818969726562,
         "boxSize": 32.0159912109375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864765064,
@@ -1602,8 +1530,7 @@
         "center_y": 1073.6141967773438,
         "boxSize": 25.4486083984375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864771456,
@@ -1624,8 +1551,7 @@
         "center_y": 1040.3668212890625,
         "boxSize": 105.48855590820312,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864776064,
@@ -1646,8 +1572,7 @@
         "center_y": 1070.5357666015625,
         "boxSize": 37.762420654296875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864781265,
@@ -1668,8 +1593,7 @@
         "center_y": 1053.5015869140625,
         "boxSize": 22.98583984375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864784495,
@@ -1690,8 +1614,7 @@
         "center_y": 1074.4351806640625,
         "boxSize": 29.55322265625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864787600,
@@ -1712,8 +1635,7 @@
         "center_y": 1043.6505126953125,
         "boxSize": 24.627685546875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864790258,
@@ -1734,8 +1656,7 @@
         "center_y": 1061.9160766601562,
         "boxSize": 20.1126708984375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864797560,
@@ -1756,8 +1677,7 @@
         "center_y": 1000.1416320800781,
         "boxSize": 44.32977294921875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864801978,
@@ -1778,8 +1698,7 @@
         "center_y": 977.1558227539062,
         "boxSize": 100.56298828125,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864806081,
@@ -1800,8 +1719,7 @@
         "center_y": 955.6065979003906,
         "boxSize": 83.734130859375,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864818671,
@@ -1822,8 +1740,7 @@
         "center_y": 899.7838439941406,
         "boxSize": 94.81658935546875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864822687,
@@ -1844,8 +1761,7 @@
         "center_y": 898.9629211425781,
         "boxSize": 89.07012939453125,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864830209,
@@ -1866,8 +1782,7 @@
         "center_y": 921.1278381347656,
         "boxSize": 61.97967529296875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864842582,
@@ -1888,8 +1803,7 @@
         "center_y": 906.9669189453125,
         "boxSize": 54.180908203125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864846959,
@@ -1910,8 +1824,7 @@
         "center_y": 885.8281555175781,
         "boxSize": 34.88922119140625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864849577,
@@ -1932,8 +1845,7 @@
         "center_y": 850.1180114746094,
         "boxSize": 44.74029541015625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864859304,
@@ -1954,8 +1866,7 @@
         "center_y": 872.4881591796875,
         "boxSize": 25.03814697265625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864863464,
@@ -1976,8 +1887,7 @@
         "center_y": 893.01123046875,
         "boxSize": 33.6578369140625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864867360,
@@ -1998,8 +1908,7 @@
         "center_y": 918.0493774414062,
         "boxSize": 24.627685546875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864873473,
@@ -2020,8 +1929,7 @@
         "center_y": 821.5909729003906,
         "boxSize": 50.07627868652344,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864880736,
@@ -2042,8 +1950,7 @@
         "center_y": 815.0236206054688,
         "boxSize": 37.762451171875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864887873,
@@ -2064,8 +1971,7 @@
         "center_y": 824.66943359375,
         "boxSize": 36.531005859375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864891280,
@@ -2086,8 +1992,7 @@
         "center_y": 832.878662109375,
         "boxSize": 51.30767822265625,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864895431,
@@ -2108,8 +2013,7 @@
         "center_y": 832.4682006835938,
         "boxSize": 33.247314453125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864898206,
@@ -2130,8 +2034,7 @@
         "center_y": 833.9048156738281,
         "boxSize": 45.150726318359375,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779864903319,
@@ -2152,8 +2055,7 @@
         "center_y": 834.7257385253906,
         "boxSize": 57.87506103515625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864909163,
@@ -2174,8 +2076,7 @@
         "center_y": 833.6995849609375,
         "boxSize": 37.762420654296875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864913066,
@@ -2196,8 +2097,7 @@
         "center_y": 794.5005493164062,
         "boxSize": 55.0018310546875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864916874,
@@ -2218,8 +2118,7 @@
         "center_y": 809.6876220703125,
         "boxSize": 39.404296875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864922384,
@@ -2240,8 +2139,7 @@
         "center_y": 844.1663513183594,
         "boxSize": 59.9273681640625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864932056,
@@ -2262,8 +2160,7 @@
         "center_y": 743.398193359375,
         "boxSize": 92.353759765625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864936119,
@@ -2284,8 +2181,7 @@
         "center_y": 752.2231140136719,
         "boxSize": 63.21099853515625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864940784,
@@ -2306,8 +2202,7 @@
         "center_y": 767.2049560546875,
         "boxSize": 36.12060546875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864945274,
@@ -2328,8 +2223,7 @@
         "center_y": 762.8951110839844,
         "boxSize": 36.12060546875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864947656,
@@ -2350,8 +2244,7 @@
         "center_y": 731.0843811035156,
         "boxSize": 42.68798828125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864953974,
@@ -2372,8 +2265,7 @@
         "center_y": 767.2049560546875,
         "boxSize": 58.6959228515625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864958280,
@@ -2394,8 +2286,7 @@
         "center_y": 717.3339233398438,
         "boxSize": 68.54705810546875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864963083,
@@ -2416,8 +2307,7 @@
         "center_y": 726.7745361328125,
         "boxSize": 63.62152099609375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864968872,
@@ -2438,8 +2328,7 @@
         "center_y": 704.8148498535156,
         "boxSize": 71.42025756835938,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864973100,
@@ -2460,8 +2349,7 @@
         "center_y": 686.54931640625,
         "boxSize": 118.21286010742188,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864977513,
@@ -2482,8 +2370,7 @@
         "center_y": 668.8994750976562,
         "boxSize": 62.800567626953125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864983120,
@@ -2504,8 +2391,7 @@
         "center_y": 662.7425537109375,
         "boxSize": 68.95748901367188,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779864988584,
@@ -2526,8 +2412,7 @@
         "center_y": 650.0182495117188,
         "boxSize": 128.06393432617188,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779864739553,
@@ -2548,8 +2433,7 @@
         "center_y": 917.1602478027344,
         "boxSize": 84.8994140625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865034296,
@@ -2570,8 +2454,7 @@
         "center_y": 1057.9027709960938,
         "boxSize": 85.11834716796875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865039384,
@@ -2592,8 +2475,7 @@
         "center_y": 1070.6705322265625,
         "boxSize": 41.951171875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865052999,
@@ -2614,8 +2496,7 @@
         "center_y": 959.7127380371094,
         "boxSize": 59.58282470703125,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865063152,
@@ -2636,8 +2517,7 @@
         "center_y": 843.2829895019531,
         "boxSize": 122.20562744140625,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779865066665,
@@ -2658,8 +2538,7 @@
         "center_y": 832.3392028808594,
         "boxSize": 69.91864013671875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865069333,
@@ -2680,8 +2559,7 @@
         "center_y": 872.4664001464844,
         "boxSize": 61.40679931640625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865073487,
@@ -2702,8 +2580,7 @@
         "center_y": 680.0381774902344,
         "boxSize": 91.19818115234375,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865110942,
@@ -2724,8 +2601,7 @@
         "center_y": 1044.5270690917969,
         "boxSize": 164.15679931640625,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779865115199,
@@ -2746,8 +2622,7 @@
         "center_y": 1015.6476135253906,
         "boxSize": 46.8150634765625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865118816,
@@ -2768,8 +2643,7 @@
         "center_y": 1016.255615234375,
         "boxSize": 60.19085693359375,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779865125461,
@@ -2790,8 +2664,7 @@
         "center_y": 930.529296875,
         "boxSize": 117.94970703125,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779865130193,
@@ -2812,8 +2685,7 @@
         "center_y": 888.578125,
         "boxSize": 75.3905029296875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865133288,
@@ -2834,8 +2706,7 @@
         "center_y": 839.9390563964844,
         "boxSize": 68.70263671875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865137118,
@@ -2856,8 +2727,7 @@
         "center_y": 790.6920471191406,
         "boxSize": 63.8387451171875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865143896,
@@ -2878,8 +2748,7 @@
         "center_y": 756.0367126464844,
         "boxSize": 68.09466552734375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865149831,
@@ -2900,8 +2769,7 @@
         "center_y": 729.2852172851562,
         "boxSize": 109.4378662109375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865153551,
@@ -2922,8 +2790,7 @@
         "center_y": 675.1742858886719,
         "boxSize": 40.12725830078125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865156248,
@@ -2944,8 +2811,7 @@
         "center_y": 696.7578430175781,
         "boxSize": 35.2633056640625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865160663,
@@ -2966,8 +2832,7 @@
         "center_y": 681.2541809082031,
         "boxSize": 110.65380859375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865080245,
@@ -2988,8 +2853,7 @@
         "center_y": 959.7127380371094,
         "boxSize": 85.726318359375,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779865085007,
@@ -3010,8 +2874,7 @@
         "center_y": 714.9974975585938,
         "boxSize": 86.33428955078125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865174367,
@@ -3032,8 +2895,7 @@
         "center_y": 1079.1695556640625,
         "boxSize": 97.35009765625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865182055,
@@ -3054,8 +2916,7 @@
         "center_y": 1066.7739868164062,
         "boxSize": 70.1405029296875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865185680,
@@ -3076,8 +2937,7 @@
         "center_y": 1084.0068359375,
         "boxSize": 72.55908203125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865189513,
@@ -3098,8 +2958,7 @@
         "center_y": 1003.5871276855469,
         "boxSize": 76.79180908203125,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865196327,
@@ -3120,8 +2979,7 @@
         "center_y": 946.1444091796875,
         "boxSize": 62.2799072265625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865206720,
@@ -3142,8 +3000,7 @@
         "center_y": 836.398681640625,
         "boxSize": 95.5362548828125,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865216118,
@@ -3164,8 +3021,7 @@
         "center_y": 785.304931640625,
         "boxSize": 70.1405029296875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865219202,
@@ -3186,8 +3042,7 @@
         "center_y": 766.5604858398438,
         "boxSize": 63.4892578125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865225249,
@@ -3208,8 +3063,7 @@
         "center_y": 693.0943298339844,
         "boxSize": 74.9779052734375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865230615,
@@ -3230,8 +3084,7 @@
         "center_y": 681.9081115722656,
         "boxSize": 74.9779052734375,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779865247521,
@@ -3252,8 +3105,7 @@
         "center_y": 1035.9364013671875,
         "boxSize": 26.0003662109375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865252035,
@@ -3274,8 +3126,7 @@
         "center_y": 1052.8668212890625,
         "boxSize": 35.0703125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865254839,
@@ -3296,8 +3147,7 @@
         "center_y": 1002.075439453125,
         "boxSize": 29.0235595703125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865259648,
@@ -3318,8 +3168,7 @@
         "center_y": 980.00537109375,
         "boxSize": 45.3494873046875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865263329,
@@ -3340,8 +3189,7 @@
         "center_y": 984.8426513671875,
         "boxSize": 44.744873046875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865270544,
@@ -3362,8 +3210,7 @@
         "center_y": 941.6094665527344,
         "boxSize": 50.7913818359375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865273839,
@@ -3384,8 +3231,7 @@
         "center_y": 932.8419189453125,
         "boxSize": 48.9774169921875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865278832,
@@ -3406,8 +3252,7 @@
         "center_y": 907.1438598632812,
         "boxSize": 38.6982421875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865286912,
@@ -3428,8 +3273,7 @@
         "center_y": 905.9345397949219,
         "boxSize": 43.5355224609375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865291856,
@@ -3450,8 +3294,7 @@
         "center_y": 913.4927978515625,
         "boxSize": 91.3035888671875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865303216,
@@ -3472,8 +3315,7 @@
         "center_y": 871.4689331054688,
         "boxSize": 99.7689208984375,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779865307080,
@@ -3494,8 +3336,7 @@
         "center_y": 858.1664428710938,
         "boxSize": 37.4888916015625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865312809,
@@ -3516,8 +3357,7 @@
         "center_y": 895.0506591796875,
         "boxSize": 38.0936279296875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865316839,
@@ -3538,8 +3378,7 @@
         "center_y": 818.2588806152344,
         "boxSize": 27.8143310546875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865321093,
@@ -3560,8 +3399,7 @@
         "center_y": 835.7940063476562,
         "boxSize": 30.23291015625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865325974,
@@ -3582,8 +3420,7 @@
         "center_y": 863.9107055664062,
         "boxSize": 79.21044921875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865331413,
@@ -3604,8 +3441,7 @@
         "center_y": 814.9332580566406,
         "boxSize": 110.65277099609375,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865334742,
@@ -3626,8 +3462,7 @@
         "center_y": 791.0491638183594,
         "boxSize": 54.41937255859375,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865339456,
@@ -3648,8 +3483,7 @@
         "center_y": 807.375,
         "boxSize": 116.0946044921875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865350768,
@@ -3670,8 +3504,7 @@
         "center_y": 776.2350158691406,
         "boxSize": 25.3956298828125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865353021,
@@ -3692,8 +3525,7 @@
         "center_y": 783.7932739257812,
         "boxSize": 26.60498046875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865355720,
@@ -3714,8 +3546,7 @@
         "center_y": 761.1185607910156,
         "boxSize": 21.1630859375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865360383,
@@ -3736,8 +3567,7 @@
         "center_y": 733.9088439941406,
         "boxSize": 32.651611328125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865239920,
@@ -3758,8 +3588,7 @@
         "center_y": 744.1880798339844,
         "boxSize": 80.41973876953125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865368664,
@@ -3780,8 +3609,7 @@
         "center_y": 1076.6639404296875,
         "boxSize": 54.283935546875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865372934,
@@ -3802,8 +3630,7 @@
         "center_y": 1002.0233764648438,
         "boxSize": 80.1922607421875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865379687,
@@ -3824,8 +3651,7 @@
         "center_y": 985.3680725097656,
         "boxSize": 86.977783203125,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865383391,
@@ -3846,8 +3672,7 @@
         "center_y": 1082.2156982421875,
         "boxSize": 70.322509765625,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865390960,
@@ -3868,8 +3693,7 @@
         "center_y": 877.1084594726562,
         "boxSize": 49.34912109375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865397415,
@@ -3890,8 +3714,7 @@
         "center_y": 759.5958862304688,
         "boxSize": 58.60205078125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865400823,
@@ -3912,8 +3735,7 @@
         "center_y": 854.2845153808594,
         "boxSize": 48.73223876953125,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865405263,
@@ -3934,8 +3756,7 @@
         "center_y": 690.5071411132812,
         "boxSize": 90.0621337890625,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865408181,
@@ -3956,8 +3777,7 @@
         "center_y": 706.5455932617188,
         "boxSize": 58.60205078125,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865411886,
@@ -3978,8 +3798,7 @@
         "center_y": 718.2659912109375,
         "boxSize": 81.426025390625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865432479,
@@ -4000,8 +3819,7 @@
         "center_y": 975.1898193359375,
         "boxSize": 68.471923828125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865435778,
@@ -4022,8 +3840,7 @@
         "center_y": 925.5322570800781,
         "boxSize": 62.92010498046875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865443495,
@@ -4044,8 +3861,7 @@
         "center_y": 879.2674865722656,
         "boxSize": 61.6864013671875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865458512,
@@ -4066,8 +3882,7 @@
         "center_y": 883.5855407714844,
         "boxSize": 101.1656494140625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865464688,
@@ -4088,8 +3903,7 @@
         "center_y": 975.4982299804688,
         "boxSize": 86.3609619140625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865472326,
@@ -4110,8 +3924,7 @@
         "center_y": 834.853271484375,
         "boxSize": 96.230712890625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865475054,
@@ -4132,8 +3945,7 @@
         "center_y": 832.6942749023438,
         "boxSize": 42.5635986328125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865480618,
@@ -4154,8 +3966,7 @@
         "center_y": 765.4561157226562,
         "boxSize": 39.479248046875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865485223,
@@ -4176,8 +3987,7 @@
         "center_y": 778.101806640625,
         "boxSize": 64.15380859375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865489055,
@@ -4198,8 +4008,7 @@
         "center_y": 721.6587524414062,
         "boxSize": 49.9659423828125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865417525,
@@ -4220,8 +4029,7 @@
         "center_y": 815.1136474609375,
         "boxSize": 92.529541015625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865422166,
@@ -4242,8 +4050,7 @@
         "center_y": 966.2452697753906,
         "boxSize": 95.6138916015625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865516111,
@@ -4264,8 +4071,7 @@
         "center_y": 565.5544738769531,
         "boxSize": 86.30767822265625,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865520118,
@@ -4286,8 +4092,7 @@
         "center_y": 591.25634765625,
         "boxSize": 68.5384521484375,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865523136,
@@ -4308,8 +4113,7 @@
         "center_y": 592.8429260253906,
         "boxSize": 53.30767822265625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865526416,
@@ -4330,8 +4134,7 @@
         "center_y": 354.86216735839844,
         "boxSize": 50.76922607421875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865530126,
@@ -4352,8 +4155,7 @@
         "center_y": 304.4102478027344,
         "boxSize": 72.98077392578125,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865533332,
@@ -4374,8 +4176,7 @@
         "center_y": 376.7563934326172,
         "boxSize": 73.61538696289062,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865536287,
@@ -4396,8 +4197,7 @@
         "center_y": 448.15061950683594,
         "boxSize": 59.01922607421875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865542705,
@@ -4418,8 +4218,7 @@
         "center_y": 215.24679565429688,
         "boxSize": 64.73075866699219,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865545257,
@@ -4440,8 +4239,7 @@
         "center_y": 230.4775619506836,
         "boxSize": 37.44232177734375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865564695,
@@ -4462,8 +4260,7 @@
         "center_y": 544.2948303222656,
         "boxSize": 39.98077392578125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865569455,
@@ -4484,8 +4281,7 @@
         "center_y": 447.83331298828125,
         "boxSize": 125.01922607421875,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779865573696,
@@ -4506,8 +4302,7 @@
         "center_y": 467.8236999511719,
         "boxSize": 116.76922607421875,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779865579018,
@@ -4528,8 +4323,7 @@
         "center_y": 466.2371520996094,
         "boxSize": 113.59613037109375,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779865585615,
@@ -4550,8 +4344,7 @@
         "center_y": 444.3429260253906,
         "boxSize": 99,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779865589166,
@@ -4572,8 +4365,7 @@
         "center_y": 456.71791076660156,
         "boxSize": 66.63461303710938,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865593184,
@@ -4594,8 +4386,7 @@
         "center_y": 511.9294738769531,
         "boxSize": 86.94232177734375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865596856,
@@ -4616,8 +4407,7 @@
         "center_y": 525.8910064697266,
         "boxSize": 42.519256591796875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865606247,
@@ -4638,8 +4428,7 @@
         "center_y": 410.0736999511719,
         "boxSize": 49.5,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865611446,
@@ -4660,8 +4449,7 @@
         "center_y": 375.1698455810547,
         "boxSize": 42.519256591796875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865616011,
@@ -4682,8 +4470,7 @@
         "center_y": 347.5640869140625,
         "boxSize": 53.307708740234375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865619968,
@@ -4704,8 +4491,7 @@
         "center_y": 339.9486999511719,
         "boxSize": 105.98077392578125,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779865625110,
@@ -4726,8 +4512,7 @@
         "center_y": 326.9390869140625,
         "boxSize": 80.59616088867188,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865629238,
@@ -4748,8 +4533,7 @@
         "center_y": 285.0544738769531,
         "boxSize": 72.98077392578125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865631711,
@@ -4770,8 +4554,7 @@
         "center_y": 271.0929489135742,
         "boxSize": 53.30769348144531,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865636270,
@@ -4792,8 +4575,7 @@
         "center_y": 257.7660217285156,
         "boxSize": 49.5,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865640314,
@@ -4814,8 +4596,7 @@
         "center_y": 219.05448150634766,
         "boxSize": 31.730743408203125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865555319,
@@ -4836,8 +4617,7 @@
         "center_y": 520.4967651367188,
         "boxSize": 90.75,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865559415,
@@ -4858,8 +4638,7 @@
         "center_y": 277.1217956542969,
         "boxSize": 92.01922607421875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865656503,
@@ -4880,8 +4659,7 @@
         "center_y": 595.1248779296875,
         "boxSize": 49.6964111328125,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865659912,
@@ -4902,8 +4680,7 @@
         "center_y": 630.3526916503906,
         "boxSize": 72.97186279296875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865669278,
@@ -4924,8 +4701,7 @@
         "center_y": 481.2635803222656,
         "boxSize": 50.9544677734375,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779865672125,
@@ -4946,8 +4722,7 @@
         "center_y": 423.3893280029297,
         "boxSize": 51.583587646484375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865678308,
@@ -4968,8 +4743,7 @@
         "center_y": 231.20906829833984,
         "boxSize": 47.18009948730469,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865681903,
@@ -4990,8 +4764,7 @@
         "center_y": 273.04207611083984,
         "boxSize": 56.6160888671875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865684369,
@@ -5012,8 +4785,7 @@
         "center_y": 272.72755432128906,
         "boxSize": 40.889434814453125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865687215,
@@ -5034,8 +4806,7 @@
         "center_y": 247.8793716430664,
         "boxSize": 61.64862060546875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865704661,
@@ -5056,8 +4827,7 @@
         "center_y": 579.3981628417969,
         "boxSize": 76.74627685546875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865707735,
@@ -5078,8 +4848,7 @@
         "center_y": 572.4784545898438,
         "boxSize": 46.551025390625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865710721,
@@ -5100,8 +4869,7 @@
         "center_y": 608.96435546875,
         "boxSize": 68.568359375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865716216,
@@ -5122,8 +4890,7 @@
         "center_y": 519.6367340087891,
         "boxSize": 65.42306518554688,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865720616,
@@ -5144,8 +4911,7 @@
         "center_y": 529.3872680664062,
         "boxSize": 39.00225830078125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865723897,
@@ -5166,8 +4932,7 @@
         "center_y": 522.7820587158203,
         "boxSize": 71.7137451171875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865727952,
@@ -5188,8 +4953,7 @@
         "center_y": 535.0488586425781,
         "boxSize": 76.74627685546875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865730998,
@@ -5210,8 +4974,7 @@
         "center_y": 539.4523620605469,
         "boxSize": 50.95452880859375,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865734314,
@@ -5232,8 +4995,7 @@
         "center_y": 521.52392578125,
         "boxSize": 28.9371337890625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865737063,
@@ -5254,8 +5016,7 @@
         "center_y": 520.2658081054688,
         "boxSize": 28.9371337890625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865739806,
@@ -5276,8 +5037,7 @@
         "center_y": 519.0076599121094,
         "boxSize": 26.42083740234375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865745959,
@@ -5298,8 +5058,7 @@
         "center_y": 419.929443359375,
         "boxSize": 125.18450927734375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865752079,
@@ -5320,8 +5079,7 @@
         "center_y": 474.029296875,
         "boxSize": 61.648681640625,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865755624,
@@ -5342,8 +5100,7 @@
         "center_y": 470.8839569091797,
         "boxSize": 65.42303466796875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865762794,
@@ -5364,8 +5121,7 @@
         "center_y": 438.80149841308594,
         "boxSize": 79.2625732421875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865766943,
@@ -5386,8 +5142,7 @@
         "center_y": 476.86009216308594,
         "boxSize": 65.42306518554688,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865775095,
@@ -5408,8 +5163,7 @@
         "center_y": 454.2136535644531,
         "boxSize": 79.2625732421875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865779805,
@@ -5430,8 +5184,7 @@
         "center_y": 444.4631042480469,
         "boxSize": 98.763671875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865782527,
@@ -5452,8 +5205,7 @@
         "center_y": 437.22882080078125,
         "boxSize": 47.80914306640625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865790295,
@@ -5474,8 +5226,7 @@
         "center_y": 352.3046417236328,
         "boxSize": 60.3905029296875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865795296,
@@ -5496,8 +5247,7 @@
         "center_y": 365.51507568359375,
         "boxSize": 54.099853515625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865807871,
@@ -5518,8 +5268,7 @@
         "center_y": 414.5823669433594,
         "boxSize": 55.987060546875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865812936,
@@ -5540,8 +5289,7 @@
         "center_y": 412.69517517089844,
         "boxSize": 81.1497802734375,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865818998,
@@ -5562,8 +5310,7 @@
         "center_y": 385.95977783203125,
         "boxSize": 84.9241943359375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865822391,
@@ -5584,8 +5331,7 @@
         "center_y": 386.90338134765625,
         "boxSize": 89.32763671875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865826839,
@@ -5606,8 +5352,7 @@
         "center_y": 354.1918487548828,
         "boxSize": 62.90673828125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865829728,
@@ -5628,8 +5373,7 @@
         "center_y": 378.4109649658203,
         "boxSize": 59.761474609375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865837056,
@@ -5650,8 +5394,7 @@
         "center_y": 308.5844268798828,
         "boxSize": 68.568359375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865840584,
@@ -5672,8 +5415,7 @@
         "center_y": 245.99215698242188,
         "boxSize": 57.24517822265625,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865843983,
@@ -5694,8 +5436,7 @@
         "center_y": 244.1049575805664,
         "boxSize": 36.48594665527344,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865846800,
@@ -5716,8 +5457,7 @@
         "center_y": 300.4065399169922,
         "boxSize": 101.2799072265625,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779865852376,
@@ -5738,8 +5478,7 @@
         "center_y": 317.7059020996094,
         "boxSize": 172.99371337890625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865693304,
@@ -5760,8 +5499,7 @@
         "center_y": 368.9749450683594,
         "boxSize": 79.2625732421875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865860937,
@@ -5782,8 +5520,7 @@
         "center_y": 638.8098449707031,
         "boxSize": 68.8280029296875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865865697,
@@ -5804,8 +5541,7 @@
         "center_y": 543.1815185546875,
         "boxSize": 64.5643310546875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865869390,
@@ -5826,8 +5562,7 @@
         "center_y": 480.1399383544922,
         "boxSize": 71.26443481445312,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865872209,
@@ -5848,8 +5583,7 @@
         "center_y": 516.9903411865234,
         "boxSize": 53.600616455078125,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865876173,
@@ -5870,8 +5604,7 @@
         "center_y": 252.03286743164062,
         "boxSize": 53.6005859375,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865879423,
@@ -5892,8 +5625,7 @@
         "center_y": 325.4291229248047,
         "boxSize": 54.209686279296875,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779865882593,
@@ -5914,8 +5646,7 @@
         "center_y": 317.20631408691406,
         "boxSize": 45.682373046875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865885959,
@@ -5936,8 +5667,7 @@
         "center_y": 254.46926879882812,
         "boxSize": 57.8642578125,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865899719,
@@ -5958,8 +5688,7 @@
         "center_y": 629.0642700195312,
         "boxSize": 69.4371337890625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865902671,
@@ -5980,8 +5709,7 @@
         "center_y": 615.9686889648438,
         "boxSize": 33.5003662109375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865905014,
@@ -6002,8 +5730,7 @@
         "center_y": 648.555419921875,
         "boxSize": 31.673095703125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865910151,
@@ -6024,8 +5751,7 @@
         "center_y": 610.7913513183594,
         "boxSize": 101.1102294921875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865912493,
@@ -6046,8 +5772,7 @@
         "center_y": 608.35498046875,
         "boxSize": 21.927490234375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865914541,
@@ -6068,8 +5793,7 @@
         "center_y": 626.018798828125,
         "boxSize": 18.27294921875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865916981,
@@ -6090,8 +5814,7 @@
         "center_y": 643.0735168457031,
         "boxSize": 25.58209228515625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865920832,
@@ -6112,8 +5835,7 @@
         "center_y": 606.2231140136719,
         "boxSize": 32.28216552734375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865924376,
@@ -6134,8 +5856,7 @@
         "center_y": 631.5006713867188,
         "boxSize": 24.972900390625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865934046,
@@ -6156,8 +5877,7 @@
         "center_y": 563.2817687988281,
         "boxSize": 43.85504150390625,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865937535,
@@ -6178,8 +5898,7 @@
         "center_y": 569.3727111816406,
         "boxSize": 103.546630859375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865942327,
@@ -6200,8 +5919,7 @@
         "center_y": 556.2771301269531,
         "boxSize": 79.791748046875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865947964,
@@ -6222,8 +5940,7 @@
         "center_y": 502.3719940185547,
         "boxSize": 53.600616455078125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865951830,
@@ -6244,8 +5961,7 @@
         "center_y": 526.1268005371094,
         "boxSize": 74.9189453125,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865957791,
@@ -6266,8 +5982,7 @@
         "center_y": 458.51695251464844,
         "boxSize": 20.7093505859375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865959711,
@@ -6288,8 +6003,7 @@
         "center_y": 478.0080871582031,
         "boxSize": 24.9730224609375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865962079,
@@ -6310,8 +6024,7 @@
         "center_y": 500.2401428222656,
         "boxSize": 28.0185546875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865966839,
@@ -6332,8 +6045,7 @@
         "center_y": 400.34814453125,
         "boxSize": 58.473388671875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865970017,
@@ -6354,8 +6066,7 @@
         "center_y": 399.7390441894531,
         "boxSize": 39.59130859375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865972473,
@@ -6376,8 +6087,7 @@
         "center_y": 432.3257751464844,
         "boxSize": 52.991455078125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865974824,
@@ -6398,8 +6108,7 @@
         "center_y": 461.2579040527344,
         "boxSize": 49.3367919921875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865979855,
@@ -6420,8 +6129,7 @@
         "center_y": 429.2802734375,
         "boxSize": 69.4371337890625,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865983455,
@@ -6442,8 +6150,7 @@
         "center_y": 480.4444580078125,
         "boxSize": 80.40087890625,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865989759,
@@ -6464,8 +6171,7 @@
         "center_y": 482.88087463378906,
         "boxSize": 87.71005249023438,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779865993391,
@@ -6486,8 +6192,7 @@
         "center_y": 389.079833984375,
         "boxSize": 38.9822998046875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865997303,
@@ -6508,8 +6213,7 @@
         "center_y": 396.99810791015625,
         "boxSize": 40.200439453125,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779866001471,
@@ -6530,8 +6234,7 @@
         "center_y": 411.3118896484375,
         "boxSize": 58.473388671875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866006090,
@@ -6552,8 +6255,7 @@
         "center_y": 405.5254669189453,
         "boxSize": 52.382415771484375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866008943,
@@ -6574,8 +6276,7 @@
         "center_y": 362.58409118652344,
         "boxSize": 35.936737060546875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866014416,
@@ -6596,8 +6297,7 @@
         "center_y": 400.9572448730469,
         "boxSize": 57.8642578125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866017919,
@@ -6618,8 +6318,7 @@
         "center_y": 438.416748046875,
         "boxSize": 53.6005859375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866023751,
@@ -6640,8 +6339,7 @@
         "center_y": 476.48533630371094,
         "boxSize": 73.0916748046875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866028614,
@@ -6662,8 +6360,7 @@
         "center_y": 326.0382385253906,
         "boxSize": 88.31915283203125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866031585,
@@ -6684,8 +6381,7 @@
         "center_y": 325.4291229248047,
         "boxSize": 82.22817993164062,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866035502,
@@ -6706,8 +6402,7 @@
         "center_y": 312.942626953125,
         "boxSize": 42.6368408203125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866039549,
@@ -6728,8 +6423,7 @@
         "center_y": 345.52935791015625,
         "boxSize": 38.9822998046875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866043537,
@@ -6750,8 +6444,7 @@
         "center_y": 284.31504821777344,
         "boxSize": 57.255126953125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866048180,
@@ -6772,8 +6465,7 @@
         "center_y": 309.89715576171875,
         "boxSize": 51.1641845703125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866051967,
@@ -6794,8 +6486,7 @@
         "center_y": 342.1793212890625,
         "boxSize": 52.991455078125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866057568,
@@ -6816,8 +6507,7 @@
         "center_y": 277.3104248046875,
         "boxSize": 107.810302734375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866062327,
@@ -6838,8 +6528,7 @@
         "center_y": 340.96112060546875,
         "boxSize": 67.000732421875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866070144,
@@ -6860,8 +6549,7 @@
         "center_y": 278.5286178588867,
         "boxSize": 73.70082092285156,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866082623,
@@ -6882,8 +6570,7 @@
         "center_y": 314.16082763671875,
         "boxSize": 77.3553466796875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866086616,
@@ -6904,8 +6591,7 @@
         "center_y": 244.72370147705078,
         "boxSize": 47.5096435546875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866089326,
@@ -6926,8 +6612,7 @@
         "center_y": 241.37367248535156,
         "boxSize": 132.7833251953125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779865894385,
@@ -6948,8 +6633,7 @@
         "center_y": 487.44911193847656,
         "boxSize": 91.3646240234375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866100343,
@@ -6970,8 +6654,7 @@
         "center_y": 620.1458129882812,
         "boxSize": 71.349853515625,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779866104679,
@@ -6992,8 +6675,7 @@
         "center_y": 510.40008544921875,
         "boxSize": 70.1405029296875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866107033,
@@ -7014,8 +6696,7 @@
         "center_y": 524.3072509765625,
         "boxSize": 42.326171875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779866112944,
@@ -7036,8 +6717,7 @@
         "center_y": 650.0764770507812,
         "boxSize": 60.466064453125,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779866118199,
@@ -7058,8 +6738,7 @@
         "center_y": 498.0045623779297,
         "boxSize": 79.8150634765625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866122301,
@@ -7080,8 +6759,7 @@
         "center_y": 361.95611572265625,
         "boxSize": 47.1634521484375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866124785,
@@ -7102,8 +6780,7 @@
         "center_y": 367.3980712890625,
         "boxSize": 52.60540771484375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866127423,
@@ -7124,8 +6801,7 @@
         "center_y": 399.7473602294922,
         "boxSize": 61.67529296875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779866149081,
@@ -7146,8 +6822,7 @@
         "center_y": 255.2336883544922,
         "boxSize": 49.58203125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866152280,
@@ -7168,8 +6843,7 @@
         "center_y": 320.5369415283203,
         "boxSize": 82.23373413085938,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779866175039,
@@ -7190,8 +6864,7 @@
         "center_y": 439.6549072265625,
         "boxSize": 26.60498046875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866180367,
@@ -7212,8 +6885,7 @@
         "center_y": 376.16563415527344,
         "boxSize": 48.372772216796875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866186525,
@@ -7234,8 +6906,7 @@
         "center_y": 527.6329040527344,
         "boxSize": 86.46636962890625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866189909,
@@ -7256,8 +6927,7 @@
         "center_y": 434.817626953125,
         "boxSize": 44.14013671875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866194217,
@@ -7278,8 +6948,7 @@
         "center_y": 408.81724548339844,
         "boxSize": 64.0938720703125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866210295,
@@ -7300,8 +6969,7 @@
         "center_y": 463.5389709472656,
         "boxSize": 36.2796630859375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866212163,
@@ -7322,8 +6990,7 @@
         "center_y": 475.6321563720703,
         "boxSize": 27.209686279296875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866217351,
@@ -7344,8 +7011,7 @@
         "center_y": 454.16673278808594,
         "boxSize": 38.0936279296875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866220972,
@@ -7366,8 +7032,7 @@
         "center_y": 517.656005859375,
         "boxSize": 60.4659423828125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866224567,
@@ -7388,8 +7053,7 @@
         "center_y": 476.8414764404297,
         "boxSize": 24.791046142578125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866227063,
@@ -7410,8 +7074,7 @@
         "center_y": 501.0278778076172,
         "boxSize": 24.791046142578125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866229253,
@@ -7432,8 +7095,7 @@
         "center_y": 529.1445617675781,
         "boxSize": 31.44232177734375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866231551,
@@ -7454,8 +7116,7 @@
         "center_y": 577.2149658203125,
         "boxSize": 30.837646484375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866233766,
@@ -7476,8 +7137,7 @@
         "center_y": 557.2611999511719,
         "boxSize": 33.25628662109375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866242328,
@@ -7498,8 +7158,7 @@
         "center_y": 416.6778259277344,
         "boxSize": 61.67529296875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866166288,
@@ -7520,8 +7179,7 @@
         "center_y": 610.7735900878906,
         "boxSize": 72.55914306640625,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779866172535,
@@ -7542,8 +7200,7 @@
         "center_y": 332.0254821777344,
         "boxSize": 73.76849365234375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866250430,
@@ -7564,8 +7221,7 @@
         "center_y": 140.8243408203125,
         "boxSize": 44.35020446777344,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779866254808,
@@ -7586,8 +7242,7 @@
         "center_y": 107.88462448120117,
         "boxSize": 73.62995147705078,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779866261473,
@@ -7608,8 +7263,7 @@
         "center_y": 152.88070678710938,
         "boxSize": 73.19937133789062,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779866264118,
@@ -7630,8 +7284,7 @@
         "center_y": 26.504153966903687,
         "boxSize": 54.684234619140625,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779866266878,
@@ -7652,8 +7305,7 @@
         "center_y": -4.928516387939453,
         "boxSize": 89.1309814453125,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779866277207,
@@ -7674,8 +7326,7 @@
         "center_y": 48.03337740898132,
         "boxSize": 83.96397638320923,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866281175,
@@ -7696,8 +7347,7 @@
         "center_y": 141.90079879760742,
         "boxSize": 112.81314086914062,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779866283789,
@@ -7718,8 +7368,7 @@
         "center_y": 74.083740234375,
         "boxSize": 86.11689758300781,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866287975,
@@ -7740,8 +7389,7 @@
         "center_y": 21.12184762954712,
         "boxSize": 78.79696655273438,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866273807,
@@ -7762,8 +7410,7 @@
         "center_y": 115.41985702514648,
         "boxSize": 97.74267578125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866295471,
@@ -7784,8 +7431,7 @@
         "center_y": 160.70053100585938,
         "boxSize": 71.46920776367188,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866302656,
@@ -7806,8 +7452,7 @@
         "center_y": 62.32527732849121,
         "boxSize": 53.3917236328125,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779866305455,
@@ -7828,8 +7473,7 @@
         "center_y": 189.07801055908203,
         "boxSize": 60.11820983886719,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866314789,
@@ -7850,8 +7494,7 @@
         "center_y": 95.32723236083984,
         "boxSize": 39.93867492675781,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866317022,
@@ -7872,8 +7515,7 @@
         "center_y": 94.27621459960938,
         "boxSize": 51.28965759277344,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866320991,
@@ -7894,8 +7536,7 @@
         "center_y": 20.494773864746094,
         "boxSize": 164.799560546875,
         "idealUsage": "Feet",
-        "ideal": "Feet",
-        "audited": false
+        "ideal": "Feet"
     },
     {
         "id": 1779866311127,
@@ -7916,8 +7557,7 @@
         "center_y": 141.78221130371094,
         "boxSize": 85.34259033203125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866328328,
@@ -7938,8 +7578,7 @@
         "center_y": 174.1449432373047,
         "boxSize": 74.2406005859375,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779866333832,
@@ -7960,8 +7599,7 @@
         "center_y": 189.7184066772461,
         "boxSize": 43.09367370605469,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866336005,
@@ -7982,8 +7620,7 @@
         "center_y": 189.93174743652344,
         "boxSize": 57.6004638671875,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866339310,
@@ -8004,8 +7641,7 @@
         "center_y": 74.30414199829102,
         "boxSize": 89.6007080078125,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866341750,
@@ -8026,8 +7662,7 @@
         "center_y": 76.86416244506836,
         "boxSize": 67.840576171875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779866352857,
@@ -8048,8 +7683,7 @@
         "center_y": 165.82488250732422,
         "boxSize": 120.7476806640625,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779866357976,
@@ -8070,8 +7704,7 @@
         "center_y": 111.85111618041992,
         "boxSize": 195.4149169921875,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779866345031,
@@ -8092,8 +7725,7 @@
         "center_y": 62.14404487609863,
         "boxSize": 93.0140380859375,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779866370776,
@@ -8114,8 +7746,7 @@
         "center_y": 201.8971710205078,
         "boxSize": 50.669677734375,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779866372999,
@@ -8136,8 +7767,7 @@
         "center_y": 192.90147399902344,
         "boxSize": 54.341339111328125,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779866377199,
@@ -8158,8 +7788,7 @@
         "center_y": 137.2750473022461,
         "boxSize": 53.97416687011719,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779866381416,
@@ -8180,8 +7809,7 @@
         "center_y": 9.683063507080078,
         "boxSize": 46.6307373046875,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779866384561,
@@ -8202,8 +7830,7 @@
         "center_y": 12.804018020629883,
         "boxSize": 66.45798110961914,
         "idealUsage": "General",
-        "ideal": "General",
-        "audited": false
+        "ideal": "General"
     },
     {
         "id": 1779866388927,
@@ -8224,8 +7851,7 @@
         "center_y": 38.50599932670593,
         "boxSize": 119.33056640625,
         "idealUsage": "Not Ideal",
-        "ideal": "Not Ideal",
-        "audited": false
+        "ideal": "Not Ideal"
     },
     {
         "id": 1779866396341,
@@ -8246,8 +7872,7 @@
         "center_y": 214.38098907470703,
         "boxSize": 119.69775390625,
         "idealUsage": "Feet",
-        "ideal": "Feet",
-        "audited": false
+        "ideal": "Feet"
     },
     {
         "id": 1779866398789,
@@ -8268,8 +7893,7 @@
         "center_y": 191.43279266357422,
         "boxSize": 51.7711181640625,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     },
     {
         "id": 1779866391900,
@@ -8290,7 +7914,6 @@
         "center_y": 142.78260803222656,
         "boxSize": 55.81005859375,
         "idealUsage": "Hand",
-        "ideal": "Hand",
-        "audited": false
+        "ideal": "Hand"
     }
 ]
