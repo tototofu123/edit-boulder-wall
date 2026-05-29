@@ -105,6 +105,15 @@
             <input type="range" id="ai-density" min="10" max="100" step="1" value="80" oninput="document.getElementById('val-density').innerText = this.value + '%'">
         </div>
 
+        <div class="form-group">
+            <label>Seed</label>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <input type="number" id="ai-seed" style="flex:1; background:#111; border:1px solid #444; color:white; padding:8px; border-radius:4px; font-family:monospace;" value="12345">
+                <button class="tool-btn btn-blue" type="button" onclick="randomizeSeed()" style="width:auto; margin-bottom:0; padding:8px 12px;">RANDOMIZE</button>
+            </div>
+            <div style="font-size:9px; color:#666; margin-top:4px;">Use the same seed to reproduce the same route sequence.</div>
+        </div>
+
         <label style="font-size:10px; color:#aaa;">HOLD CATEGORIES</label>
         <div class="checkbox-group">
             <label class="checkbox-item"><input type="checkbox" id="ai-cat-c" checked> Climbing</label>
@@ -151,6 +160,7 @@
     let activeRoute = null, routeCount = 0;
     let selectedFeedbackId = null; 
     let feedbackCache = {}; 
+    const AI_SEED_STORAGE_KEY = 'edit-boulder-wall-ai-seed-v1';
 
     const typeColors = { 1: '#00ff00', 2: '#007acc', 3: '#ff8800', 4: '#ff0000' };
     const typeNames = { 1: 'START', 2: 'HAND', 3: 'FOOT', 4: 'END' };
@@ -173,6 +183,16 @@
             calibrationData = await (await fetch('docs/calibration.json')).json().catch(()=>[]);
             boundaryPoints = await (await fetch('docs/wall_annotations.json')).json().catch(()=>[]);
             
+            const storedSeed = localStorage.getItem(AI_SEED_STORAGE_KEY);
+            if (storedSeed && !Number.isNaN(Number(storedSeed))) {
+                document.getElementById('ai-seed').value = String(Number(storedSeed));
+            }
+            if (!localStorage.getItem(AI_SEED_STORAGE_KEY)) {
+                const initialSeed = Math.floor(Date.now() % 1000000000);
+                document.getElementById('ai-seed').value = String(initialSeed);
+                localStorage.setItem(AI_SEED_STORAGE_KEY, String(initialSeed));
+            }
+
             // Initialize routeCount from log
             const logs = await (await fetch('docs/ai_generation_log.json')).json().catch(()=>[]);
             routeCount = logs.filter(l => l.type === 'ai_generation').length;
@@ -184,6 +204,12 @@
     function toggleConfig() {
         const p = document.getElementById('ai-config');
         p.style.display = p.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function randomizeSeed() {
+        const nextSeed = Math.floor(Math.random() * 1000000000);
+        document.getElementById('ai-seed').value = String(nextSeed);
+        localStorage.setItem(AI_SEED_STORAGE_KEY, String(nextSeed));
     }
 
     async function generate() {
@@ -200,6 +226,7 @@
                 holdDensity: parseInt(document.getElementById('ai-density').value),
                 targetGradeNum: parseInt(document.getElementById('ai-grade').value),
                 targetGradeStr: 'V' + document.getElementById('ai-grade').value,
+                seed: parseInt(document.getElementById('ai-seed').value),
                 allowedCats: [],
                 routeCount: routeCount,
                 setActiveRoute: (route) => {
@@ -216,6 +243,7 @@
             if (document.getElementById('ai-cat-c').checked) ctx.allowedCats.push('C');
             if (document.getElementById('ai-cat-i').checked) ctx.allowedCats.push('I');
             if (document.getElementById('ai-cat-f').checked) ctx.allowedCats.push('F');
+            localStorage.setItem(AI_SEED_STORAGE_KEY, document.getElementById('ai-seed').value);
             
             window.generateTraverseRoute(ctx);
         }

@@ -37,6 +37,7 @@ export interface RouteContext {
     allowedCats: string[];
     routeCount: number;
     holdDensity: number;
+    seed?: number | string;
     setActiveRoute: (route: any) => void;
     render: () => void;
 }
@@ -77,6 +78,26 @@ function directionLabel(direction: number) {
         315: 'up-left'
     };
     return labels[normalized] || `${normalized}°`;
+}
+
+function hashSeed(input: string) {
+    let hash = 2166136261;
+    for (let i = 0; i < input.length; i++) {
+        hash ^= input.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+    }
+    return hash >>> 0;
+}
+
+function createSeededRng(seedInput: string) {
+    let state = hashSeed(seedInput) || 1;
+    return () => {
+        state |= 0;
+        state = (state + 0x6D2B79F5) | 0;
+        let t = Math.imul(state ^ (state >>> 15), 1 | state);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
 }
 
 const WEIGHT_CONFIG = {
@@ -175,9 +196,11 @@ function isPointInPoly(pt: {x: number, y: number}, poly: {x: number, y: number}[
 }
 
 export function generateTraverseRoute(ctx: RouteContext) {
-    const { holds, richMetadata, catMapFull, holdSpec, boundaryPoints, pixelsToMeters, height, wingspan, targetLen, targetGradeNum, targetGradeStr, allowedCats, routeCount, holdDensity, setActiveRoute, render } = ctx;
+    const { holds, richMetadata, catMapFull, holdSpec, boundaryPoints, pixelsToMeters, height, wingspan, targetLen, targetGradeNum, targetGradeStr, allowedCats, routeCount, holdDensity, seed, setActiveRoute, render } = ctx;
     const density = Math.min(100, Math.max(1, holdDensity || 80));
     const densityFactor = density / 100;
+    const rng = createSeededRng(`${seed ?? '0'}|${routeCount ?? 0}`);
+    const rand = () => rng();
     const holdSpecLookup = new Map<string, HoldSpec>();
     (holdSpec || []).forEach(spec => {
         holdSpecLookup.set(String(spec.id), spec);
@@ -248,7 +271,7 @@ export function generateTraverseRoute(ctx: RouteContext) {
     const yStartMax = maxY - (1.0 / pixelsToMeters(1));
 
     // Determine direction: Left to Right or Right to Left
-    const isLeftToRight = Math.random() > 0.5;
+    const isLeftToRight = rand() > 0.5;
 
     let heightCandidates = candidates.filter(h => h.center.y >= yStartMin && h.center.y <= yStartMax);
     if (heightCandidates.length === 0) heightCandidates = candidates;
@@ -325,7 +348,7 @@ export function generateTraverseRoute(ctx: RouteContext) {
             + lineCost(candidate.center, idealLine, attempts)
             + progressPenalty
             + shortMoveSpamCost(consecutiveShortMoves, spec)
-            + (Math.random() * 1.5);
+            + (rand() * 1.5);
 
         return score;
     }
@@ -350,7 +373,7 @@ export function generateTraverseRoute(ctx: RouteContext) {
         const recycledBonus = preferRecycledHands && routeHands.some(prev => prev.id === candidate.id) ? -WEIGHT_CONFIG.route.finishRecycleBonus : 0;
         const sizeBonus = spec.boxSize >= 85 ? -WEIGHT_CONFIG.route.finishSizeBonusLarge : spec.boxSize >= 65 ? -WEIGHT_CONFIG.route.finishSizeBonusMid : 0;
         const typePenalty = spec.footRating >= 4 && targetGradeNum <= 2 ? WEIGHT_CONFIG.route.finishTypePenaltyEasy : 0;
-        return distanceCost + footQualityCost + typePenalty + sizeBonus + recycledBonus + (Math.random() * WEIGHT_CONFIG.route.footSearchJitter);
+        return distanceCost + footQualityCost + typePenalty + sizeBonus + recycledBonus + (rand() * WEIGHT_CONFIG.route.footSearchJitter);
     }
 
     function findFeetForHands(h1: Hold, h2: Hold | null, routeHands: Hold[], isFinal: boolean = false) {
@@ -407,7 +430,7 @@ export function generateTraverseRoute(ctx: RouteContext) {
         const poolSize = Math.min(heightCandidates.length, Math.max(WEIGHT_CONFIG.route.startPoolSizeMin, Math.round(WEIGHT_CONFIG.route.startPoolBase + densityFactor * WEIGHT_CONFIG.route.startPoolDensityMultiplier)));
         const pool = heightCandidates.slice(0, poolSize);
         // Bias toward edge candidates, but keep enough randomness that repeated generations vary.
-        const bias = Math.pow(Math.random(), WEIGHT_CONFIG.route.startBiasExponent);
+        const bias = Math.pow(rand(), WEIGHT_CONFIG.route.startBiasExponent);
         const jitter = Math.min(pool.length - 1, Math.floor(bias * pool.length));
         const routeJitter = routeCount % Math.max(1, pool.length);
         return pool[(jitter + routeJitter) % pool.length];
@@ -481,7 +504,7 @@ export function generateTraverseRoute(ctx: RouteContext) {
             neighbors.sort((a, b) => {
                 const sA = scoreHandCandidate(a, currentHold, idealLine, attempts, consecutiveShortMoves);
                 const sB = scoreHandCandidate(b, currentHold, idealLine, attempts, consecutiveShortMoves);
-                return (sA + Math.random() * WEIGHT_CONFIG.route.handSearchJitter) - (sB + Math.random() * WEIGHT_CONFIG.route.handSearchJitter);
+                return (sA + rand() * WEIGHT_CONFIG.route.handSearchJitter) - (sB + rand() * WEIGHT_CONFIG.route.handSearchJitter);
             });
 
             let nextH: Hold | null = null;
