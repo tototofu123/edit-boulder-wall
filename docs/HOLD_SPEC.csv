@@ -1,6 +1,6 @@
 id,cell,cat,num,category,type,baseDifficulty,handDifficulty,footDifficulty,footRating,footLabel,generalUsability,direction,directionLabel,center_x,center_y,boxSize,idealUsage,ideal
-1779863784072,"0,0",C,1,climbing holds,jug,3,6,2,1,Heaven,1,180,down,180.93311309814453,1510.2805786132812,103.5018310546875,General,General
-1779864118528,"0,0",C,2,climbing holds,jug,3,6,2,1,Heaven,1,180,down,276.30728912353516,1503.3399658203125,88.52001953125,General,General
+1779863784072,"0,0",C,1,climbing holds,jug,4,8,1,1,Heaven,1,180,down,180.93311309814453,1510.2805786132812,103.5018310546875,Feet,Feet
+1779864118528,"0,0",C,2,climbing holds,jug,5,10,2,1,Heaven,1,180,down,276.30728912353516,1503.3399658203125,88.52001953125,General,General
 1779864120773,"0,0",C,3,climbing holds,jug,3,6,4,2,Good,2,180,down,555.8775329589844,1474.6824340820312,64.3201904296875,General,General
 1779864124115,"0,0",C,4,climbing holds,jug,1,2,2,1,Heaven,1,225,down-left,275.35204315185547,1364.5101318359375,86.60945129394531,General,General
 1779864127074,"0,0",C,5,climbing holds,jug,1,2,4,2,Good,2,180,down,505.8860321044922,1372.4705200195312,56.0413818359375,General,General

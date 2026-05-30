@@ -5,10 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Wall Editor - Multi-Tool</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #1a1a1a; color: white; display: flex; height: 100vh; overflow: hidden; touch-action: none; }
+        :root {
+            --nav-bg: #171b20;
+            --nav-surface: #232a31;
+            --nav-panel: #2b333c;
+            --nav-line: #4b5563;
+            --nav-accent: #12b886;
+            --nav-accent-2: #007acc;
+            --nav-text: #f5f7fb;
+            --nav-muted: #b7c0ce;
+        }
+
+        * { box-sizing: border-box; }
+
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: radial-gradient(circle at top right, rgba(18,184,134,0.18), transparent 32%), linear-gradient(180deg, #12161a, var(--nav-bg)); color: var(--nav-text); display: flex; min-height: 100vh; overflow: hidden; touch-action: none; }
         
         .viewport { 
-            flex: 1; position: relative; background: #000; overflow: hidden; cursor: grab;
+            flex: 1; position: relative; background: #000; overflow: hidden; cursor: grab; min-width: 0;
         }
         .viewport:active { cursor: grabbing; }
         .viewport.measuring { cursor: crosshair; }
@@ -18,16 +31,23 @@
         #wall-img { display: block; user-select: none; -webkit-user-drag: none; }
         #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: all; }
         
-        .sidebar { width: 420px; background: #252526; border-left: 2px solid #444; display: flex; flex-direction: column; gap: 15px; padding: 20px; overflow-y: auto; z-index: 100; }
-        .status { background: #000; padding: 15px; color: #0f0; font-family: monospace; border: 1px solid #555; font-size: 14px; font-weight: bold; text-align: center; }
+        .sidebar { width: min(420px, 38vw); background: linear-gradient(180deg, rgba(35,42,49,0.98), rgba(24,29,34,0.98)); border-left: 2px solid var(--nav-line); display: flex; flex-direction: column; gap: 15px; padding: 20px; overflow: hidden; z-index: 100; min-width: 0; }
+        .sidebar-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; padding-right: 6px; }
+        .sidebar-dock { flex: 0 0 auto; margin-top: auto; position: sticky; bottom: 0; padding-top: 12px; background: linear-gradient(180deg, rgba(35,42,49,0) 0%, rgba(35,42,49,0.95) 22px, rgba(35,42,49,1) 100%); }
+        .detail-stack { display: flex; flex-direction: column; gap: 10px; }
+        .detail-card { margin-top: 0; }
+        .detail-card.edit-form { max-height: min(52vh, 640px); overflow-y: auto; }
+        .detail-card.hold-info, .detail-card#link-details { max-height: min(36vh, 420px); overflow-y: auto; }
+        .audit-toast-slot { min-height: 52px; }
+        .status { background: linear-gradient(90deg, #0b1220, #121f1a); padding: 15px; color: #79f2c0; font-family: monospace; border: 1px solid var(--nav-line); font-size: 14px; font-weight: bold; text-align: center; border-radius: 12px; }
         
-        .box { background: #333; padding: 15px; border-radius: 4px; border-left: 4px solid #007acc; }
+        .box { background: rgba(43,51,60,0.92); padding: 15px; border-radius: 12px; border-left: 4px solid var(--nav-accent); min-width: 0; }
         
         .mode-selector { display: flex; gap: 10px; margin-top: 10px; }
-        .mode-btn { flex: 1; padding: 10px; border: 1px solid #555; background: #444; color: white; cursor: pointer; border-radius: 4px; font-weight: bold; text-align: center; font-size: 12px; }
-        .mode-btn.active { background: #007acc; border-color: white; }
+        .mode-btn { flex: 1; padding: 10px; border: 1px solid #555; background: #3b424a; color: white; cursor: pointer; border-radius: 10px; font-weight: bold; text-align: center; font-size: 12px; }
+        .mode-btn.active { background: linear-gradient(90deg, var(--nav-accent-2), #005ea0); border-color: white; }
 
-        .hold-info { background: #1e1e1e; padding: 20px; border-radius: 8px; border: 1px solid #444; margin-top: 10px; display: none; }
+        .hold-info { background: #1e1e1e; padding: 20px; border-radius: 12px; border: 1px solid #444; margin-top: 10px; display: none; }
         .info-label { color: #aaa; font-size: 11px; text-transform: uppercase; margin-bottom: 4px; }
         
         .id-container { font-family: monospace; font-size: 20px; font-weight: bold; margin-bottom: 15px; display: flex; gap: 8px; }
@@ -38,17 +58,17 @@
         .info-value { font-size: 14px; font-weight: bold; margin-bottom: 10px; color: #0098ff; }
         .info-value-big { font-size: 18px; font-weight: bold; margin-bottom: 12px; color: #fff; letter-spacing: 1px; font-family: monospace; }
 
-        .edit-form { display: none; background: #2d2d2d; padding: 15px; border-radius: 8px; border: 1px solid #007acc; margin-top: 10px; }
+        .edit-form { display: none; background: #2d2d2d; padding: 15px; border-radius: 12px; border: 1px solid #007acc; margin-top: 10px; }
         .form-group { margin-bottom: 10px; }
-        .form-group label { display: block; font-size: 10px; color: #aaa; text-transform: uppercase; margin-bottom: 3px; }
-        .form-group input, .form-group select { width: 100%; padding: 6px; background: #1a1a1a; border: 1px solid #444; color: white; border-radius: 4px; box-sizing: border-box; }
+        .form-group label { display: block; font-size: 10px; color: #aaa; text-transform: uppercase; margin-bottom: 3px; overflow-wrap: anywhere; }
+        .form-group input, .form-group select { width: 100%; padding: 6px; background: #1a1a1a; border: 1px solid #444; color: white; border-radius: 8px; box-sizing: border-box; min-width: 0; }
         
-        .tool-btn { width: 100%; padding: 10px; border: none; color: white; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 6px; font-size: 12px; transition: 0.2s; }
+        .tool-btn { width: 100%; padding: 10px; border: none; color: white; border-radius: 10px; cursor: pointer; font-weight: bold; margin-bottom: 6px; font-size: 12px; transition: 0.2s; }
         .tool-btn.active { outline: 2px solid white; box-shadow: 0 0 10px rgba(255,255,255,0.5); }
-        .btn-blue { background: #007acc; }
-        .btn-green { background: #28a745; }
-        .btn-purple { background: #6f42c1; }
-        .btn-red { background: #dc3545; }
+        .btn-blue { background: linear-gradient(90deg, #007acc, #005ea0); }
+        .btn-green { background: linear-gradient(90deg, #28a745, #1f8a3a); }
+        .btn-purple { background: linear-gradient(90deg, #6f42c1, #5530a3); }
+        .btn-red { background: linear-gradient(90deg, #dc3545, #b32634); }
 
         .hold-path { cursor: pointer; stroke-width: 3; fill: none; transition: stroke-opacity 0.2s, fill 0.2s; pointer-events: all; }
         .hold-path.highlight { stroke: white !important; stroke-width: 12 !important; filter: drop-shadow(0 0 15px white); }
@@ -68,7 +88,7 @@
         .click-dot { fill: white; stroke: #007acc; stroke-width: 2; pointer-events: none; }
         .calib-dot { fill: #ff00ff; stroke: white; stroke-width: 2; }
 
-        .setup-list { background: #111; border: 1px solid #444; border-radius: 4px; padding: 10px; margin-top: 10px; max-height: 200px; overflow-y: auto; }  
+        .setup-list { background: #111; border: 1px solid #444; border-radius: 12px; padding: 10px; margin-top: 10px; max-height: 200px; overflow-y: auto; }  
         .setup-item { display: flex; justify-content: space-between; align-items: center; padding: 6px; border-bottom: 1px solid #333; font-size: 11px; font-family: monospace; }
         .setup-item:last-child { border-bottom: none; }
         .delete-small { color: #ff4444; cursor: pointer; font-weight: bold; padding: 2px 6px; border: 1px solid #444; border-radius: 3px; background: #222; }
@@ -90,12 +110,24 @@
 
         /* Dual Hold Display */
         .dual-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .mini-card { background: #111; padding: 10px; border-radius: 4px; border: 1px solid #444; font-size: 11px; }
+        .mini-card { background: #111; padding: 10px; border-radius: 10px; border: 1px solid #444; font-size: 11px; min-width: 0; }
 
         @media (max-width: 768px) {
             body { flex-direction: column; }
             .sidebar { width: 100%; height: auto; border-left: none; border-top: 2px solid #444; order: 2; }
             .viewport { order: 1; min-height: 400px; }
+        }
+
+        @media (max-width: 1100px) {
+            body { overflow: auto; }
+            .sidebar { width: 100%; max-height: none; }
+        }
+
+        @media (max-width: 700px) {
+            .sidebar { padding: 14px; }
+            .box, .hold-info, .edit-form { padding: 12px; }
+            .ai-grid, .dual-container { grid-template-columns: 1fr; }
+            .mode-selector { flex-direction: column; }
         }
     </style>
 </head>
@@ -109,6 +141,7 @@
 </div>
 
 <div class="sidebar">
+    <div class="sidebar-scroll">
     <div class="status" id="status">WALL WORKSPACE</div>
 
     <div class="box" id="view-controls-box">
@@ -270,9 +303,12 @@
             <div style="padding:10px; color:#666; font-style:italic;">No calibrations</div>
         </div>
     </div>
+    </div>
 
+    <div class="sidebar-dock">
+        <div class="detail-stack">
     <!-- VIEW MODE -->
-    <div id="hold-details" class="hold-info">
+    <div id="hold-details" class="hold-info detail-card">
         <div class="info-label">HOLD ID (5-char)</div>
         <div id="val-id-5" class="info-value-big">-</div>
 
@@ -296,10 +332,12 @@
         <div id="audit-progress" style="margin-top:12px; font-size:11px; color:#ffcc66; text-align:center; display:none;"></div>
     </div>
 
-    <div id="audit-toast" style="display:none; margin-top:10px; background:rgba(0,122,204,0.15); color:#8fd0ff; border:1px solid #007acc; padding:10px; border-radius:6px; font-size:11px; line-height:1.4;"></div>
+    <div class="audit-toast-slot">
+        <div id="audit-toast" style="display:none; background:rgba(0,122,204,0.15); color:#8fd0ff; border:1px solid #007acc; padding:10px; border-radius:6px; font-size:11px; line-height:1.4;"></div>
+    </div>
 
     <!-- DUAL HOLD LINK INFO -->
-    <div id="link-details" class="hold-info">
+    <div id="link-details" class="hold-info detail-card">
         <div class="info-label" style="text-align:center; margin-bottom:10px;">LINKED HOLDS COMPARISON</div>
         <div class="dual-container">
             <div id="h1-card" class="mini-card">-</div>
@@ -309,7 +347,7 @@
     </div>
 
     <!-- EDIT MODE -->
-    <div id="edit-panel" class="edit-form">
+    <div id="edit-panel" class="edit-form detail-card">
         <div style="font-weight:bold; margin-bottom:15px; color:#007acc; border-bottom:1px solid #444; padding-bottom:5px;">EDITING HOLD</div>
         <div class="form-group"><label>Hold Cell (x,y)</label><input type="text" id="edit-cell"></div>
         <div class="form-group"><label>Category</label><select id="edit-cat"><option value="C">Climbing</option><option value="I">Insert</option><option value="F">Feature</option></select></div>
@@ -321,6 +359,8 @@
         <div class="form-group"><label>General Usability (1-10)</label><input type="number" id="edit-general-usability" min="1" max="10" step="1"></div>
         <div class="form-group"><label>Ideal Usage</label><select id="edit-ideal"><option value="General">General</option><option value="Hand">Hand</option><option value="Feet">Feet</option><option value="Not Ideal">Not Ideal</option></select></div>
         <div style="display:flex; gap:10px;"><button class="save-btn" onclick="saveEdit()">SAVE</button><button class="cancel-btn" onclick="cancelEdit()">CANCEL</button></div>
+    </div>
+        </div>
     </div>
 </div>
 

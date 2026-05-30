@@ -1,14 +1,5 @@
 {
     "0,0": {
-        "climbing holds2": {
-            "cell_x": 0,
-            "cell_y": 0,
-            "category": "climbing holds",
-            "num": "2",
-            "type": "jug",
-            "difficulty": "3",
-            "direction": "180"
-        },
         "climbing holds3": {
             "cell_x": 0,
             "cell_y": 0,
@@ -99,22 +90,6 @@
             "difficulty": "3",
             "direction": "45"
         },
-        "climbing holds1": {
-            "cell_x": 0,
-            "cell_y": 0,
-            "category": "climbing holds",
-            "num": "1",
-            "type": "jug",
-            "difficulty": "3",
-            "handDifficulty": "6",
-            "footDifficulty": "2",
-            "footRating": "1",
-            "generalUsability": "1",
-            "direction": "180",
-            "idealUsage": "General",
-            "ideal": "General",
-            "audited": "true"
-        },
         "climbing holds5": {
             "cell_x": 0,
             "cell_y": 0,
@@ -160,6 +135,36 @@
             "direction": "225",
             "idealUsage": "Hand",
             "ideal": "Hand"
+        },
+        "climbing holds1": {
+            "cell_x": 0,
+            "cell_y": 0,
+            "category": "climbing holds",
+            "num": "1",
+            "type": "jug",
+            "difficulty": "4",
+            "handDifficulty": "8",
+            "footDifficulty": "1",
+            "footRating": "1",
+            "generalUsability": "1",
+            "direction": "180",
+            "idealUsage": "Feet",
+            "ideal": "Feet"
+        },
+        "climbing holds2": {
+            "cell_x": 0,
+            "cell_y": 0,
+            "category": "climbing holds",
+            "num": "2",
+            "type": "jug",
+            "difficulty": "5",
+            "handDifficulty": "10",
+            "footDifficulty": "2",
+            "footRating": "1",
+            "generalUsability": "1",
+            "direction": "180",
+            "idealUsage": "General",
+            "ideal": "General"
         }
     },
     "0,2": {

@@ -5,30 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AI ROUTE WORKSPACE</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #0f0f12; color: #e1e1e6; display: flex; height: 100vh; overflow: hidden; }
+        :root {
+            --ai-bg: #0f0f12;
+            --ai-surface: #19191e;
+            --ai-panel: #25252d;
+            --ai-line: #33384d;
+            --ai-accent: #7f5af0;
+            --ai-accent-2: #007acc;
+            --ai-text: #e1e1e6;
+            --ai-muted: #a2a8bd;
+        }
+
+        * { box-sizing: border-box; }
+
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: radial-gradient(circle at top left, rgba(127,90,240,0.18), transparent 30%), linear-gradient(180deg, #0b0b10, var(--ai-bg)); color: var(--ai-text); display: flex; min-height: 100vh; overflow: hidden; }
         
-        .viewport { flex: 1; position: relative; background: #000; overflow: hidden; cursor: grab; }
+        .viewport { flex: 1; position: relative; background: #000; overflow: hidden; cursor: grab; min-width: 0; }
         .viewport:active { cursor: grabbing; }
 
         #canvas-wrapper { position: absolute; transform-origin: 0 0; will-change: transform; }
         #wall-img { display: block; user-select: none; -webkit-user-drag: none; }
         #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: all; }
         
-        .sidebar { width: 450px; background: #19191e; border-left: 1px solid #333; display: flex; flex-direction: column; gap: 15px; padding: 20px; overflow-y: auto; box-shadow: -5px 0 20px rgba(0,0,0,0.5); }
-        .status { background: #6f42c1; padding: 12px; color: white; font-family: monospace; font-size: 14px; font-weight: bold; text-align: center; border-radius: 4px; letter-spacing: 1px; }
+        .sidebar { width: min(450px, 42vw); background: linear-gradient(180deg, rgba(25,25,30,0.98), rgba(18,18,24,0.98)); border-left: 1px solid var(--ai-line); display: flex; flex-direction: column; gap: 15px; padding: 20px; overflow-y: auto; box-shadow: -5px 0 20px rgba(0,0,0,0.5); min-width: 0; }
+        .status { background: linear-gradient(90deg, var(--ai-accent), var(--ai-accent-2)); padding: 12px; color: white; font-family: monospace; font-size: 14px; font-weight: bold; text-align: center; border-radius: 10px; letter-spacing: 1px; }
         
-        .box { background: #25252d; padding: 15px; border-radius: 6px; border: 1px solid #333; }
-        .box-title { font-weight: bold; margin-bottom: 12px; font-size: 14px; color: #999; text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        .box { background: rgba(37,37,45,0.95); padding: 15px; border-radius: 14px; border: 1px solid var(--ai-line); min-width: 0; }
+        .box-title { font-weight: bold; margin-bottom: 12px; font-size: 14px; color: #c2c8dd; text-transform: uppercase; border-bottom: 1px solid var(--ai-line); padding-bottom: 5px; }
 
         .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 11px; color: #aaa; text-transform: uppercase; margin-bottom: 5px; }
+        .form-group label { display: block; font-size: 11px; color: var(--ai-muted); text-transform: uppercase; margin-bottom: 5px; overflow-wrap: anywhere; }
         .form-group input[type="range"] { width: 100%; height: 6px; background: #444; border-radius: 3px; outline: none; }
+        .form-group input, .form-group select { min-width: 0; max-width: 100%; }
         
-        .tool-btn { width: 100%; padding: 12px; border: none; color: white; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; margin-bottom: 8px; }
-        .btn-purple { background: #6f42c1; }
-        .btn-purple:hover { background: #5a32a3; }
-        .btn-green { background: #28a745; }
-        .btn-blue { background: #007acc; }
+        .tool-btn { width: 100%; padding: 12px; border: none; color: white; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; margin-bottom: 8px; }
+        .btn-purple { background: linear-gradient(90deg, #7f5af0, #5b38d6); }
+        .btn-purple:hover { background: linear-gradient(90deg, #8b67f4, #6c49dd); }
+        .btn-green { background: linear-gradient(90deg, #28a745, #1f8a3a); }
+        .btn-blue { background: linear-gradient(90deg, #007acc, #005ea0); }
 
         .ai-config-panel { display: none; margin-top: 10px; border-top: 1px solid #444; padding-top: 15px; }
         
@@ -47,10 +61,10 @@
         .stat-val { font-size: 20px; font-weight: bold; color: #0f0; font-family: monospace; }
         .stat-label { font-size: 9px; color: #666; text-transform: uppercase; margin-top: 4px; }
 
-        .hold-list { background: #111; border: 1px solid #333; border-radius: 4px; margin-top: 10px; max-height: 250px; overflow-y: auto; }
+        .hold-list { background: #111; border: 1px solid var(--ai-line); border-radius: 12px; margin-top: 10px; max-height: 250px; overflow-y: auto; }
         .hold-item { display: flex; flex-direction: column; padding: 10px; border-bottom: 1px solid #222; font-family: monospace; font-size: 11px; cursor: pointer; }
         .hold-item:hover { background: #1a1a1a; }
-        .hold-item.selected { border-left: 4px solid #6f42c1; background: #1a1a2a; }
+        .hold-item.selected { border-left: 4px solid #7f5af0; background: #1a1a2a; }
         
         .feedback-box { background: #1a1e2a; border: 1px solid #28a745; padding: 15px; border-radius: 6px; margin-top: 15px; display: none; }
         .feedback-box textarea { width: 100%; height: 60px; background: #000; border: 1px solid #333; color: white; padding: 8px; font-size: 12px; resize: none; box-sizing: border-box; margin-top: 10px; }
@@ -63,6 +77,24 @@
         .stickman-bone { stroke: #fff; stroke-width: 8; stroke-linecap: round; filter: drop-shadow(0 0 5px rgba(255,255,255,0.5)); }
         .stickman-joint { fill: #fff; stroke: #000; stroke-width: 2; }
         .stickman-head { fill: #fff; stroke: none; filter: drop-shadow(0 0 8px white); }
+
+        @media (max-width: 1280px) {
+            .sidebar { width: 38vw; }
+        }
+
+        @media (max-width: 1080px) {
+            body { flex-direction: column; overflow: auto; }
+            .viewport { min-height: 52vh; }
+            .sidebar { width: 100%; border-left: none; border-top: 1px solid var(--ai-line); max-height: none; }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { padding: 14px; }
+            .box { padding: 12px; }
+            .ai-grid { grid-template-columns: 1fr; }
+            .stat-grid, .dual-container { grid-template-columns: 1fr; }
+            .tool-btn { font-size: 12px; }
+        }
         </style>
         </head>
         <body>

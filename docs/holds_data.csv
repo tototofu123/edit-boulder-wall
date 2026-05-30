@@ -1,7 +1,7 @@
 cell_x,cell_y,category,num,type,difficulty,handDifficulty,footDifficulty,footRating,generalUsability,direction,idealUsage,ideal,audited
-0,0,climbing holds,1,jug,3,6,2,1,1,180,General,General,true
+0,0,climbing holds,1,jug,4,8,1,1,1,180,Feet,Feet,
 0,0,climbing holds,10,jug,1,,,,,225,,,
-0,0,climbing holds,2,jug,3,,,,,180,,,
+0,0,climbing holds,2,jug,5,10,2,1,1,180,General,General,
 0,0,climbing holds,3,jug,3,,,,,180,,,
 0,0,climbing holds,4,jug,1,,,,,225,,,
 0,0,climbing holds,5,jug,1,2,4,2,2,180,General,General,true
