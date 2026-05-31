@@ -48,21 +48,27 @@ func Launch(config Config) error {
 	}
 	defer serverLog.Close()
 
-	logLine(launcherLog, "mode=%s", config.Mode)
-	logLine(launcherLog, "name=%s", config.Name)
-	logLine(launcherLog, "url=%s", config.URL)
-	logLine(launcherLog, "working_dir=%s", filepath.Join(root, config.WorkingDir))
+	serverWriter := io.MultiWriter(serverLog, os.Stdout)
+	launcherWriter := io.MultiWriter(launcherLog, os.Stdout)
+
+	logLine(launcherWriter, "mode=%s", config.Mode)
+	logLine(launcherWriter, "name=%s", config.Name)
+	logLine(launcherWriter, "url=%s", config.URL)
+	logLine(launcherWriter, "working_dir=%s", filepath.Join(root, config.WorkingDir))
+	logLine(launcherWriter, "trace_dir=%s", runDir)
+	fmt.Fprintf(os.Stdout, "Starting %s...\n", config.Name)
 
 	pythonExe := resolvePythonExecutable(root)
 	cmd := exec.Command(pythonExe, config.PythonArgs...)
 	cmd.Dir = filepath.Join(root, config.WorkingDir)
-	cmd.Stdout = serverLog
-	cmd.Stderr = serverLog
+	cmd.Stdout = serverWriter
+	cmd.Stderr = serverWriter
 
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("start server: %w", err)
 	}
-	logLine(launcherLog, "server_pid=%d", cmd.Process.Pid)
+	logLine(launcherWriter, "server_pid=%d", cmd.Process.Pid)
+	fmt.Fprintf(os.Stdout, "Waiting for %s...\n", config.URL)
 
 	if err := waitForURL(config.URL, 20*time.Second); err != nil {
 		_ = cmd.Process.Kill()
@@ -71,13 +77,15 @@ func Launch(config Config) error {
 	}
 
 	if err := openURL(config.URL); err != nil {
-		logLine(launcherLog, "browser_open_error=%v", err)
+		logLine(launcherWriter, "browser_open_error=%v", err)
+		fmt.Fprintf(os.Stdout, "Browser open failed: %v\n", err)
 	} else {
-		logLine(launcherLog, "browser_opened=true")
+		logLine(launcherWriter, "browser_opened=true")
+		fmt.Fprintf(os.Stdout, "Opened %s\n", config.URL)
 	}
 
-	logLine(launcherLog, "server_ready=true")
-	logLine(launcherLog, "trace_dir=%s", runDir)
+	logLine(launcherWriter, "server_ready=true")
+	fmt.Fprintf(os.Stdout, "Trace files: %s\n", runDir)
 	return cmd.Wait()
 }
 
