@@ -3,7 +3,12 @@ setlocal
 echo Compiling TypeScript files...
 call npx tsc
 pushd "%~dp0\mode-launchers"
-echo Starting Wall Navigator on Port 8003...
+echo.
+echo ==========================================
+echo Starting Wall Navigator on Port 8003
+echo Browser should open automatically.
+echo Console output and server logs will stay visible.
+echo ==========================================
 go run ./cmd/wall-navigator
 echo.
 echo ==========================================
